@@ -5,11 +5,15 @@
 须事先安装如下环境：python3.6以上、airtest、pocoui、BeautifulReport、unittest。须在系统里有适用的adb.exe环境变量。
 
 2.config.ini。整个项目的配置文件。
+
     packName填写待测试包名；
-    deviceslist填写测试设备名，以逗号分隔，（PS：如不想使用配置，而是直接连接当前adb上已连接的设备，可以取消#devicesList = getdevices()的注释，则实时读取当前设备列表）；
-    apkpath填写待测试应用的安装地址，须使用绝对路径；
-    testcase填写期望测试的用例id，须是一个int元组，RunTestCase函数会比对testcase元组与TestCase目录下的TC_*.py文件，在元组内的用例才会被测试。
     
+    deviceslist填写测试设备名，以逗号分隔，（PS：如不想使用配置，而是直接连接当前adb上已连接的设备，可以取消#devicesList = getdevices()的注释，则实时读取当前设备列表）；
+    
+    apkpath填写待测试应用的安装地址，须使用绝对路径；
+    
+    testcase填写期望测试的用例id，须是一个int元组，RunTestCase函数会比对testcase元组与TestCase目录下的TC_*.py文件，在元组内的用例才会被测试。
+        
 3.main.py。可以使用pycharm运行，也可以在cmd运行。当通过cmd运行时，请务必先cd到Demo的根目录，否则会出现找不到模块的情况。
 
 4.core/index。index是整个框架的索引，负责根据devices分发进程，让每个设备各自去运行Main()函数。Main()函数里进行设备的初始化，在确保初始化成功、安装包成功的情况下，启动待测试apk并调用RunTestCase函数，进行测试用例的分发。
