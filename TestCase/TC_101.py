@@ -27,6 +27,7 @@ def Main(devices):
 
         def test_02_of_101(self):
             u'''用例test_02_of_101的操作步骤'''
+            time.sleep(5)
             Screencap.GetScreen(time.time(), devices, "test_02_of_101的描述")
             t = 1
             self.assertEquals(2, t)
