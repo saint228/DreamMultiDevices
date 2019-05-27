@@ -14,7 +14,7 @@ def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
 def RunTestCase(starttime,devices):
-    print("进入",devices,"的RunTestCase")
+    print("进入{}的RunTestCase".format(devices))
     # 获取路径
     configPath = "./config.ini"
     package = Config.getValue(configPath, "packName")[0]
@@ -39,7 +39,6 @@ def RunTestCase(starttime,devices):
     #处理模拟器端口用的冒号
     if ":" in devices:
         devices=devices.split(":")[1]
-    print("devices=",devices)
     nowtime=time.strftime("%H%M%S")
     unittestReport.report(filename=devices+"_"+str(nowtime),description=package, report_dir=reportpath)
     stop_app(package)

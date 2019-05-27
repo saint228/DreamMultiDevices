@@ -4,11 +4,10 @@ __author__ = "无声"
 import os
 import sys
 import threading
-import multiprocessing
-from airtest.core.error import *
-from poco.exceptions import *
-from tools import Config
 from core import RunTestCase
+
+from tools import Config
+
 from airtest.core.api import *
 from poco.drivers.android.uiautomation import AndroidUiautomationPoco
 
@@ -22,40 +21,28 @@ class MultiAdb():
     def __init__(self):
         self.configPath = "./config.ini"
         self.devicesList = Config.getValue(self.configPath, "deviceslist", )
+        self.apkpath = Config.getValue(self.configPath, "apkpath")[0]
+        self.packagename = Config.getValue(self.configPath, "packName")[0]
+        self.needclickinstall = Config.getValue(self.configPath, "needclickinstall")[0]
+        self.needclickstartapp = Config.getValue(self.configPath, "needclickstartapp")[0]
+        self.starttime=time.time()
+        #snapshot("d:\\temp.png")
 
-    def connectdevices(self):
-        devicesList=self.devicesList
-        if devicesList[0] == "":
-            devicesList = self.getdevices()
-        print("测试开始")
-        try:
-            pool = multiprocessing.Pool(processes=len(devicesList))
-            print("启动进程池")
-            results = []
-            for i in range(len(devicesList)):
-                pool.apply_async(self.enter_processing, (i, devicesList[i],))  # 根据设备列表去循环创建进程，对每个进程调用下面的Main方法。
-            pool.close()
-            pool.join()
-            print("进程回收完毕")
-            print("测试结束")
-        except AirtestError as ae:
-            print("Airtest发生错误" + ae)
-        except PocoException as pe:
-            print("Poco发生错误" + pe)
-        except Exception as e:
-            print("发生未知错误" + e)
 
-# 本方法用于读取实时的设备连接
+    # 本方法用于读取实时的设备连接
     def getdevices(self):
         deviceslist=[]
         for devices in os.popen("adb devices"):
+            print("adb devices:{}".format(devices))
             if "\t" in devices:
                 if devices.find("emulator")<0:
-                    deviceslist.append(devices.split("\t")[0])
+                    if devices.split("\t")[1] == "device\n":
+                        deviceslist.append(devices.split("\t")[0])
+                        print("设备{}被添加到deviceslist中".format(deviceslist))
+        print("返回的devicelist为{}".format(deviceslist))
         return deviceslist
 
     def enter_processing(self,processNo,devices):
-        starttime=time.time()
         print("进入{}进程,devicename={}".format(processNo,devices))
         isconnect=""
         try:
@@ -63,103 +50,123 @@ class MultiAdb():
             time.sleep(1)
             auto_setup(__file__)
             isconnect="Pass"
+            print("设备{}连接成功".format(devices))
+            if isconnect == "Pass":
+                try:
+                    print("设备{}开始安装apk".format(devices))
+                    needclickinstall = self.needclickinstall
+                    needclickstartapp = self.needclickstartapp
+                    installResult = self.PushApk2Devices(devices, needclickinstall)
+                    if installResult == "Success":
+                        print("{}确定安装成功".format(devices))
+                        self.StartApp(devices, needclickstartapp)
+                        time.sleep(5)
+                        RunTestCase.RunTestCase(self.starttime, devices)
+                        print("{}完成测试".format(devices))
+                except Exception as e:
+                    print(e)
+                    print("{}安装/运行失败，installResult={}".format(devices, installResult))
+            else:
+                print("设备{}连接失败".format(devices))
         except Exception as e:
             print(e)
             isconnect="Fail"
             print( "连接设备{}失败".format(devices))
-        if isconnect=="Pass":
-            try:
-                print( "设备{}开始安装apk".format(devices))
-                installResult=self.PushApk2Devices(devices)
-                if installResult == "Success":
-                    print("{}确定安装成功".format(devices))
-                    self.StartApp(devices)
-                    sleep(5)
-                    RunTestCase.RunTestCase(starttime, devices)
-                    print( "{}完成测试".format(devices))
-            except Exception as e:
-                print(e)
-                print("{}安装/运行失败，installResult={}".format(devices,installResult))
+        return isconnect
 
-    def StartApp(self,devices):
+
+    def StartApp(self,devices,needclickstartapp):
         print("{}进入StartAPP函数".format(devices))
-        configPath = "../config.ini"
-        packagename = Config.getValue(configPath, "packName")[0]
-        start_app(packagename)
-        print("{}开始初始化pocoui，处理应用权限".format(devices))
-        # 获取andorid的poco代理对象，准备进行开启应用权限（例如申请文件存储、定位等权限）点击操作
-        pocoAndroid = AndroidUiautomationPoco(use_airtest_input=True, screenshot_each_action=False)
-        if devices == "127.0.0.1:62001":
-            # 这里是针对不同机型进行不同控件的选取，需要用户根据自己的实际机型实际控件进行修改
-            count = 0
-            while not pocoAndroid("android.view.View").exists():
-                print(devices, "开启应用的权限点击，循环第", count, "次")
-                if count >= 3:
-                    break
-                if pocoAndroid("com.android.packageinstaller:id/permission_allow_button").exists():
-                    pocoAndroid("com.android.packageinstaller:id/permission_allow_button").click()
-                else:
-                    time.sleep(3)
-                    count += 1
-        elif devices == "127.0.0.1:62025":
-            count = 0
-            while not pocoAndroid("android.view.View").exists():
-                print(devices, "开启应用的权限点击，循环第", count, "次")
-                if count >= 3:
-                    break
-                if pocoAndroid("android:id/button1").exists():
-                    pocoAndroid("android:id/button1").click()
-                else:
-                    time.sleep(3)
-                    count += 1
-
+        start_app(self.packagename)
+        if needclickstartapp=="True":
+            print("设备{}，needclickstartapp为{}，开始初始化pocoui，处理应用权限".format(devices,needclickstartapp))
+            # 获取andorid的poco代理对象，准备进行开启应用权限（例如申请文件存储、定位等权限）点击操作
+            pocoAndroid = AndroidUiautomationPoco(use_airtest_input=True, screenshot_each_action=False)
+            if devices == "127.0.0.1:62001":
+                # 这里是针对不同机型进行不同控件的选取，需要用户根据自己的实际机型实际控件进行修改
+                count = 0
+                while not pocoAndroid("android.view.View").exists():
+                    print("{}开启应用的权限点击，循环第{}次".format(devices,count))
+                    if count >= 3:
+                        break
+                    if pocoAndroid("com.android.packageinstaller:id/permission_allow_button").exists():
+                        pocoAndroid("com.android.packageinstaller:id/permission_allow_button").oclick()
+                    else:
+                        time.sleep(3)
+                        count += 1
+            elif devices == "127.0.0.1:62025":
+                count = 0
+                while not pocoAndroid("android.view.View").exists():
+                    print("{}开启应用的权限点击，循环第{}次".format(devices,count))
+                    if count >= 3:
+                        break
+                    if pocoAndroid("android:id/button1").exists():
+                        pocoAndroid("android:id/button1").click()
+                    else:
+                        time.sleep(3)
+                        count += 1
+        else:
+            print("设备{}，needclickstartapp为{}，不做开启权限点击操作".format(devices,needclickstartapp))
         return None
 
-    def PushApk2Devices(self,devicesname):
-        configPath = "./config.ini"
-        packagename = Config.getValue(configPath, "packName")[0]
-        apkpath = Config.getValue(configPath, "apkpath")[0]
+    def PushApk2Devices(self,device,needclickinstall):
         try:
-            installThread = threading.Thread(target=self.AppInstall, args=(devicesname, apkpath, packagename,))
-            inputThread = threading.Thread(target=self.InputEvent, args=(devicesname,))
+            installThread = threading.Thread(target=self.AppInstall, args=(device, self.apkpath, self.packagename,))
             installThread.start()
-            inputThread.start()
+            if needclickinstall=="True":
+                print("设备{}，needclickinstall为{}，开始进行安装点击权限操作".format(device,needclickinstall))
+                inputThread = threading.Thread(target=self.InputEvent, args=(device,))
+                inputThread.start()
+                inputThread.join()
+            else:
+                print("设备{}，needclickinstall为{}，不进行安装点击权限操作".format(device,needclickinstall))
             installThread.join()
-            inputThread.join()
             return "Success"
         except Exception as e:
             return e
         pass
 
     def AppInstall(self,devices, apkpath, package):
+        print("设备{}开始进行自动安装".format(devices))
         try:
             if self.isinstalled(devices, package):
                 uninstallcommand = "adb -s " + str(devices) + " uninstall " + package
                 print("正在{}上卸载{},卸载命令为：{}".format(devices, package, uninstallcommand))
-                print("卸载结果：", os.system(uninstallcommand))
+                #print("卸载结果：", os.system(uninstallcommand))
 
             installcommand = "adb -s " + str(devices) + " install -r " + apkpath
-            os.popen(installcommand).read()
+            result=os.popen(installcommand)
+            res = result.read()
+            for line in res.splitlines():
+                print("output={}".format(line))
             print("正在{}上安装{},安装命令为：{}".format(devices, package, installcommand))
             if self.isinstalled(devices, package):
+                print("{}上安装成功，退出AppInstall线程".format(devices))
                 return "Install Success"
         except Exception as e:
+            print("{}上安装异常".format(devices)+e)
             return "Install Fail"
 
     def InputEvent(self,devices):
+        print("设备{}开始进行自动处理权限".format(devices))
         # 获取andorid的poco代理对象，准备进行开启安装权限（例如各个品牌的自定义系统普遍要求的二次安装确认、vivo/oppo特别要求的输入手机账号密码等）的点击操作。
         pocoAndroid = AndroidUiautomationPoco(use_airtest_input=True, screenshot_each_action=False)
         # 这里是针对不同机型进行不同控件的选取，需要用户根据自己的实际机型实际控件进行修改
-        n = 1
-        if devices == "127.0.0.1:62001":
+        n = 3
+        if devices == "2983aa37":
             count = 0
             # 找n次或找到对象以后跳出，否则等5秒重试。
             while True:
-                print(devices, "安装点击，循环第", count, "次")
+                print("{}安装应用的权限点击，循环第{}次".format(devices,count))
                 if count >= n:
+                    print("{}退出InputEvent线程".format(devices))
                     break
-                if pocoAndroid("vivo:id/vivo_adb_install_ok_button").exists():
-                    pocoAndroid("vivo:id/vivo_adb_install_ok_button").click()
+                if pocoAndroid("com.coloros.safecenter:id/et_login_passwd_edit").exists():
+                    pocoAndroid("com.coloros.safecenter:id/et_login_passwd_edit").set_text("qatest2019")
+                    time.sleep(2)
+                    if pocoAndroid("android.widget.FrameLayout").offspring("android:id/buttonPanel").offspring("android:id/button1").exists():
+                        pocoAndroid("android.widget.FrameLayout").offspring("android:id/buttonPanel").offspring(
+                            "android:id/button1").click()
                     break
                 else:
                     time.sleep(5)
@@ -167,7 +174,7 @@ class MultiAdb():
         elif devices == "127.0.0.1:62025":
             count = 0
             while True:
-                print(devices, "安装点击，循环第", count, "次")
+                print("{}安装应用的权限点击，循环第{}次".format(devices,count))
                 if count >= n:
                     break
                 if pocoAndroid("com.android.packageinstaller:id/continue_button").exists():
@@ -179,10 +186,10 @@ class MultiAdb():
     def isinstalled(self,devices, package):
         command = "adb -s " + devices + " shell pm list packages"
         commandresult = os.popen(command)
-        print("进入isinstalled方法，devices=", devices, "package=", package)
+        print("设备{}进入isinstalled方法，package={}".format(devices,package))
         for pkg in commandresult:
             if "package:" + package in pkg:
-                print("在", devices, "上发现已安装：", package, "。")
+                print("在{}上发现已安装{}".format(devices,package))
                 return True
-        print("在", devices, "上没找到包：", package)
+        print("在{}上没找到包{}".format(devices,package))
         return False
