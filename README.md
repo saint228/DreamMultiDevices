@@ -13,6 +13,7 @@
     apkpath填写待测试应用的安装地址，须使用绝对路径；
     
     testcase填写期望测试的用例id，须是一个int元组，RunTestCase函数会比对testcase元组与TestCase目录下的TC_*.py文件，在元组内的用例才会被测试。
+    needclickinstall和needclickstartapp 填写True或False，设置是否需要安装点击或运行点击。
         
 3.main.py。可以使用pycharm运行，也可以在cmd运行。当通过cmd运行时，请务必先cd到Demo的根目录，否则会出现找不到模块的情况。
 
