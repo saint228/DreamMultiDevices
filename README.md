@@ -31,3 +31,5 @@
 
 10.Report/Html报告。RunTestCase使用BeautifulReport库进行报告输出。输入内容在Demo\Report目录下。以设备名和时间命名。相关截图则存储在Report\Screen目录下。
 
+11.core/MultiADB Madb类，集成了各个与device有关的方法。
+
