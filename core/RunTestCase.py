@@ -4,7 +4,6 @@ __author__ = "无声"
 import unittest
 import time
 from BeautifulReport import BeautifulReport
-from tools import Config
 import os
 from airtest.core.api import *
 from tools import  File
@@ -13,12 +12,13 @@ _print = print
 def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
-def RunTestCase(starttime,devices):
+def RunTestCase(madb):
+    devices=madb.get_mdevice()
     print("进入{}的RunTestCase".format(devices))
     # 获取路径
-    configPath = "./config.ini"
-    package = Config.getValue(configPath, "packName")[0]
+    package = madb.get_packagename()
     casepath = os.path.join(os.getcwd(), "TestCase")
+    print("casepath=",casepath)
     if not os.path.exists(casepath):
         print("测试用例需放到‘TestCase’文件目录下")
     reportpath = os.path.join(os.getcwd(), "Report")
@@ -26,7 +26,7 @@ def RunTestCase(starttime,devices):
         os.mkdir(reportpath)
         os.mkdir(reportpath+"/Screen")
     #读取ini文件，获得期望测试的用例列表
-    TestList=Config.getValue(configPath, "testcase")
+    TestList=madb.get_alltestcase()
     # 通过GetPyList方法，取得目录里可测试的用例列表
     scriptList = File.GetPyList(casepath)
     suite = unittest.TestSuite()

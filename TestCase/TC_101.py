@@ -10,6 +10,7 @@ from poco.drivers.unity3d import UnityPoco
 _print = print
 def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
+
 def Main(devices):
     class TC101(unittest.TestCase):
         u'''测试用例101的集合'''
