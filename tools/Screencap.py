@@ -32,11 +32,10 @@ def GetScreen(startTime,devices,action):
 def compressImage(path,cr=0.2,left=0,right=1,top=0,buttom=1):
     # 打开原图片压缩
     sImg =Image.open(path)
-    w, h = sImg.size
-    print(w, h)
+    w, h = sImg.size# 获取屏幕绝对尺寸
     box=(int(w*left),int(h*top),int(w*right),int(h*buttom))
     sImg=sImg.crop(box)
-    dImg = sImg.resize((int(w*cr), int(h*cr)), Image.ANTIALIAS)  # 设置压缩尺寸和选项，注意尺寸要用括号
+    dImg = sImg.resize((int(w*cr), int(h*cr)), Image.ANTIALIAS)  # 设置压缩尺寸和选项
     # 压缩图片路径名称
     dImg.save(path)  # save这个函数后面可以加压缩编码选项JPEG之类的
 

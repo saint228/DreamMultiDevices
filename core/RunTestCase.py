@@ -26,22 +26,24 @@ def RunTestCase(madb):
         os.mkdir(reportpath)
         os.mkdir(reportpath+"/Screen")
     #读取ini文件，获得期望测试的用例列表
-    TestList=madb.get_alltestcase()
+    TestList=madb.get_testcaseforselfdevice()
+    print("{}的待测用例为：{}".format(madb.get_mdevice(),TestList))
     # 通过GetPyList方法，取得目录里可测试的用例列表
     scriptList = File.GetPyList(casepath)
     suite = unittest.TestSuite()
     for i in range(len(TestList)):
         fileName = "TC_" + TestList[i]
+        print("fileName=",fileName)
         if fileName in scriptList:
+            print("进入循环")
             result = globals()[fileName].Main(devices)
             suite.addTests(result)
     unittestReport = BeautifulReport(suite)
-    #处理模拟器端口用的冒号
-    if ":" in devices:
-        devices=devices.split(":")[1]
+
     nowtime=time.strftime("%H%M%S")
-    unittestReport.report(filename=devices+"_"+str(nowtime),description=package, report_dir=reportpath)
+    unittestReport.report(filename=madb.get_nickdevice()+"_"+str(nowtime),description=package, report_dir=reportpath)
     stop_app(package)
 
 
 #RunTestCase(time.time(),"127.0.0.1:62001")
+

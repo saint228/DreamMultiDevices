@@ -16,7 +16,7 @@ def print(*args, **kwargs):
 
 class MultiAdb:
 
-    def __init__(self,mdevice):
+    def __init__(self,mdevice=""):
         self._configPath="./config.ini"
         self._devicesList = Config.getValue(self._configPath, "deviceslist", )
         self._apkpath = Config.getValue(self._configPath, "apkpath")[0]
@@ -27,8 +27,20 @@ class MultiAdb:
         self._timeoutaction=int(Config.getValue(self._configPath, "timeoutperaction")[0])
         self._timeoustartspp=int(Config.getValue(self._configPath, "timeoutofstartapp")[0])
         self._mdevice=mdevice
+        # 处理模拟器端口用的冒号
+        if ":" in self._mdevice:
+            self._nickdevice = self._mdevice.split(":")[1]
+        else:
+            self._nickdevice=self._mdevice
         self._iteration=int(Config.getValue(self._configPath, "iteration")[0])
         self._alltestcase=Config.getValue(self._configPath, "testcase", )
+        try:
+            self._testcaseforselfdevice =Config.getTestCase(self._configPath, self._nickdevice)
+            if self._testcaseforselfdevice[0]=="":
+                self._testcaseforselfdevice = self._alltestcase
+        except Exception:
+            self._testcaseforselfdevice=self._alltestcase
+
         #snapshot("d:\\temp.png")
 
 
@@ -50,6 +62,12 @@ class MultiAdb:
     def get_mdevice(self):
         return self._mdevice
 
+    def get_nickdevice(self):
+        return self._nickdevice
+
+    def set_mdevice(self,device):
+        self._mdevice=device
+
     def get_timeoustartspp(self):
         return self._timeoustartspp
 
@@ -67,6 +85,11 @@ class MultiAdb:
 
     def get_alltestcase(self):
         return self._alltestcase
+
+    def get_testcaseforselfdevice(self):
+        return self._testcaseforselfdevice
+
+
 
     # 本方法用于读取实时的设备连接
     def getdevices(self):

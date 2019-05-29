@@ -14,9 +14,9 @@ def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
 def main():
-    devicesList = Madb.MultiAdb("").get_devicesList()
+    devicesList = Madb.MultiAdb().get_devicesList()
     if devicesList[0] == "":
-        devicesList = Madb.MultiAdb("").getdevices()
+        devicesList = Madb.MultiAdb().getdevices()
     print("测试开始")
     results=""
     if devicesList:

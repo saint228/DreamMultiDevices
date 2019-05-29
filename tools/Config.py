@@ -11,5 +11,14 @@ def getValue(path,section):
     list=result.split(",")
     return list
 
+def getTestCase(path,device=""):
+    if device!="":
+        config.read(path)
+        result = config.get("TestCaseforDevice",device)
+        list=result.split(",")
+        return list
+    else:
+        return []
+
 
 

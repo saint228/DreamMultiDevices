@@ -12,6 +12,7 @@ def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
 def Main(devices):
+    print("{}进入unittest".format(devices))
     class TC101(unittest.TestCase):
         u'''测试用例101的集合'''
 
@@ -28,14 +29,16 @@ def Main(devices):
             u'''用例test_01_of_101的操作步骤'''
             # 每个函数里分别实例poco，否则容易出现pocoserver无限重启的情况
             poco = UnityPoco()
+            print("我是TC101的test_01_of_101方法")
             t = 1
             self.assertEquals(1, t)
 
         def test_02_of_101(self):
+            u'''用例test_02_of_101的操作步骤'''
             # 每个函数里分别实例poco，否则容易出现pocoserver无限重启的情况
             poco = UnityPoco()
-            u'''用例test_02_of_101的操作步骤'''
             time.sleep(5)
+            print("我是TC102的test_02_of_101方法")
             Screencap.GetScreen(time.time(), devices, "test_02_of_101的描述")
             t = 1
             self.assertEquals(2, t)
@@ -43,7 +46,7 @@ def Main(devices):
 
         def tearDown(self):
             u'''这里放需要在每条用例后执行的部分'''
-            print("tearDown，在每条用例之后执行")
+            print("我是tearDown，在每条用例之后执行")
 
         @classmethod
         def tearDownClass(self):
