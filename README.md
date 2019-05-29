@@ -6,14 +6,15 @@
 
 2.config.ini。整个项目的配置文件。
 
-    packName填写待测试包名；
+    packName填写待测试包名，str；
+    deviceslist填写测试设备名，以逗号分隔，（PS：如不想使用配置，留空即可，则读取当前所有已连接的设备）元组；
+    apkpath填写待测试应用的安装地址，须使用绝对路径，str；
+    testcase填写期望测试的用例id，须是一个int元组，RunTestCase函数会比对testcase元组与TestCase目录下的TC_*.py文件，在元组内的用例才会被测试；
+    needclickinstall和needclickstartapp 填写True或False，设置是否需要安装点击或运行点击，不为True则不执行；
+    timeoutperaction填写全局sleep时间，int；
+    timeoutofstartapp填写安装app等待时间，int；
+    iteration填写权限脚本循环次数，int。
     
-    deviceslist填写测试设备名，以逗号分隔，（PS：如不想使用配置，而是直接连接当前adb上已连接的设备，可以取消#devicesList = getdevices()的注释，则实时读取当前设备列表）；
-    
-    apkpath填写待测试应用的安装地址，须使用绝对路径；
-    
-    testcase填写期望测试的用例id，须是一个int元组，RunTestCase函数会比对testcase元组与TestCase目录下的TC_*.py文件，在元组内的用例才会被测试。
-    needclickinstall和needclickstartapp 填写True或False，设置是否需要安装点击或运行点击。
         
 3.main.py。可以使用pycharm运行，也可以在cmd运行。当通过cmd运行时，请务必先cd到Demo的根目录，否则会出现找不到模块的情况。
 
@@ -30,4 +31,6 @@
 9.TestCast/TC_*.py。单个用例的执行文件，由用户自行编写，最后须符合unittest格式。特别要说明一点，BeautifulReport的默认截图方法是异常时触发语法糖截图。使用时略有不便，我新增了GetScreen()函数，可以在任意需要时实时截图。
 
 10.Report/Html报告。RunTestCase使用BeautifulReport库进行报告输出。输入内容在Demo\Report目录下。以设备名和时间命名。相关截图则存储在Report\Screen目录下。
+
+11.core/MultiADB Madb类，集成了各个与device有关的方法。
 
