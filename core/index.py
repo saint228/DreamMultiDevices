@@ -2,7 +2,7 @@
 __author__ = "无声"
 
 import time
-from core import MultiAdb as Madb
+from core.MultiAdb import MultiAdb as Madb
 import multiprocessing
 from airtest.core.error import *
 from poco.exceptions import *
@@ -14,9 +14,9 @@ def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
 def main():
-    devicesList = Madb.MultiAdb().get_devicesList()
+    devicesList = Madb().get_devicesList()
     if devicesList[0] == "":
-        devicesList = Madb.MultiAdb().getdevices()
+        devicesList = Madb().getdevices()
     print("测试开始")
     results=""
     if devicesList:
@@ -25,7 +25,7 @@ def main():
             print("启动进程池")
             results=[]
             for i in range(len(devicesList)):
-                madb=Madb.MultiAdb(devicesList[i])
+                madb=Madb(devicesList[i])
                 pool.apply_async(enter_processing, (i,madb,))  # 根据设备列表去循环创建进程，对每个进程调用下面的enter_processing方法。
             pool.close()
             pool.join()
