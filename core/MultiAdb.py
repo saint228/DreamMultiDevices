@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 __author__ = "无声"
 
-import os
+import os,inspect
 import sys
 import threading
-from core import RunTestCase
-from tools import Config
+from DreamMultiDevices.core import RunTestCase
+from DreamMultiDevices.tools import Config
 from airtest.core.api import *
 from poco.drivers.android.uiautomation import AndroidUiautomationPoco
 
@@ -17,7 +17,9 @@ def print(*args, **kwargs):
 class MultiAdb:
 
     def __init__(self,mdevice=""):
-        self._configPath="./config.ini"
+        self._parentPath=os.path.abspath(os.path.dirname(inspect.getfile(inspect.currentframe())) + os.path.sep + ".")
+        self._rootPath=os.path.abspath(os.path.dirname(self._parentPath) + os.path.sep + ".")
+        self._configPath=self._rootPath+"\config.ini"
         self._devicesList = Config.getValue(self._configPath, "deviceslist", )
         self._apkpath = Config.getValue(self._configPath, "apkpath")[0]
         self._packagename = Config.getValue(self._configPath, "packName")[0]
@@ -95,13 +97,11 @@ class MultiAdb:
     def getdevices(self):
         deviceslist=[]
         for devices in os.popen("adb devices"):
-            print("adb devices:{}".format(devices))
             if "\t" in devices:
                 if devices.find("emulator")<0:
                     if devices.split("\t")[1] == "device\n":
                         deviceslist.append(devices.split("\t")[0])
                         print("设备{}被添加到deviceslist中".format(deviceslist))
-        print("返回的devicelist为{}".format(deviceslist))
         return deviceslist
 
     def StartApp(self,devices,needclickstartapp):

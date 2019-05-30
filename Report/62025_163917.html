@@ -7164,33 +7164,34 @@ body.skin-3 {
 
 
     var resultData = {
-    "testPass": 2,
+    "testPass": 3,
     "testResult": [
         {
             "className": "Main.<locals>.TC101",
             "methodName": "test_01_of_101",
             "description": "用例test_01_of_101的操作步骤",
-            "spendTime": "0.127 s",
+            "spendTime": "0.178 s",
             "status": "成功",
             "log": [
-                "2019-05-28 18:32:41 我是setUp，在每条用例之前执行",
+                "2019-05-30 16:39:17 我是setUp，在每条用例之前执行",
                 "[rpc]connected",
-                "2019-05-28 18:32:41 tearDown，在每条用例之后执行",
+                "2019-05-30 16:39:17 我是TC101的test_01_of_101方法",
+                "2019-05-30 16:39:17 我是tearDown，在每条用例之后执行",
                 ""
             ]
         },
         {
             "className": "Main.<locals>.TC101",
             "methodName": "test_02_of_101",
-            "description": null,
-            "spendTime": "7.5 s",
+            "description": "用例test_02_of_101的操作步骤",
+            "spendTime": "7.75 s",
             "status": "失败",
             "log": [
-                "2019-05-28 18:32:41 我是setUp，在每条用例之前执行\n[rpc]connected\n2019-05-28 18:32:47 screenpath= E:\\Git\\GitHub\\DreamMultiDevices\\Report\\Screen\n2019-05-28 18:32:47 png= E:\\Git\\GitHub\\DreamMultiDevices\\Report\\Screen\\20190528_183247__test_02_of_101的描述.png\n2019-05-28 18:32:49 1280 720\n2019-05-28 18:32:49 <img src='E:\\Git\\GitHub\\DreamMultiDevices\\Report\\Screen\\20190528_183247__test_02_of_101的描述.png' width=600 />\n2019-05-28 18:32:49 tearDown，在每条用例之后执行\n",
+                "2019-05-30 16:39:17 我是setUp，在每条用例之前执行\n[rpc]connected\n2019-05-30 16:39:22 我是TC102的test_02_of_101方法\n2019-05-30 16:39:22 screenpath= E:\\Git\\GitHub\\DreamMultiDevices\\Report\\Screen\n2019-05-30 16:39:22 png= E:\\Git\\GitHub\\DreamMultiDevices\\Report\\Screen\\20190530_163922__test_02_of_101的描述.png\n2019-05-30 16:39:25 <img src='E:\\Git\\GitHub\\DreamMultiDevices\\Report\\Screen\\20190530_163922__test_02_of_101的描述.png' width=600 />\n2019-05-30 16:39:25 我是tearDown，在每条用例之后执行\n",
                 "Traceback (most recent call last):\n",
                 "  File \"D:\\Python3.7\\lib\\unittest\\case.py\", line 59, in testPartExecutor\n    yield\n",
                 "  File \"D:\\Python3.7\\lib\\unittest\\case.py\", line 615, in run\n    testMethod()\n",
-                "  File \"E:\\Git\\GitHub\\DreamMultiDevices\\TestCase\\TC_101.py\", line 41, in test_02_of_101\n    self.assertEquals(2, t)\n",
+                "  File \"D:\\Python3.7\\lib\\site-packages\\DreamMultiDevices\\TestCase\\TC_101.py\", line 44, in test_02_of_101\n    self.assertEquals(2, t)\n",
                 "  File \"D:\\Python3.7\\lib\\unittest\\case.py\", line 1338, in deprecated_func\n    return original_func(*args, **kwargs)\n",
                 "  File \"D:\\Python3.7\\lib\\unittest\\case.py\", line 839, in assertEqual\n    assertion_func(first, second, msg=msg)\n",
                 "  File \"D:\\Python3.7\\lib\\unittest\\case.py\", line 832, in _baseAssertEqual\n    raise self.failureException(msg)\n",
@@ -7201,12 +7202,13 @@ body.skin-3 {
             "className": "Main.<locals>.TC102",
             "methodName": "test_01_of_102",
             "description": "用例test_01_of_102的操作步骤",
-            "spendTime": "0.0819 s",
+            "spendTime": "0.164 s",
             "status": "成功",
             "log": [
-                "2019-05-28 18:32:49 我是setUp，在每条用例之前执行",
+                "2019-05-30 16:39:25 我是setUp，在每条用例之前执行",
+                "2019-05-30 16:39:25 我是TC102的test_01_of_102方法",
                 "[rpc]connected",
-                "2019-05-28 18:32:49 tearDown，在每条用例之后执行",
+                "2019-05-30 16:39:25 我是tearDown，在每条用例之后执行",
                 ""
             ]
         },
@@ -7214,14 +7216,46 @@ body.skin-3 {
             "className": "Main.<locals>.TC102",
             "methodName": "test_02_of_102",
             "description": "用例test_02_of_102的操作步骤",
-            "spendTime": "1.58 s",
+            "spendTime": "1.82 s",
             "status": "失败",
             "log": [
-                "2019-05-28 18:32:49 我是setUp，在每条用例之前执行\n[rpc]connected\n2019-05-28 18:32:49 screenpath= E:\\Git\\GitHub\\DreamMultiDevices\\Report\\Screen\n2019-05-28 18:32:49 png= E:\\Git\\GitHub\\DreamMultiDevices\\Report\\Screen\\20190528_183249__test_02_of_102的描述.png\n2019-05-28 18:32:51 1280 720\n2019-05-28 18:32:51 <img src='E:\\Git\\GitHub\\DreamMultiDevices\\Report\\Screen\\20190528_183249__test_02_of_102的描述.png' width=600 />\n2019-05-28 18:32:51 tearDown，在每条用例之后执行\n",
+                "2019-05-30 16:39:25 我是setUp，在每条用例之前执行\n2019-05-30 16:39:25 我是TC102的test_02_of_102方法\n[rpc]connected\n2019-05-30 16:39:25 screenpath= E:\\Git\\GitHub\\DreamMultiDevices\\Report\\Screen\n2019-05-30 16:39:25 png= E:\\Git\\GitHub\\DreamMultiDevices\\Report\\Screen\\20190530_163925__test_02_of_102的描述.png\n2019-05-30 16:39:27 <img src='E:\\Git\\GitHub\\DreamMultiDevices\\Report\\Screen\\20190530_163925__test_02_of_102的描述.png' width=600 />\n2019-05-30 16:39:27 我是tearDown，在每条用例之后执行\n",
                 "Traceback (most recent call last):\n",
                 "  File \"D:\\Python3.7\\lib\\unittest\\case.py\", line 59, in testPartExecutor\n    yield\n",
                 "  File \"D:\\Python3.7\\lib\\unittest\\case.py\", line 615, in run\n    testMethod()\n",
-                "  File \"E:\\Git\\GitHub\\DreamMultiDevices\\TestCase\\TC_102.py\", line 39, in test_02_of_102\n    self.assertEquals(2, t)\n",
+                "  File \"D:\\Python3.7\\lib\\site-packages\\DreamMultiDevices\\TestCase\\TC_102.py\", line 41, in test_02_of_102\n    self.assertEquals(2, t)\n",
+                "  File \"D:\\Python3.7\\lib\\unittest\\case.py\", line 1338, in deprecated_func\n    return original_func(*args, **kwargs)\n",
+                "  File \"D:\\Python3.7\\lib\\unittest\\case.py\", line 839, in assertEqual\n    assertion_func(first, second, msg=msg)\n",
+                "  File \"D:\\Python3.7\\lib\\unittest\\case.py\", line 832, in _baseAssertEqual\n    raise self.failureException(msg)\n",
+                "AssertionError: 2 != 1\n"
+            ]
+        },
+        {
+            "className": "Main.<locals>.TC104",
+            "methodName": "test_01_of_104",
+            "description": "用例test_01_of_104的操作步骤",
+            "spendTime": "0.111 s",
+            "status": "成功",
+            "log": [
+                "2019-05-30 16:39:27 我是setUp，在每条用例之前执行",
+                "2019-05-30 16:39:27 我是TC102的test_01_of_104方法",
+                "[rpc]connected",
+                "2019-05-30 16:39:27 我是tearDown，在每条用例之后执行",
+                ""
+            ]
+        },
+        {
+            "className": "Main.<locals>.TC104",
+            "methodName": "test_02_of_104",
+            "description": "用例test_02_of_104的操作步骤",
+            "spendTime": "2.0 s",
+            "status": "失败",
+            "log": [
+                "2019-05-30 16:39:27 我是setUp，在每条用例之前执行\n2019-05-30 16:39:27 我是TC102的test_02_of_104方法\n[rpc]connected\n2019-05-30 16:39:27 screenpath= E:\\Git\\GitHub\\DreamMultiDevices\\Report\\Screen\n2019-05-30 16:39:27 png= E:\\Git\\GitHub\\DreamMultiDevices\\Report\\Screen\\20190530_163927__test_02_of_104的描述.png\n2019-05-30 16:39:29 <img src='E:\\Git\\GitHub\\DreamMultiDevices\\Report\\Screen\\20190530_163927__test_02_of_104的描述.png' width=600 />\n2019-05-30 16:39:29 我是tearDown，在每条用例之后执行\n",
+                "Traceback (most recent call last):\n",
+                "  File \"D:\\Python3.7\\lib\\unittest\\case.py\", line 59, in testPartExecutor\n    yield\n",
+                "  File \"D:\\Python3.7\\lib\\unittest\\case.py\", line 615, in run\n    testMethod()\n",
+                "  File \"D:\\Python3.7\\lib\\site-packages\\DreamMultiDevices\\TestCase\\TC_104.py\", line 41, in test_02_of_104\n    self.assertEquals(2, t)\n",
                 "  File \"D:\\Python3.7\\lib\\unittest\\case.py\", line 1338, in deprecated_func\n    return original_func(*args, **kwargs)\n",
                 "  File \"D:\\Python3.7\\lib\\unittest\\case.py\", line 839, in assertEqual\n    assertion_func(first, second, msg=msg)\n",
                 "  File \"D:\\Python3.7\\lib\\unittest\\case.py\", line 832, in _baseAssertEqual\n    raise self.failureException(msg)\n",
@@ -7230,10 +7264,10 @@ body.skin-3 {
         }
     ],
     "testName": "com.gamehero.crazybird",
-    "testAll": 4,
-    "testFail": 2,
-    "beginTime": "2019-05-28 18:32:41",
-    "totalTime": "10s",
+    "testAll": 6,
+    "testFail": 3,
+    "beginTime": "2019-05-30 16:39:17",
+    "totalTime": "12s",
     "testSkip": 0,
     "testError": 0
 };

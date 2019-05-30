@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 __author__ = "无声"
 
 import time
-from core.MultiAdb import MultiAdb as Madb
+from DreamMultiDevices.core.MultiAdb import MultiAdb as Madb
 import multiprocessing
 from airtest.core.error import *
 from poco.exceptions import *
 from airtest.core.api import *
-from core import RunTestCase
+from DreamMultiDevices.core import RunTestCase
 
 _print = print
 def print(*args, **kwargs):
@@ -17,15 +17,20 @@ def main():
     devicesList = Madb().get_devicesList()
     if devicesList[0] == "":
         devicesList = Madb().getdevices()
+    print("最终的devicesList=",devicesList)
     print("测试开始")
     results=""
     if devicesList:
         try:
+
             pool = multiprocessing.Pool(processes=len(devicesList))
             print("启动进程池")
             results=[]
+           
             for i in range(len(devicesList)):
+                print("i=",i)
                 madb=Madb(devicesList[i])
+                print(madb.get_mdevice())
                 pool.apply_async(enter_processing, (i,madb,))  # 根据设备列表去循环创建进程，对每个进程调用下面的enter_processing方法。
             pool.close()
             pool.join()
@@ -46,7 +51,7 @@ def enter_processing(processNo,madb):
     isconnect=""
     try:
         connect_device("Android:///" + devices)
-        time.sleep(1)
+        time.sleep(madb.get_timeoutaction())
         auto_setup(__file__)
         isconnect="Pass"
         print("设备{}连接成功".format(devices))

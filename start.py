@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
-from core import index
+from DreamMultiDevices.core import index
 __author__ = "无声"
 
 def begin():

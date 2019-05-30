@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 __author__ = "无声"
-
-import unittest
-import time
-from BeautifulReport import BeautifulReport
 import os
+import time
+import unittest
+from BeautifulReport import BeautifulReport
 from airtest.core.api import *
-from tools import  File
-from TestCase import *
+from DreamMultiDevices.tools import  File
+from DreamMultiDevices.TestCase import *
 _print = print
 def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
@@ -41,6 +40,7 @@ def RunTestCase(madb):
     unittestReport = BeautifulReport(suite)
 
     nowtime=time.strftime("%H%M%S")
+    #unittestReport.report(filename=madb.get_nickdevice()+"_"+str(nowtime),description=package, report_dir=reportpath,rundevice=madb.get_mdevice())
     unittestReport.report(filename=madb.get_nickdevice()+"_"+str(nowtime),description=package, report_dir=reportpath)
     stop_app(package)
 

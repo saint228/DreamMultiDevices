@@ -2,7 +2,7 @@
 __author__ = "无声"
 
 import unittest
-from tools import  Screencap
+from DreamMultiDevices.tools import  Screencap
 from airtest.core.api import *
 from poco.drivers.unity3d import UnityPoco
 
