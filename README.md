@@ -1,9 +1,19 @@
 # DreamMultiDevices
 基于Python/Airtest/Unittest的自动化多设备测试
 
-1.本框架由无声编写，落落测试。
+    pip install DreamMultiDevices
+    
+    from DreamMultiDevices.start import *
+    
+    if __name__ == "__main__":
+        start()
+    
+
+
+
+1.本框架由无声andTreize编写，落落测试。
 须事先安装如下环境：python3.6以上、airtest、pocoui、BeautifulReport、unittest。须在系统里有适用的adb.exe环境变量。
-下载以后，丢到python\Lib\site-packages\ 目录下就好了。
+
 
 2.config.ini。整个项目的配置文件。
     
