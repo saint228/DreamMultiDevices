@@ -15,13 +15,11 @@ def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
 def main():
-    '''
+ 
     devicesList = Madb().get_devicesList()
     if devicesList[0] == "":
         devicesList = Madb().getdevices()
     print("最终的devicesList=",devicesList)
-    '''
-    devicesList=['127.0.0.1:62001','127.0.0.1:62025']
     print("测试开始")
     results=""
     if devicesList:
