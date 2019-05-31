@@ -7,7 +7,7 @@ import  os,inspect
 from DreamMultiDevices.tools import File
 
 Path = os.path.abspath(os.path.dirname(inspect.getfile(inspect.currentframe())) + os.path.sep + ".")
-
+print("Path=",Path)
 pyList = File.GetPyList(Path)
 
 __all__ = pyList

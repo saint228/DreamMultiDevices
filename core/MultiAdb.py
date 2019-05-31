@@ -8,11 +8,14 @@ from DreamMultiDevices.core import RunTestCase
 from DreamMultiDevices.tools import Config
 from airtest.core.api import *
 from poco.drivers.android.uiautomation import AndroidUiautomationPoco
+from airtest.core.android.adb import ADB
 
 _print = print
 def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
+adb = ADB().adb_path
+print(f'OUTPUT: adb = {adb}')
 
 class MultiAdb:
 
@@ -42,9 +45,9 @@ class MultiAdb:
                 self._testcaseforselfdevice = self._alltestcase
         except Exception:
             self._testcaseforselfdevice=self._alltestcase
-
-        #snapshot("d:\\temp.png")
-
+        self._TestCasePath=Config.getValue(self._configPath, "testcasepath")
+        if self._TestCasePath[0]=="":
+            self._TestCasePath=os.path.join(self._rootPath, "TestCase")
 
     def get_devicesList(self):
         return self._devicesList
@@ -67,9 +70,6 @@ class MultiAdb:
     def get_nickdevice(self):
         return self._nickdevice
 
-    def set_mdevice(self,device):
-        self._mdevice=device
-
     def get_timeoustartspp(self):
         return self._timeoustartspp
 
@@ -79,24 +79,42 @@ class MultiAdb:
     def get_iteration(self):
         return self._iteration
 
-    def set_apkpath(self,apkpath):
-        self._apkpath=apkpath
-
-    def set_packagename(self, packagename):
-        self._packagename = packagename
-
     def get_alltestcase(self):
         return self._alltestcase
 
     def get_testcaseforselfdevice(self):
         return self._testcaseforselfdevice
 
+    def get_TestCasePath(self):
+        return self._TestCasePath
+
+    def set_mdevice(self,device):
+        self._mdevice=device
+
+    def set_apkpath(self,apkpath):
+        self._apkpath=apkpath
+
+    def set_packagename(self, packagename):
+        self._packagename = packagename
+
+    def set_packagename(self,packagename):
+        configPath=self._configPath
+        Config.setValue(configPath,"packname",packagename)
+
+    def set_packagepath(self, packagepath):
+        configPath = self._configPath
+        Config.setValue(configPath, "apkpath", packagepath)
+
+    def set_TestCasePath(self,TestCasepath):
+        configPath=self._configPath
+        Config.setValue(configPath,"testcasepath",TestCasepath)
+
 
 
     # 本方法用于读取实时的设备连接
     def getdevices(self):
         deviceslist=[]
-        for devices in os.popen("adb devices"):
+        for devices in os.popen(adb + " devices"):
             if "\t" in devices:
                 if devices.find("emulator")<0:
                     if devices.split("\t")[1] == "device\n":
@@ -160,11 +178,11 @@ class MultiAdb:
         print("设备{}开始进行自动安装".format(devices))
         try:
             if self.isinstalled(devices, package):
-                uninstallcommand = "adb -s " + str(devices) + " uninstall " + package
+                uninstallcommand = adb + " -s " + str(devices) + " uninstall " + package
                 print("正在{}上卸载{},卸载命令为：{}".format(devices, package, uninstallcommand))
                 #print("卸载结果：", os.system(uninstallcommand))
 
-            installcommand = "adb -s " + str(devices) + " install -r " + apkpath
+            installcommand = adb + " -s " + str(devices) + " install -r " + apkpath
             result=os.popen(installcommand)
             res = result.read()
             for line in res.splitlines():
@@ -214,7 +232,7 @@ class MultiAdb:
                 count += 1
 
     def isinstalled(self,devices, package):
-        command = "adb -s " + devices + " shell pm list packages"
+        command = adb + " -s " + devices + " shell pm list packages"
         commandresult = os.popen(command)
         print("设备{}进入isinstalled方法，package={}".format(devices,package))
         for pkg in commandresult:

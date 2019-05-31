@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 __author__ = "无声"
-import os
-import time
+#import os
+#import time
 import unittest
 from BeautifulReport import BeautifulReport
 from airtest.core.api import *
-from DreamMultiDevices.tools import  File
+from DreamMultiDevices.tools import File
 from DreamMultiDevices.TestCase import *
 _print = print
 def print(*args, **kwargs):
@@ -16,9 +16,9 @@ def RunTestCase(madb):
     print("进入{}的RunTestCase".format(devices))
     # 获取路径
     package = madb.get_packagename()
-    casepath = os.path.join(os.getcwd(), "TestCase")
-    print("casepath=",casepath)
-    if not os.path.exists(casepath):
+    TestCasePath = madb.get_TestCasePath()
+    print("TestCasePath=",TestCasePath)
+    if not os.path.exists(TestCasePath):
         print("测试用例需放到‘TestCase’文件目录下")
     reportpath = os.path.join(os.getcwd(), "Report")
     if not os.path.exists(reportpath):
@@ -28,7 +28,7 @@ def RunTestCase(madb):
     TestList=madb.get_testcaseforselfdevice()
     print("{}的待测用例为：{}".format(madb.get_mdevice(),TestList))
     # 通过GetPyList方法，取得目录里可测试的用例列表
-    scriptList = File.GetPyList(casepath)
+    scriptList = File.GetPyList(TestCasePath)
     suite = unittest.TestSuite()
     for i in range(len(TestList)):
         fileName = "TC_" + TestList[i]

@@ -20,5 +20,10 @@ def getTestCase(path,device=""):
     else:
         return []
 
+def setValue(configpath,key,value):
+    if  key!="" and value!="":
+        con.set("config",key,value)
+        con.write(open(configpath, "w"))
+
 
 

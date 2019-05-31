@@ -2,31 +2,33 @@
 __author__ = "无声"
 
 import time
-from DreamMultiDevices.core.MultiAdb import MultiAdb as Madb
 import multiprocessing
+from DreamMultiDevices.core.MultiAdb import MultiAdb as Madb
 from airtest.core.error import *
 from poco.exceptions import *
 from airtest.core.api import *
 from DreamMultiDevices.core import RunTestCase
+import traceback
 
 _print = print
 def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
 def main():
+    '''
     devicesList = Madb().get_devicesList()
     if devicesList[0] == "":
         devicesList = Madb().getdevices()
     print("最终的devicesList=",devicesList)
+    '''
+    devicesList=['127.0.0.1:62001','127.0.0.1:62025']
     print("测试开始")
     results=""
     if devicesList:
         try:
-
             pool = multiprocessing.Pool(processes=len(devicesList))
             print("启动进程池")
             results=[]
-           
             for i in range(len(devicesList)):
                 print("i=",i)
                 madb=Madb(devicesList[i])
@@ -37,11 +39,11 @@ def main():
             print("进程回收完毕")
             print("测试结束")
         except AirtestError as ae:
-            print("Airtest发生错误" + ae)
+            print("Airtest发生错误" + traceback.format_exc())
         except PocoException as pe:
-            print("Poco发生错误" + pe)
+            print("Poco发生错误" + traceback.format_exc())
         except Exception as e:
-            print("发生未知错误" + e)
+            print("发生未知错误" +  traceback.format_exc())
     else:
         print("未找到设备，测试结束")
 
