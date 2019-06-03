@@ -15,7 +15,6 @@ def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
 adb = ADB().adb_path
-print(f'OUTPUT: adb = {adb}')
 
 class MultiAdb:
 
@@ -24,13 +23,13 @@ class MultiAdb:
         self._rootPath=os.path.abspath(os.path.dirname(self._parentPath) + os.path.sep + ".")
         self._configPath=self._rootPath+"\config.ini"
         self._devicesList = Config.getValue(self._configPath, "deviceslist", )
-        self._apkpath = Config.getValue(self._configPath, "apkpath")[0]
-        self._packagename = Config.getValue(self._configPath, "packName")[0]
-        self._needclickinstall = Config.getValue(self._configPath, "needclickinstall")[0]
-        self._needclickstartapp = Config.getValue(self._configPath, "needclickstartapp")[0]
-        self._starttime=time.time()
-        self._timeoutaction=int(Config.getValue(self._configPath, "timeoutperaction")[0])
-        self._timeoustartspp=int(Config.getValue(self._configPath, "timeoutofstartapp")[0])
+        self._apkPath = Config.getValue(self._configPath, "apkpath")[0]
+        self._packageName = Config.getValue(self._configPath, "packName")[0]
+        self._needClickInstall = Config.getValue(self._configPath, "needclickinstall")[0]
+        self._needClickStartApp = Config.getValue(self._configPath, "needclickstartapp")[0]
+        self._startTime=time.time()
+        self._timeoutAction=int(Config.getValue(self._configPath, "timeoutperaction")[0])
+        self._timeoutStartApp=int(Config.getValue(self._configPath, "timeoutofstartapp")[0])
         self._mdevice=mdevice
         # 处理模拟器端口用的冒号
         if ":" in self._mdevice:
@@ -38,13 +37,13 @@ class MultiAdb:
         else:
             self._nickdevice=self._mdevice
         self._iteration=int(Config.getValue(self._configPath, "iteration")[0])
-        self._alltestcase=Config.getValue(self._configPath, "testcase", )
+        self._allTestcase=Config.getValue(self._configPath, "testcase")
         try:
             self._testcaseforselfdevice =Config.getTestCase(self._configPath, self._nickdevice)
             if self._testcaseforselfdevice[0]=="":
-                self._testcaseforselfdevice = self._alltestcase
+                self._testcaseforselfdevice = self._allTestcase
         except Exception:
-            self._testcaseforselfdevice=self._alltestcase
+            self._testcaseforselfdevice=self._allTestcase
         self._TestCasePath=Config.getValue(self._configPath, "testcasepath")
         if self._TestCasePath[0]=="":
             self._TestCasePath=os.path.join(self._rootPath, "TestCase")
@@ -53,16 +52,16 @@ class MultiAdb:
         return self._devicesList
 
     def get_apkpath(self):
-        return self._apkpath
+        return self._apkPath
 
     def get_packagename(self):
-        return self._packagename
+        return self._packageName
 
     def get_needclickinstall(self):
-        return self._needclickinstall
+        return self._needClickInstall
 
     def get_needclickstartapp(self):
-        return self._needclickstartapp
+        return self._needClickStartApp
 
     def get_mdevice(self):
         return self._mdevice
@@ -71,16 +70,16 @@ class MultiAdb:
         return self._nickdevice
 
     def get_timeoustartspp(self):
-        return self._timeoustartspp
+        return self._timeoutStartApp
 
     def get_timeoutaction(self):
-        return self._timeoutaction
+        return self._timeoutAction
 
     def get_iteration(self):
         return self._iteration
 
     def get_alltestcase(self):
-        return self._alltestcase
+        return self._allTestcase
 
     def get_testcaseforselfdevice(self):
         return self._testcaseforselfdevice
@@ -90,12 +89,6 @@ class MultiAdb:
 
     def set_mdevice(self,device):
         self._mdevice=device
-
-    def set_apkpath(self,apkpath):
-        self._apkpath=apkpath
-
-    def set_packagename(self, packagename):
-        self._packagename = packagename
 
     def set_packagename(self,packagename):
         configPath=self._configPath
@@ -241,3 +234,4 @@ class MultiAdb:
                 return True
         print("在{}上没找到包{}".format(devices,package))
         return False
+
