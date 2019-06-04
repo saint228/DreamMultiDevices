@@ -41,7 +41,7 @@ def RunTestCase(madb):
 
     nowtime=time.strftime("%H%M%S")
     #unittestReport.report(filename=madb.get_nickdevice()+"_"+str(nowtime),description=package, report_dir=reportpath,rundevice=madb.get_mdevice())
-    unittestReport.report(filename=madb.get_nickdevice()+"_"+str(nowtime),description=package, report_dir=reportpath)
+    unittestReport.report(filename=madb.get_nickname()+"_"+str(nowtime),description=package, report_dir=reportpath)
     stop_app(package)
 
 

@@ -4,6 +4,7 @@ __author__ = "无声"
 import os,inspect
 import sys
 import threading
+import queue
 from DreamMultiDevices.core import RunTestCase
 from DreamMultiDevices.tools import Config
 from airtest.core.api import *
@@ -15,6 +16,7 @@ def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
 adb = ADB().adb_path
+q = queue.Queue()
 
 class MultiAdb:
 
@@ -23,7 +25,7 @@ class MultiAdb:
         self._rootPath=os.path.abspath(os.path.dirname(self._parentPath) + os.path.sep + ".")
         self._configPath=self._rootPath+"\config.ini"
         self._devicesList = Config.getValue(self._configPath, "deviceslist", )
-        self._apkPath = Config.getValue(self._configPath, "apkpath")[0]
+        self._packagePath = Config.getValue(self._configPath, "apkpath")[0]
         self._packageName = Config.getValue(self._configPath, "packName")[0]
         self._needClickInstall = Config.getValue(self._configPath, "needclickinstall")[0]
         self._needClickStartApp = Config.getValue(self._configPath, "needclickstartapp")[0]
@@ -33,26 +35,26 @@ class MultiAdb:
         self._mdevice=mdevice
         # 处理模拟器端口用的冒号
         if ":" in self._mdevice:
-            self._nickdevice = self._mdevice.split(":")[1]
+            self._nickName = self._mdevice.split(":")[1]
         else:
-            self._nickdevice=self._mdevice
+            self._nickName=self._mdevice
         self._iteration=int(Config.getValue(self._configPath, "iteration")[0])
         self._allTestcase=Config.getValue(self._configPath, "testcase")
         try:
-            self._testcaseforselfdevice =Config.getTestCase(self._configPath, self._nickdevice)
-            if self._testcaseforselfdevice[0]=="":
-                self._testcaseforselfdevice = self._allTestcase
+            self._testcaseForSelfDevice =Config.getTestCase(self._configPath, self._nickName)
+            if self._testcaseForSelfDevice[0]=="":
+                self._testcaseForSelfDevice = self._allTestcase
         except Exception:
-            self._testcaseforselfdevice=self._allTestcase
-        self._TestCasePath=Config.getValue(self._configPath, "testcasepath")
-        if self._TestCasePath[0]=="":
-            self._TestCasePath=os.path.join(self._rootPath, "TestCase")
+            self._testcaseForSelfDevice=self._allTestcase
+        self._testCasePath=Config.getValue(self._configPath, "testcasepath")
+        if self._testCasePath[0]=="":
+            self._testCasePath=os.path.join(self._rootPath, "TestCase")
 
     def get_devicesList(self):
         return self._devicesList
 
     def get_apkpath(self):
-        return self._apkPath
+        return self._packagePath
 
     def get_packagename(self):
         return self._packageName
@@ -66,8 +68,8 @@ class MultiAdb:
     def get_mdevice(self):
         return self._mdevice
 
-    def get_nickdevice(self):
-        return self._nickdevice
+    def get_nickname(self):
+        return self._nickName
 
     def get_timeoustartspp(self):
         return self._timeoutStartApp
@@ -82,13 +84,15 @@ class MultiAdb:
         return self._allTestcase
 
     def get_testcaseforselfdevice(self):
-        return self._testcaseforselfdevice
+        return self._testcaseForSelfDevice
 
     def get_TestCasePath(self):
-        return self._TestCasePath
+        return self._testCasePath
 
     def set_mdevice(self,device):
         self._mdevice=device
+
+    #写回包名、包路径、测试用例路径等等到配置文件
 
     def set_packagename(self,packagename):
         configPath=self._configPath
@@ -133,7 +137,7 @@ class MultiAdb:
                     if pocoAndroid("com.android.packageinstaller:id/permission_allow_button").exists():
                         pocoAndroid("com.android.packageinstaller:id/permission_allow_button").oclick()
                     else:
-                        time.sleep(3)
+                        time.sleep(self.get_timeoutaction())
                         count += 1
             elif devices == "127.0.0.1:62025":
                 count = 0
@@ -147,25 +151,30 @@ class MultiAdb:
                         time.sleep(3)
                         count += 1
         else:
-            print("设备{}，needclickstartapp为{}，不做开启权限点击操作".format(devices,needclickstartapp))
+            print("设备{}，needclickstartapp不为True，不做开启权限点击操作".format(devices))
         return None
 
+    #推送apk到设备上的函数，读配置决定要不要进行权限点击操作。
     def PushApk2Devices(self,device,needclickinstall):
         try:
             installThread = threading.Thread(target=self.AppInstall, args=(device, self.get_apkpath(), self.get_packagename(),))
             installThread.start()
+            result = q.get()
             if needclickinstall=="True":
                 print("设备{}，needclickinstall为{}，开始进行安装点击权限操作".format(device,needclickinstall))
                 inputThread = threading.Thread(target=self.InputEvent, args=(device,))
                 inputThread.start()
                 inputThread.join()
             else:
-                print("设备{}，needclickinstall为{}，不进行安装点击权限操作".format(device,needclickinstall))
+                print("设备{}，needclickinstall不为True，不进行安装点击权限操作".format(device))
             installThread.join()
-            return "Success"
+            if result=="Install Success":
+                return "Success"
+            else:
+                return "Fail"
         except Exception as e:
-            return e
-        pass
+            print(e)
+            pass
 
     def AppInstall(self,devices, apkpath, package):
         print("设备{}开始进行自动安装".format(devices))
@@ -173,8 +182,7 @@ class MultiAdb:
             if self.isinstalled(devices, package):
                 uninstallcommand = adb + " -s " + str(devices) + " uninstall " + package
                 print("正在{}上卸载{},卸载命令为：{}".format(devices, package, uninstallcommand))
-                #print("卸载结果：", os.system(uninstallcommand))
-
+            time.sleep(self.get_timeoutaction())
             installcommand = adb + " -s " + str(devices) + " install -r " + apkpath
             result=os.popen(installcommand)
             res = result.read()
@@ -183,10 +191,15 @@ class MultiAdb:
             print("正在{}上安装{},安装命令为：{}".format(devices, package, installcommand))
             if self.isinstalled(devices, package):
                 print("{}上安装成功，退出AppInstall线程".format(devices))
-                return "Install Success"
+                q.put("Install Success")
+                return True
+            else:
+                print("{}上安装未成功".format(devices))
+                q.put("Install Fail")
+                return False
         except Exception as e:
-            print("{}上安装异常".format(devices)+e)
-            return "Install Fail"
+            print("{}上安装异常".format(devices))
+            q.put("Install Fail")
 
     def InputEvent(self,devices):
         print("设备{}开始进行自动处理权限".format(devices))

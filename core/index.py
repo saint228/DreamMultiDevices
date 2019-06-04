@@ -28,9 +28,7 @@ def main():
             print("启动进程池")
             results=[]
             for i in range(len(devicesList)):
-                print("i=",i)
                 madb=Madb(devicesList[i])
-                print(madb.get_mdevice())
                 pool.apply_async(enter_processing, (i,madb,))  # 根据设备列表去循环创建进程，对每个进程调用下面的enter_processing方法。
             pool.close()
             pool.join()
