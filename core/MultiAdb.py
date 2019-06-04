@@ -248,3 +248,24 @@ class MultiAdb:
         print("在{}上没找到包{}".format(devices,package))
         return False
 
+    def get_androidversion(self):
+        command="adb -s {} shell getprop ro.build.version.release".format(self.get_mdevice())
+        version=os.popen(command).read()[0]
+        return version
+
+    def get_allocated_memory(self):
+        command="adb -s {} shell dumpsys meminfo {}".format(self.get_mdevice(),self.get_packagename())
+        memory=os.popen(command)
+        res = memory.read()
+        list=[]
+        for line in res.splitlines():
+            line=line.strip()
+            list=line.split(' ')
+            if list[0]=="TOTAL":
+                while '' in list:
+                    list.remove('')
+                allocated_memory=format(int(list[1])/1024,".2f")
+                return allocated_memory
+
+
+
