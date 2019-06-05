@@ -5,11 +5,14 @@ import os,inspect
 import sys
 import threading
 import queue
+import xlwings as xw
 from DreamMultiDevices.core import RunTestCase
 from DreamMultiDevices.tools import Config
 from airtest.core.api import *
 from poco.drivers.android.uiautomation import AndroidUiautomationPoco
 from airtest.core.android.adb import ADB
+from pylib import *
+
 
 _print = print
 def print(*args, **kwargs):
@@ -119,7 +122,9 @@ class MultiAdb:
                         print("设备{}被添加到deviceslist中".format(deviceslist))
         return deviceslist
 
-    def StartApp(self,devices,needclickstartapp):
+    def StartApp(self):
+        devices=self.get_mdevice()
+        needclickstartapp=self.get_needclickstartapp()
         print("{}进入StartAPP函数".format(devices))
         start_app(self.get_packagename())
         if needclickstartapp=="True":
@@ -155,14 +160,16 @@ class MultiAdb:
         return None
 
     #推送apk到设备上的函数，读配置决定要不要进行权限点击操作。
-    def PushApk2Devices(self,device,needclickinstall):
+    def PushApk2Devices(self):
+        device=self.get_mdevice()
+        needclickinstall=self.get_needclickinstall()
         try:
-            installThread = threading.Thread(target=self.AppInstall, args=(device, self.get_apkpath(), self.get_packagename(),))
+            installThread = threading.Thread(target=self.AppInstall, args=())
             installThread.start()
             result = q.get()
             if needclickinstall=="True":
                 print("设备{}，needclickinstall为{}，开始进行安装点击权限操作".format(device,needclickinstall))
-                inputThread = threading.Thread(target=self.InputEvent, args=(device,))
+                inputThread = threading.Thread(target=self.InputEvent, args=(self,))
                 inputThread.start()
                 inputThread.join()
             else:
@@ -176,10 +183,13 @@ class MultiAdb:
             print(e)
             pass
 
-    def AppInstall(self,devices, apkpath, package):
+    def AppInstall(self):
+        devices=self.get_mdevice()
+        apkpath=self.get_apkpath()
+        package=self.get_packagename()
         print("设备{}开始进行自动安装".format(devices))
         try:
-            if self.isinstalled(devices, package):
+            if self.isinstalled():
                 uninstallcommand = adb + " -s " + str(devices) + " uninstall " + package
                 print("正在{}上卸载{},卸载命令为：{}".format(devices, package, uninstallcommand))
             time.sleep(self.get_timeoutaction())
@@ -189,7 +199,7 @@ class MultiAdb:
             for line in res.splitlines():
                 print("output={}".format(line))
             print("正在{}上安装{},安装命令为：{}".format(devices, package, installcommand))
-            if self.isinstalled(devices, package):
+            if self.isinstalled():
                 print("{}上安装成功，退出AppInstall线程".format(devices))
                 q.put("Install Success")
                 return True
@@ -199,9 +209,11 @@ class MultiAdb:
                 return False
         except Exception as e:
             print("{}上安装异常".format(devices))
+            print(e)
             q.put("Install Fail")
 
-    def InputEvent(self,devices):
+    def InputEvent(self):
+        devices=self.get_mdevice()
         print("设备{}开始进行自动处理权限".format(devices))
         # 获取andorid的poco代理对象，准备进行开启安装权限（例如各个品牌的自定义系统普遍要求的二次安装确认、vivo/oppo特别要求的输入手机账号密码等）的点击操作。
         pocoAndroid = AndroidUiautomationPoco(use_airtest_input=True, screenshot_each_action=False)
@@ -237,7 +249,9 @@ class MultiAdb:
                     time.sleep(5)
                 count += 1
 
-    def isinstalled(self,devices, package):
+    def isinstalled(self):
+        devices=self.get_mdevice()
+        package=self.get_packagename()
         command = adb + " -s " + devices + " shell pm list packages"
         commandresult = os.popen(command)
         print("设备{}进入isinstalled方法，package={}".format(devices,package))
@@ -255,6 +269,7 @@ class MultiAdb:
 
     def get_allocated_memory(self):
         command="adb -s {} shell dumpsys meminfo {}".format(self.get_mdevice(),self.get_packagename())
+        print(command)
         memory=os.popen(command)
         res = memory.read()
         list=[]
@@ -266,6 +281,33 @@ class MultiAdb:
                     list.remove('')
                 allocated_memory=format(int(list[1])/1024,".2f")
                 return allocated_memory
+
+    def get_fps(self):
+        androidcommand = android_commands.AndroidCommands(self.get_mdevice())
+
+
+    def record_allocated_memory(self,timeout=30):
+        start_time=time.time()
+        while time.time()-start_time<timeout:
+            nowmemory=self.get_allocated_memory()
+            self.write_excel(nowmemory,"allocated_memory",time.time())
+            time.sleep(0.5)
+
+    def write_excel(self,nowmemory,type,time):
+        self.create_log_excel()
+
+    def create_log_excel(self):
+        exclefile=os.getcwd()+"\log.xlsx"
+        if not os.path.exists(exclefile):
+            app = xw.App(visible=True, add_book=False)
+            wb = app.books.add(name="allocated_memory")
+            #app.books.add().sheets("ToTal_memory")
+            #app.books.add().sheets("allocated_CPU")
+            #app.books.add().sheets("ToTal_CPU")
+            #app.books.add().sheets("FPS")
+            wb.save(exclefile)
+            wb.close()
+            app.quit()
 
 
 

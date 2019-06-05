@@ -56,12 +56,10 @@ def enter_processing(processNo,madb):
         if isconnect == "Pass":
             try:
                 print("设备{}开始安装apk".format(devices))
-                install = madb.get_needclickinstall()
-                startapp = madb.get_needclickstartapp()
-                installResult = madb.PushApk2Devices(devices, install)
+                installResult = madb.PushApk2Devices()
                 if installResult == "Success":
                     print("{}确定安装成功".format(devices))
-                    madb.StartApp(devices, startapp)
+                    madb.StartApp()
                     time.sleep(madb.get_timeoutaction())
                     RunTestCase.RunTestCase(madb)
                     print("{}完成测试".format(devices))
