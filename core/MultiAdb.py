@@ -11,8 +11,6 @@ from DreamMultiDevices.tools import Config
 from airtest.core.api import *
 from poco.drivers.android.uiautomation import AndroidUiautomationPoco
 from airtest.core.android.adb import ADB
-from pylib import *
-
 
 _print = print
 def print(*args, **kwargs):
@@ -253,9 +251,12 @@ class MultiAdb:
         devices=self.get_mdevice()
         package=self.get_packagename()
         command = adb + " -s " + devices + " shell pm list packages"
+        print(command)
         commandresult = os.popen(command)
+
         print("设备{}进入isinstalled方法，package={}".format(devices,package))
         for pkg in commandresult:
+            print(pkg)
             if "package:" + package in pkg:
                 print("在{}上发现已安装{}".format(devices,package))
                 return True
@@ -263,12 +264,12 @@ class MultiAdb:
         return False
 
     def get_androidversion(self):
-        command="adb -s {} shell getprop ro.build.version.release".format(self.get_mdevice())
+        command=adb+" -s {} shell getprop ro.build.version.release".format(self.get_mdevice())
         version=os.popen(command).read()[0]
         return version
 
     def get_allocated_memory(self):
-        command="adb -s {} shell dumpsys meminfo {}".format(self.get_mdevice(),self.get_packagename())
+        command=adb + " -s {} shell dumpsys meminfo {}".format(self.get_mdevice(),self.get_packagename())
         print(command)
         memory=os.popen(command)
         res = memory.read()
@@ -281,9 +282,6 @@ class MultiAdb:
                     list.remove('')
                 allocated_memory=format(int(list[1])/1024,".2f")
                 return allocated_memory
-
-    def get_fps(self):
-        androidcommand = android_commands.AndroidCommands(self.get_mdevice())
 
 
     def record_allocated_memory(self,timeout=30):
