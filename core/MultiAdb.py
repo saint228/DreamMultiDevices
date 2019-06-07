@@ -250,23 +250,32 @@ class MultiAdb:
     def isinstalled(self):
         devices=self.get_mdevice()
         package=self.get_packagename()
-        command = adb + " -s " + devices + " shell pm list packages"
-        print(command)
-        commandresult = os.popen(command)
-
+        command=adb + " -s {} shell pm list package".format(devices)
+        commandresult=os.popen(command)
         print("设备{}进入isinstalled方法，package={}".format(devices,package))
         for pkg in commandresult:
-            print(pkg)
+            #print(pkg)
             if "package:" + package in pkg:
                 print("在{}上发现已安装{}".format(devices,package))
                 return True
         print("在{}上没找到包{}".format(devices,package))
         return False
+        '''
+         command = adb + " -s {} shell ps | findstr {}".format(devices,package)
+        print(command)
+        commandresult = os.popen(command).readline()
+        if len(commandresult)>0:
+            print("在{}上发现已安装{}".format(devices, package))
+            return True
+        else:
+            print("在{}上没找到包{}".format(devices, package))
+            return False
+        '''
 
     def get_androidversion(self):
         command=adb+" -s {} shell getprop ro.build.version.release".format(self.get_mdevice())
         version=os.popen(command).read()[0]
-        return version
+        return int(version)
 
     def get_allocated_memory(self):
         command=adb + " -s {} shell dumpsys meminfo {}".format(self.get_mdevice(),self.get_packagename())
@@ -283,6 +292,83 @@ class MultiAdb:
                 allocated_memory=format(int(list[1])/1024,".2f")
                 return allocated_memory
 
+    def get_totalmemory(self):
+        command = adb + " -s {} shell dumpsys meminfo ".format(self.get_mdevice())
+        print(command)
+        memory=os.popen(command)
+        res = memory.read()
+        TotalRAM=0
+        for line in res.splitlines():
+            line=line.strip()
+            list = line.split(":")
+            if list[0]=="Total RAM":
+                if self.get_androidversion()== 5 or self.get_androidversion()== 6:
+                    TotalRAM = format(int(list[1].split(" ")[1])/1024,".2f")
+                elif self.get_androidversion()== 7 or self.get_androidversion()== 8:
+                    TotalRAM = format(int(list[1].split("K")[0].replace(",",""))/1024,".2f")
+                break
+        return  TotalRAM
+
+    def get_freememory(self):
+        command = adb + " -s {} shell dumpsys meminfo ".format(self.get_mdevice())
+        print(command)
+        memory = os.popen(command)
+        res = memory.read()
+        FreeRAM=0
+        for line in res.splitlines():
+            line = line.strip()
+            list = line.split(":")
+            if list[0]=="Free RAM":
+                if self.get_androidversion()== 5 or self.get_androidversion()== 6:
+                    FreeRAM = format(int(list[1].split(" ")[1])/1024,".2f")
+                elif self.get_androidversion()== 7 or self.get_androidversion()== 8:
+                    FreeRAM = format(int(list[1].split("K")[0].replace(",",""))/1024,".2f")
+                break
+        return  FreeRAM
+
+    def get_usedmemory(self):
+        command = adb + " -s {} shell dumpsys meminfo ".format(self.get_mdevice())
+        print(command)
+        memory = os.popen(command)
+        res = memory.read()
+        UsedRAM=0
+        for line in res.splitlines():
+            line = line.strip()
+            list = line.split(":")
+            if list[0]=="Used RAM":
+                if self.get_androidversion()== 5 or self.get_androidversion()== 6:
+                    UsedRAM = format(int(list[1].split(" ")[1])/1024,".2f")
+                elif self.get_androidversion()== 7 or self.get_androidversion()== 8:
+                    UsedRAM = format(int(list[1].split("K")[0].replace(",",""))/1024,".2f")
+                break
+        return  UsedRAM
+
+    def get_memoryinfo(self):
+        command = adb + " -s {} shell dumpsys meminfo ".format(self.get_mdevice())
+        print(command)
+        memory = os.popen(command)
+        res = memory.read()
+        for line in res.splitlines():
+            line = line.strip()
+            list = line.split(":")
+            if list[0]=="Total RAM":
+                if self.get_androidversion()== 5 or self.get_androidversion()== 6:
+                    TotalRAM = format(int(list[1].split(" ")[1])/1024,".2f")
+                elif self.get_androidversion()== 7 or self.get_androidversion()== 8:
+                    TotalRAM = format(int(list[1].split("K")[0].replace(",",""))/1024,".2f")
+            elif list[0]=="Free RAM":
+                if self.get_androidversion()== 5 or self.get_androidversion()== 6:
+                    FreeRAM = format(int(list[1].split(" ")[1])/1024,".2f")
+                elif self.get_androidversion()== 7 or self.get_androidversion()== 8:
+                    FreeRAM = format(int(list[1].split("K")[0].replace(",",""))/1024,".2f")
+            elif list[0] == "Used RAM":
+                if self.get_androidversion() == 5 or self.get_androidversion() == 6:
+                    UsedRAM = format(int(list[1].split(" ")[1]) / 1024, ".2f")
+                elif self.get_androidversion() == 7 or self.get_androidversion() == 8:
+                    UsedRAM = format(int(list[1].split("K")[0].replace(",", "")) / 1024, ".2f")
+        return  TotalRAM, FreeRAM,UsedRAM
+
+
 
     def record_allocated_memory(self,timeout=30):
         start_time=time.time()
@@ -290,6 +376,8 @@ class MultiAdb:
             nowmemory=self.get_allocated_memory()
             self.write_excel(nowmemory,"allocated_memory",time.time())
             time.sleep(0.5)
+
+
 
     def write_excel(self,nowmemory,type,time):
         self.create_log_excel()
