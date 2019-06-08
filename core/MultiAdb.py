@@ -296,9 +296,8 @@ class MultiAdb:
         command = adb + " -s {} shell dumpsys meminfo ".format(self.get_mdevice())
         print(command)
         memory=os.popen(command)
-        res = memory.read()
         TotalRAM=0
-        for line in res.splitlines():
+        for line in memory:
             line=line.strip()
             list = line.split(":")
             if list[0]=="Total RAM":
@@ -313,9 +312,8 @@ class MultiAdb:
         command = adb + " -s {} shell dumpsys meminfo ".format(self.get_mdevice())
         print(command)
         memory = os.popen(command)
-        res = memory.read()
         FreeRAM=0
-        for line in res.splitlines():
+        for line in memory:
             line = line.strip()
             list = line.split(":")
             if list[0]=="Free RAM":
@@ -330,9 +328,8 @@ class MultiAdb:
         command = adb + " -s {} shell dumpsys meminfo ".format(self.get_mdevice())
         print(command)
         memory = os.popen(command)
-        res = memory.read()
         UsedRAM=0
-        for line in res.splitlines():
+        for line in memory:
             line = line.strip()
             list = line.split(":")
             if list[0]=="Used RAM":
@@ -347,8 +344,7 @@ class MultiAdb:
         command = adb + " -s {} shell dumpsys meminfo ".format(self.get_mdevice())
         print(command)
         memory = os.popen(command)
-        res = memory.read()
-        for line in res.splitlines():
+        for line in memory:
             line = line.strip()
             list = line.split(":")
             if list[0]=="Total RAM":
@@ -367,8 +363,6 @@ class MultiAdb:
                 elif self.get_androidversion() == 7 or self.get_androidversion() == 8:
                     UsedRAM = format(int(list[1].split("K")[0].replace(",", "")) / 1024, ".2f")
         return  TotalRAM, FreeRAM,UsedRAM
-
-
 
     def record_allocated_memory(self,timeout=30):
         start_time=time.time()
