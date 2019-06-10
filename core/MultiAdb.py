@@ -9,8 +9,10 @@ import xlwings as xw
 from DreamMultiDevices.core import RunTestCase
 from DreamMultiDevices.tools import Config
 from airtest.core.api import *
+from airtest.core.error import *
 from poco.drivers.android.uiautomation import AndroidUiautomationPoco
 from airtest.core.android.adb import ADB
+import  subprocess
 
 _print = print
 def print(*args, **kwargs):
@@ -279,7 +281,7 @@ class MultiAdb:
 
     def get_allocated_memory(self):
         command=adb + " -s {} shell dumpsys meminfo {}".format(self.get_mdevice(),self.get_packagename())
-        print(command)
+        #print(command)
         memory=os.popen(command)
         res = memory.read()
         list=[]
@@ -342,25 +344,26 @@ class MultiAdb:
 
     def get_memoryinfo(self):
         command = adb + " -s {} shell dumpsys meminfo ".format(self.get_mdevice())
-        print(command)
+        #print(command)
         memory = os.popen(command)
+        androidversion=self.get_androidversion()
         for line in memory:
             line = line.strip()
             list = line.split(":")
             if list[0]=="Total RAM":
-                if self.get_androidversion()== 5 or self.get_androidversion()== 6:
+                if androidversion== 5 or androidversion== 6:
                     TotalRAM = format(int(list[1].split(" ")[1])/1024,".2f")
-                elif self.get_androidversion()== 7 or self.get_androidversion()== 8:
+                elif androidversion== 7 or androidversion== 8 or androidversion==9:
                     TotalRAM = format(int(list[1].split("K")[0].replace(",",""))/1024,".2f")
             elif list[0]=="Free RAM":
-                if self.get_androidversion()== 5 or self.get_androidversion()== 6:
+                if androidversion== 5 or androidversion== 6:
                     FreeRAM = format(int(list[1].split(" ")[1])/1024,".2f")
-                elif self.get_androidversion()== 7 or self.get_androidversion()== 8:
+                elif androidversion == 7 or androidversion == 8 or androidversion == 9:
                     FreeRAM = format(int(list[1].split("K")[0].replace(",",""))/1024,".2f")
             elif list[0] == "Used RAM":
-                if self.get_androidversion() == 5 or self.get_androidversion() == 6:
+                if androidversion== 5 or androidversion== 6:
                     UsedRAM = format(int(list[1].split(" ")[1]) / 1024, ".2f")
-                elif self.get_androidversion() == 7 or self.get_androidversion() == 8:
+                elif androidversion == 7 or androidversion == 8 or androidversion == 9:
                     UsedRAM = format(int(list[1].split("K")[0].replace(",", "")) / 1024, ".2f")
         return  TotalRAM, FreeRAM,UsedRAM
 
@@ -371,10 +374,34 @@ class MultiAdb:
             self.write_excel(nowmemory,"allocated_memory",time.time())
             time.sleep(0.5)
 
+    def get_totalcpu(self):
+        command = adb + " -s {} shell dumpsys cpuinfo |findstr TOTAL ".format(self.get_mdevice())
+        print(command)
+        commandresult = os.popen(command)
+        cputotal=""
+        for result in commandresult:
+            result= result.split(" ")
+            cputotal=result[0]
+            break
+        return cputotal
 
-
-    def write_excel(self,nowmemory,type,time):
-        self.create_log_excel()
+    def get_allocated_cpu(self):
+        packagename=self.get_packagename()[0:9]
+        command = adb + " -s {} shell top -n 1 |findstr {} ".format(self.get_mdevice(),packagename)
+        print(command)
+        subresult= os.popen(command).read()
+        version=self.get_androidversion()
+        if subresult == "" :
+            return "N/a"
+        else:
+            cpuresult = subresult.split(" ")
+            if version==6:
+                cpu = cpuresult[4]
+            elif version ==7:
+                cpu=cpuresult[7]
+            elif version ==8 or version == 9:
+                cpu = cpuresult[15]+"%"
+            return cpu
 
     def create_log_excel(self):
         exclefile=os.getcwd()+"\log.xlsx"
@@ -388,6 +415,12 @@ class MultiAdb:
             wb.save(exclefile)
             wb.close()
             app.quit()
+
+if __name__ == "__main__":
+    madb = MultiAdb("99fa1f38")
+    res=subprocess.call("adb -s 6c176579 shell top -n 1")
+    print("res=",res)
+
 
 
 
