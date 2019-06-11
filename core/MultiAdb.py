@@ -192,11 +192,11 @@ class MultiAdb:
             if self.isinstalled():
                 uninstallcommand = adb + " -s " + str(devices) + " uninstall " + package
                 print("正在{}上卸载{},卸载命令为：{}".format(devices, package, uninstallcommand))
+                os.popen(uninstallcommand)
             time.sleep(self.get_timeoutaction())
             installcommand = adb + " -s " + str(devices) + " install -r " + apkpath
             result=os.popen(installcommand)
-            res = result.read()
-            for line in res.splitlines():
+            for line in result:
                 print("output={}".format(line))
             print("正在{}上安装{},安装命令为：{}".format(devices, package, installcommand))
             if self.isinstalled():
@@ -281,11 +281,10 @@ class MultiAdb:
 
     def get_allocated_memory(self):
         command=adb + " -s {} shell dumpsys meminfo {}".format(self.get_mdevice(),self.get_packagename())
-        #print(command)
+        print(command)
         memory=os.popen(command)
-        res = memory.read()
         list=[]
-        for line in res.splitlines():
+        for line in memory:
             line=line.strip()
             list=line.split(' ')
             if list[0]=="TOTAL":
@@ -293,6 +292,7 @@ class MultiAdb:
                     list.remove('')
                 allocated_memory=format(int(list[1])/1024,".2f")
                 return allocated_memory
+        return "N/a"
 
     def get_totalmemory(self):
         command = adb + " -s {} shell dumpsys meminfo ".format(self.get_mdevice())
@@ -375,18 +375,51 @@ class MultiAdb:
             time.sleep(0.5)
 
     def get_totalcpu(self):
-        command = adb + " -s {} shell dumpsys cpuinfo |findstr TOTAL ".format(self.get_mdevice())
+        starttime =time.time()
+        command = adb + " -s {} shell top -n 1 ".format(self.get_mdevice())
         print(command)
-        commandresult = os.popen(command)
-        cputotal=""
-        for result in commandresult:
-            result= result.split(" ")
-            cputotal=result[0]
-            break
-        return cputotal
+        commandresult =os.popen(command)
+        cputotal=0
+        andversion=self.get_androidversion()
+        print("get_totalcpu",time.time()-starttime)
+        for line in commandresult:
+            list=line.strip().split(" ")
+            while '' in list:
+                list.remove('')
+            if len(list)>9:
+                if andversion == 6:
+                    #print(list)
+                    if ("%" in list[2]and list[2]!="CPU%"):
+                        cpu=int(list[2][:-1])
+                        if cpu!=0:
+                            cputotal=cputotal+cpu
+                        else:
+                            break
+                elif andversion ==7 :
+                    #print(list)
+                    if ("%" in list[4] and list[4] != "CPU%"):
+                        cpu = int(list[4][:-1])
+                        if cpu != 0:
+                            cputotal = cputotal + cpu
+                        else:
+                            break
+                elif andversion ==8 or andversion ==9:
+                    #print(list)
+                    try :
+                        cpu=float(list[8])
+                        if cpu != 0:
+                            cputotal = cputotal + cpu
+                        else:
+                            break
+                    except:
+                        pass
+
+        print(time.time()-starttime,"cputotal=",cputotal,"%")
+        return  str(format(cputotal,".2f"))+"%"
 
     def get_allocated_cpu(self):
-        packagename=self.get_packagename()[0:9]
+        start=time.time()
+        packagename=self.get_packagename()[0:11]
         command = adb + " -s {} shell top -n 1 |findstr {} ".format(self.get_mdevice(),packagename)
         print(command)
         subresult= os.popen(command).read()
@@ -395,12 +428,15 @@ class MultiAdb:
             return "N/a"
         else:
             cpuresult = subresult.split(" ")
+            while '' in cpuresult:
+                cpuresult.remove('')
+            #print(self.get_mdevice(),"cpuresult=",cpuresult)
             if version==6:
-                cpu = cpuresult[4]
+                cpu = cpuresult[2]
             elif version ==7:
-                cpu=cpuresult[7]
+                cpu=cpuresult[4]
             elif version ==8 or version == 9:
-                cpu = cpuresult[15]+"%"
+                cpu = cpuresult[8]+"%"
             return cpu
 
     def create_log_excel(self):
@@ -418,8 +454,8 @@ class MultiAdb:
 
 if __name__ == "__main__":
     madb = MultiAdb("99fa1f38")
-    res=subprocess.call("adb -s 6c176579 shell top -n 1")
-    print("res=",res)
+    madb.get_totalcpu()
+
 
 
 
