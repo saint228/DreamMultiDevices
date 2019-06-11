@@ -5,7 +5,6 @@ import os,inspect
 import sys
 import threading
 import queue
-import xlwings as xw
 from DreamMultiDevices.core import RunTestCase
 from DreamMultiDevices.tools import Config
 from airtest.core.api import *
@@ -108,8 +107,6 @@ class MultiAdb:
     def set_TestCasePath(self,TestCasepath):
         configPath=self._configPath
         Config.setValue(configPath,"testcasepath",TestCasepath)
-
-
 
     # 本方法用于读取实时的设备连接
     def getdevices(self):
@@ -249,6 +246,7 @@ class MultiAdb:
                     time.sleep(5)
                 count += 1
 
+    #判断给定设备里是否已经安装了指定apk
     def isinstalled(self):
         devices=self.get_mdevice()
         package=self.get_packagename()
@@ -262,23 +260,14 @@ class MultiAdb:
                 return True
         print("在{}上没找到包{}".format(devices,package))
         return False
-        '''
-         command = adb + " -s {} shell ps | findstr {}".format(devices,package)
-        print(command)
-        commandresult = os.popen(command).readline()
-        if len(commandresult)>0:
-            print("在{}上发现已安装{}".format(devices, package))
-            return True
-        else:
-            print("在{}上没找到包{}".format(devices, package))
-            return False
-        '''
 
+    #判断给定设备的安卓版本号
     def get_androidversion(self):
         command=adb+" -s {} shell getprop ro.build.version.release".format(self.get_mdevice())
         version=os.popen(command).read()[0]
         return int(version)
 
+    #判断给定设备运行指定apk时的内存占用
     def get_allocated_memory(self):
         command=adb + " -s {} shell dumpsys meminfo {}".format(self.get_mdevice(),self.get_packagename())
         print(command)
@@ -294,6 +283,7 @@ class MultiAdb:
                 return allocated_memory
         return "N/a"
 
+    #判断给定设备运行时的内存总占用
     def get_totalmemory(self):
         command = adb + " -s {} shell dumpsys meminfo ".format(self.get_mdevice())
         print(command)
@@ -303,13 +293,14 @@ class MultiAdb:
             line=line.strip()
             list = line.split(":")
             if list[0]=="Total RAM":
-                if self.get_androidversion()== 5 or self.get_androidversion()== 6:
+                if self.get_androidversion()<7:
                     TotalRAM = format(int(list[1].split(" ")[1])/1024,".2f")
-                elif self.get_androidversion()== 7 or self.get_androidversion()== 8:
+                elif self.get_androidversion()>6:
                     TotalRAM = format(int(list[1].split("K")[0].replace(",",""))/1024,".2f")
                 break
         return  TotalRAM
 
+    #判断给定设备运行时的空闲内存
     def get_freememory(self):
         command = adb + " -s {} shell dumpsys meminfo ".format(self.get_mdevice())
         print(command)
@@ -319,13 +310,14 @@ class MultiAdb:
             line = line.strip()
             list = line.split(":")
             if list[0]=="Free RAM":
-                if self.get_androidversion()== 5 or self.get_androidversion()== 6:
+                if self.get_androidversion()<7:
                     FreeRAM = format(int(list[1].split(" ")[1])/1024,".2f")
-                elif self.get_androidversion()== 7 or self.get_androidversion()== 8:
+                elif self.get_androidversion()>6:
                     FreeRAM = format(int(list[1].split("K")[0].replace(",",""))/1024,".2f")
                 break
         return  FreeRAM
 
+    #判断给定设备运行时的总使用内存
     def get_usedmemory(self):
         command = adb + " -s {} shell dumpsys meminfo ".format(self.get_mdevice())
         print(command)
@@ -335,13 +327,14 @@ class MultiAdb:
             line = line.strip()
             list = line.split(":")
             if list[0]=="Used RAM":
-                if self.get_androidversion()== 5 or self.get_androidversion()== 6:
+                if self.get_androidversion()<7:
                     UsedRAM = format(int(list[1].split(" ")[1])/1024,".2f")
-                elif self.get_androidversion()== 7 or self.get_androidversion()== 8:
+                elif self.get_androidversion()>6:
                     UsedRAM = format(int(list[1].split("K")[0].replace(",",""))/1024,".2f")
                 break
         return  UsedRAM
 
+    #判断给定设备运行时的Total/Free/Used内存,一次dump，加快获取速度
     def get_memoryinfo(self):
         command = adb + " -s {} shell dumpsys meminfo ".format(self.get_mdevice())
         #print(command)
@@ -351,29 +344,23 @@ class MultiAdb:
             line = line.strip()
             list = line.split(":")
             if list[0]=="Total RAM":
-                if androidversion== 5 or androidversion== 6:
+                if androidversion<7:
                     TotalRAM = format(int(list[1].split(" ")[1])/1024,".2f")
-                elif androidversion== 7 or androidversion== 8 or androidversion==9:
+                elif androidversion>6:
                     TotalRAM = format(int(list[1].split("K")[0].replace(",",""))/1024,".2f")
             elif list[0]=="Free RAM":
-                if androidversion== 5 or androidversion== 6:
+                if androidversion<7:
                     FreeRAM = format(int(list[1].split(" ")[1])/1024,".2f")
-                elif androidversion == 7 or androidversion == 8 or androidversion == 9:
+                elif androidversion > 6:
                     FreeRAM = format(int(list[1].split("K")[0].replace(",",""))/1024,".2f")
             elif list[0] == "Used RAM":
-                if androidversion== 5 or androidversion== 6:
+                if androidversion<7:
                     UsedRAM = format(int(list[1].split(" ")[1]) / 1024, ".2f")
-                elif androidversion == 7 or androidversion == 8 or androidversion == 9:
+                elif androidversion > 6:
                     UsedRAM = format(int(list[1].split("K")[0].replace(",", "")) / 1024, ".2f")
         return  TotalRAM, FreeRAM,UsedRAM
 
-    def record_allocated_memory(self,timeout=30):
-        start_time=time.time()
-        while time.time()-start_time<timeout:
-            nowmemory=self.get_allocated_memory()
-            self.write_excel(nowmemory,"allocated_memory",time.time())
-            time.sleep(0.5)
-
+    #判断给定设备运行时的总CPU占用，对安卓8以上，CPU总数不一定是100%，视手机CPU内核数决定。
     def get_totalcpu(self):
         starttime =time.time()
         command = adb + " -s {} shell top -n 1 ".format(self.get_mdevice())
@@ -381,12 +368,14 @@ class MultiAdb:
         commandresult =os.popen(command)
         cputotal=0
         andversion=self.get_androidversion()
-        print("get_totalcpu",time.time()-starttime)
+        #print("get_totalcpu",time.time()-starttime)
+        maxcpu=""
         for line in commandresult:
             list=line.strip().split(" ")
             while '' in list:
                 list.remove('')
-            if len(list)>9:
+            #print(list)
+            if len(list)>8:
                 if andversion == 6:
                     #print(list)
                     if ("%" in list[2]and list[2]!="CPU%"):
@@ -403,8 +392,12 @@ class MultiAdb:
                             cputotal = cputotal + cpu
                         else:
                             break
-                elif andversion ==8 or andversion ==9:
+                elif andversion >7:
                     #print(list)
+                    if "%cpu" in list[0]:
+                        maxcpu = list[0]
+                        #print(list)
+                        #print(maxcpu)
                     try :
                         cpu=float(list[8])
                         if cpu != 0:
@@ -414,9 +407,10 @@ class MultiAdb:
                     except:
                         pass
 
-        print(time.time()-starttime,"cputotal=",cputotal,"%")
-        return  str(format(cputotal,".2f"))+"%"
+        #print(time.time()-starttime,"cputotal=",cputotal,"%")
+        return  str(format(cputotal,".2f"))+"%",maxcpu
 
+    #判断给定设备运行时的总使用CPU
     def get_allocated_cpu(self):
         start=time.time()
         packagename=self.get_packagename()[0:11]
@@ -428,6 +422,7 @@ class MultiAdb:
             return "N/a"
         else:
             cpuresult = subresult.split(" ")
+            #去空白项
             while '' in cpuresult:
                 cpuresult.remove('')
             #print(self.get_mdevice(),"cpuresult=",cpuresult)
@@ -435,26 +430,14 @@ class MultiAdb:
                 cpu = cpuresult[2]
             elif version ==7:
                 cpu=cpuresult[4]
-            elif version ==8 or version == 9:
+            elif version>7:
                 cpu = cpuresult[8]+"%"
             return cpu
 
-    def create_log_excel(self):
-        exclefile=os.getcwd()+"\log.xlsx"
-        if not os.path.exists(exclefile):
-            app = xw.App(visible=True, add_book=False)
-            wb = app.books.add(name="allocated_memory")
-            #app.books.add().sheets("ToTal_memory")
-            #app.books.add().sheets("allocated_CPU")
-            #app.books.add().sheets("ToTal_CPU")
-            #app.books.add().sheets("FPS")
-            wb.save(exclefile)
-            wb.close()
-            app.quit()
-
 if __name__ == "__main__":
     madb = MultiAdb("99fa1f38")
-    madb.get_totalcpu()
+
+
 
 
 
