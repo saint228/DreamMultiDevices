@@ -30,7 +30,6 @@ def enter_performance(madb,timeout=3600):
             allocated=get_allocated_memory.get_result()
             total,free,used=get_memory_info.get_result()
             totalcpu,maxcpu=get_total_cpu.get_result()
-            print(totalcpu,maxcpu)
             allocatedcpu=get_allocated_cpu.get_result()
 
             get_allocated_memory.join()

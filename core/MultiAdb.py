@@ -416,7 +416,7 @@ class MultiAdb:
         #print(time.time()-starttime,"cputotal=",cputotal,"%")
         totalcpu=str(format(cputotal, ".2f")) + "%"
         q.put(totalcpu,maxcpu)
-        print(totalcpu,maxcpu)
+        #print(totalcpu,maxcpu)
         return  totalcpu,maxcpu
 
     #判断给定设备运行时的总使用CPU
