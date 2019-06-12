@@ -17,30 +17,31 @@ def enter_performance(madb,timeout=3600):
             if time.time()-starttime>timeout:
                 break
             total=allocated= used=free=totalcpu= allocatedcpu=""
-            getallocatedmemory = MyThread(madb.get_allocated_memory,args=())
-            getmemoryinfo = MyThread(madb.get_memoryinfo,args=())
-            gettotalcpu = MyThread(madb.get_totalcpu,args=() )
-            getallocatedcpu = MyThread(madb.get_allocated_cpu,args=() )
+            get_allocated_memory = MyThread(madb.get_allocated_memory,args=())
+            get_memory_info = MyThread(madb.get_memoryinfo,args=())
+            get_total_cpu = MyThread(madb.get_totalcpu,args=() )
+            get_allocated_cpu = MyThread(madb.get_allocated_cpu,args=() )
 
-            getallocatedmemory.start()
-            getmemoryinfo.start()
-            gettotalcpu.start()
-            getallocatedcpu.start()
+            get_allocated_memory.start()
+            get_memory_info.start()
+            get_total_cpu.start()
+            get_allocated_cpu.start()
 
-            allocated=getallocatedmemory.get_result()
-            total,free,used=getmemoryinfo.get_result()
-            totalcpu,maxcpu=gettotalcpu.get_result()
-            allocatedcpu=getallocatedcpu.get_result()
+            allocated=get_allocated_memory.get_result()
+            total,free,used=get_memory_info.get_result()
+            totalcpu,maxcpu=get_total_cpu.get_result()
+            print(totalcpu,maxcpu)
+            allocatedcpu=get_allocated_cpu.get_result()
 
-            getallocatedmemory.join()
-            getmemoryinfo.join()
-            gettotalcpu.join()
-            getallocatedcpu.join()
+            get_allocated_memory.join()
+            get_memory_info.join()
+            get_total_cpu.join()
+            get_allocated_cpu.join()
             if maxcpu=="":
                 maxcpu="100%"
 
             nowtime = time.localtime()
-            inputtime = time.strftime("%H:%M:%S", nowtime)
+            inputtime = str(time.strftime("%H:%M:%S", nowtime))
             list = [inputtime, total, allocated, used, free, totalcpu+"/"+maxcpu, allocatedcpu]
             record_to_excel(sheet, list)
         wb.save()
@@ -61,16 +62,18 @@ class MyThread(threading.Thread):
         threading.Thread.join(self)  # 等待线程执行完毕
         try:
             return self.result
-        except Exception:
+        except Exception as e:
+            print(e)
             return None
 
 if __name__ == "__main__":
     devicesList = Madb().getdevices()
     pool = multiprocessing.Pool(processes=len(devicesList))
     print("启动进程池")
-    results = []
     for i in range(len(devicesList)):
         madb = Madb(devicesList[i])
+        if madb.get_androidversion()<5:
+            break
         pool.apply_async(enter_performance, (madb,))  # 根据设备列表去循环创建进程，对每个进程调用下面的enter_processing方法。
     pool.close()
     pool.join()

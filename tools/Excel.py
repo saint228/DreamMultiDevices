@@ -12,7 +12,7 @@ def create_log_excel(nowtime,device):
         sheet=wb.sheets("Sheet1")
         sheet.range('A1').value = ["Time","TotalMemory", "AllocatedMemory","UsedMemory","FreeMemory","TotalCPU","AllocatedCPU"]
         wb.save(exclefile)
-        print(exclefile)
+        print("创建Excel文件：{}".format(exclefile))
     return exclefile, sheet,wb
 
 def record_to_excel(sheet,list):

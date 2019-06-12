@@ -382,8 +382,8 @@ class MultiAdb:
                 list.remove('')
             #print(list)
             if len(list)>8:
-                if andversion == 6:
-                    #print(list)
+                if andversion <7:
+                    print(list)
                     if ("%" in list[2]and list[2]!="CPU%"):
                         cpu=int(list[2][:-1])
                         if cpu!=0:
@@ -416,6 +416,7 @@ class MultiAdb:
         #print(time.time()-starttime,"cputotal=",cputotal,"%")
         totalcpu=str(format(cputotal, ".2f")) + "%"
         q.put(totalcpu,maxcpu)
+        print(totalcpu,maxcpu)
         return  totalcpu,maxcpu
 
     #判断给定设备运行时的总使用CPU
@@ -445,7 +446,8 @@ class MultiAdb:
             return cpu
 
 if __name__ == "__main__":
-    madb = MultiAdb("99fa1f38")
+    madb = MultiAdb("127.0.0.1:62025")
+    madb.get_totalcpu()
 
 
 
