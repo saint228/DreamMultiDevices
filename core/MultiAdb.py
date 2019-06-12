@@ -280,7 +280,9 @@ class MultiAdb:
                 while '' in list:
                     list.remove('')
                 allocated_memory=format(int(list[1])/1024,".2f")
+                q.put(allocated_memory)
                 return allocated_memory
+        q.put("N/a")
         return "N/a"
 
     #判断给定设备运行时的内存总占用
@@ -298,6 +300,7 @@ class MultiAdb:
                 elif self.get_androidversion()>6:
                     TotalRAM = format(int(list[1].split("K")[0].replace(",",""))/1024,".2f")
                 break
+        q.put(TotalRAM)
         return  TotalRAM
 
     #判断给定设备运行时的空闲内存
@@ -315,6 +318,7 @@ class MultiAdb:
                 elif self.get_androidversion()>6:
                     FreeRAM = format(int(list[1].split("K")[0].replace(",",""))/1024,".2f")
                 break
+        q.put(FreeRAM)
         return  FreeRAM
 
     #判断给定设备运行时的总使用内存
@@ -332,6 +336,7 @@ class MultiAdb:
                 elif self.get_androidversion()>6:
                     UsedRAM = format(int(list[1].split("K")[0].replace(",",""))/1024,".2f")
                 break
+        q.put(UsedRAM)
         return  UsedRAM
 
     #判断给定设备运行时的Total/Free/Used内存,一次dump，加快获取速度
@@ -358,6 +363,7 @@ class MultiAdb:
                     UsedRAM = format(int(list[1].split(" ")[1]) / 1024, ".2f")
                 elif androidversion > 6:
                     UsedRAM = format(int(list[1].split("K")[0].replace(",", "")) / 1024, ".2f")
+        q.put(TotalRAM,FreeRAM,UsedRAM)
         return  TotalRAM, FreeRAM,UsedRAM
 
     #判断给定设备运行时的总CPU占用，对安卓8以上，CPU总数不一定是100%，视手机CPU内核数决定。
@@ -408,7 +414,9 @@ class MultiAdb:
                         pass
 
         #print(time.time()-starttime,"cputotal=",cputotal,"%")
-        return  str(format(cputotal,".2f"))+"%",maxcpu
+        totalcpu=str(format(cputotal, ".2f")) + "%"
+        q.put(totalcpu,maxcpu)
+        return  totalcpu,maxcpu
 
     #判断给定设备运行时的总使用CPU
     def get_allocated_cpu(self):
@@ -419,6 +427,7 @@ class MultiAdb:
         subresult= os.popen(command).read()
         version=self.get_androidversion()
         if subresult == "" :
+            q.put("N/a")
             return "N/a"
         else:
             cpuresult = subresult.split(" ")
@@ -432,6 +441,7 @@ class MultiAdb:
                 cpu=cpuresult[4]
             elif version>7:
                 cpu = cpuresult[8]+"%"
+            q.put(cpu)
             return cpu
 
 if __name__ == "__main__":

@@ -15,18 +15,20 @@ def create_log_excel(nowtime,device):
         print(exclefile)
     return exclefile, sheet,wb
 
-def record_to_excel(sheet,nowtime,*,TotalMemory,AllocatedMemory,UsedMemory,FreeMemory,TotalCPU,AllocatedCPU):
-    sheet.range("A2").value =time.strftime("%Y-%m-%d %H:%M:%S",nowtime)
-    sheet.range("B2").value=TotalMemory
-    sheet.range("C2").value=AllocatedMemory
-    sheet.range("D2").value=UsedMemory
-    sheet.range("E2").value=FreeMemory
-    sheet.range("F2").value=TotalCPU
-    sheet.range("G2").value=AllocatedCPU
+def record_to_excel(sheet,list):
+    rng = sheet.range('A1').expand()
+    nrow = rng.last_cell.row
+    #print("nrow=",nrow)
+    currentcell="A"+str(nrow+1)
+    sheet.range(currentcell).value =list
+    sheet.autofit()
+
 
 if __name__ == "__main__":
     nowtime=time.localtime()
-    print(nowtime)
     filepath,sheet,wb=create_log_excel(nowtime,"62001")
-    record_to_excel(sheet,nowtime,TotalMemory="1024MB",AllocatedMemory="100MB",UsedMemory="500MB",FreeMemory="300MB",TotalCPU="50%",AllocatedCPU="25%")
+    inputtime=time.strftime("%Y-%m-%d %H:%M:%S", nowtime)
+    list=[inputtime,"1024MB","100MB","500MB","300MB","50%","25%"]
+    for i in range(100):
+        record_to_excel(sheet,list)
     wb.save()
