@@ -51,7 +51,7 @@ class MultiAdb:
         self._testCasePath=Config.getValue(self._configPath, "testcasepath")
         if self._testCasePath[0]=="":
             self._testCasePath=os.path.join(self._rootPath, "TestCase")
-        self._finishflag="False"
+
 
     def get_devicesList(self):
         return self._devicesList
@@ -94,12 +94,6 @@ class MultiAdb:
 
     def set_mdevice(self,device):
         self._mdevice=device
-
-    def get_finishflag(self):
-        return self._finishflag
-
-    def set_finishflag(self,bool):
-        self._finishflag=bool
 
     #写回包名、包路径、测试用例路径等等到配置文件
 

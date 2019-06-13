@@ -28,15 +28,18 @@ def main():
     if devicesList:
         try:
             print("启动进程池")
+            list=[]
             for i in range(len(devicesList)):
                 madb=Madb(devicesList[i])
                 # 根据设备列表去循环创建进程，对每个进程调用下面的enter_processing/enter_enter_performance方法。
                 p1=Process(target=enter_performance, args=(madb,))
                 p2=Process(target=enter_processing, args=(i,madb,))
-                p1.start()
-                p2.start()
-                p1.join()
-                p2.join()
+                list.append(p1)
+                list.append(p2)
+            for p in list:
+                p.start()
+            for p in list:
+                p.join()
             print("进程回收完毕")
             print("测试结束")
         except AirtestError as ae:
@@ -70,7 +73,6 @@ def enter_processing(processNo,madb):
             except Exception as e:
                 print(e)
                 print("{}安装失败，installResult={}".format(devices, installResult))
-
             try:
                 madb.StartApp()
             except Exception as e:
@@ -85,7 +87,7 @@ def enter_processing(processNo,madb):
         print(e)
         isconnect="Fail"
         print( "连接设备{}失败".format(devices))
-        madb.set_finishflag("True")
+
     os.remove(filepath)
     return isconnect
 

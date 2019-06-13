@@ -15,16 +15,19 @@ def print(*args, **kwargs):
 adb = ADB().adb_path
 
 def GetScreen(startTime,devices,action):
+    if ":" in devices:
+        nickname = devices.split(":")[1]
     reportpath = os.path.join(os.getcwd(), "Report")
     screenpath = os.path.join(reportpath, "Screen")
     print("screenpath=",screenpath)
-    png = screenpath +"\\"+ time.strftime('%Y%m%d_%H%M%S', time.localtime(startTime)) + "_" +  "_" + action+ ".png"
+    png = screenpath +"\\"+ time.strftime('%Y%m%d_%H%M%S',time.localtime(startTime))+ nickname+ "_" + action+ ".png"
     print("png=",png)
     os.system(adb + " -s " + devices + " shell screencap -p /sdcard/screencap.png")
+    time.sleep(0.5)
     fp = open(png, "a+", encoding="utf-8")
     fp.close()
     os.system(adb + " -s " + devices + " pull /sdcard/screencap.png " + png)
-    time.sleep(1)
+    time.sleep(0.5)
     compressImage(png)
     print("<img src='" + png + "' width=600 />")
     return png
