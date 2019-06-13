@@ -27,6 +27,7 @@ def record_to_excel(sheet,list):
     sheet.autofit()
 
 
+
 if __name__ == "__main__":
     nowtime=time.localtime()
     filepath,sheet,wb=create_log_excel(nowtime,"62001")

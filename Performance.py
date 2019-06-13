@@ -11,22 +11,24 @@ _print = print
 def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
-def enter_performance(madb,):
+def enter_performance(madb):
     print("设备{}进入enter_performance方法".format(madb.get_mdevice()))
     filepath, sheet, wb = create_log_excel(time.localtime(), madb.get_nickname())
-    collect_data(madb,wb,sheet)
+    collect_data(madb,sheet)
     calculate(sheet)
 
 def calculate(sheet):
     print("calculate")
     pass
 
-def collect_data(madb,wb,sheet,timeout=3600):
+def collect_data(madb,sheet,timeout=3600):
     starttime=time.time()
+    file=os.getcwd()+"\\"+madb.get_nickname()+".tmp"
+    print("collect_data",file)
     try:
 
         while True:
-            if (time.time()-starttime>timeout):
+            if (time.time()-starttime>timeout)or not os.path.exists(file):
                 break
             total=allocated= used=free=totalcpu= allocatedcpu=""
             get_allocated_memory = MyThread(madb.get_allocated_memory,args=())
@@ -55,7 +57,7 @@ def collect_data(madb,wb,sheet,timeout=3600):
             inputtime = str(time.strftime("%H:%M:%S", nowtime))
             list = [inputtime, total, allocated, used, free, totalcpu+"/"+maxcpu, allocatedcpu]
             record_to_excel(sheet, list)
-        wb.save()
+
     except Exception as e:
         print(madb.get_mdevice(),e)
 

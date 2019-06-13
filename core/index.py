@@ -10,6 +10,7 @@ from airtest.core.api import *
 from DreamMultiDevices.core import RunTestCase
 import traceback
 from DreamMultiDevices.Performance import *
+import queue
 
 
 _print = print
@@ -48,6 +49,9 @@ def main():
         print("未找到设备，测试结束")
 
 def enter_processing(processNo,madb):
+    filepath=os.getcwd() +"\\"+ madb.get_nickname() + '.tmp'
+    file = open(filepath, 'w')
+    file.close()
     devices = madb.get_mdevice()
     print("进入{}进程,devicename={}".format(processNo,devices))
     isconnect=""
@@ -75,15 +79,14 @@ def enter_processing(processNo,madb):
             time.sleep(madb.get_timeoutaction())
             RunTestCase.RunTestCase(madb)
             print("{}完成测试".format(devices))
-            print("{}madb.finfishflag={}".format(madb.get_mdevice(),madb.get_finishflag()) )
         else:
             print("设备{}连接失败".format(devices))
-
     except Exception as e:
         print(e)
         isconnect="Fail"
         print( "连接设备{}失败".format(devices))
         madb.set_finishflag("True")
+    os.remove(filepath)
     return isconnect
 
 
