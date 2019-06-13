@@ -24,7 +24,6 @@ def main():
         devicesList = Madb().getdevices()
     print("最终的devicesList=",devicesList)
     print("测试开始")
-    results=""
     if devicesList:
         try:
             print("启动进程池")
@@ -32,9 +31,13 @@ def main():
             for i in range(len(devicesList)):
                 madb=Madb(devicesList[i])
                 # 根据设备列表去循环创建进程，对每个进程调用下面的enter_processing/enter_enter_performance方法。
-                p1=Process(target=enter_performance, args=(madb,))
+                if madb.get_androidversion()<5:
+                    print("设备{}的安卓版本低于5，不支持。".format(madb.get_mdevice()))
+                    continue
+                else:
+                    p1 = Process(target=enter_performance, args=(madb,))
+                    list.append(p1)
                 p2=Process(target=enter_processing, args=(i,madb,))
-                list.append(p1)
                 list.append(p2)
             for p in list:
                 p.start()
@@ -71,23 +74,19 @@ def enter_processing(processNo,madb):
                 if installResult == "Success":
                     print("{}确定安装成功".format(devices))
             except Exception as e:
-                print(e)
-                print("{}安装失败，installResult={}".format(devices, installResult))
+                print("{}安装失败，installResult={}".format(devices, installResult)+ traceback.format_exc())
             try:
                 madb.StartApp()
             except Exception as e:
-                print(e)
-                print("运行失败")
+                print("运行失败"+traceback.format_exc())
             time.sleep(madb.get_timeoutaction())
             RunTestCase.RunTestCase(madb)
             print("{}完成测试".format(devices))
         else:
             print("设备{}连接失败".format(devices))
     except Exception as e:
-        print(e)
         isconnect="Fail"
-        print( "连接设备{}失败".format(devices))
-
+        print( "连接设备{}失败".format(devices)+ traceback.format_exc())
     os.remove(filepath)
     return isconnect
 

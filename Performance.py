@@ -6,8 +6,10 @@ from DreamMultiDevices.core.MultiAdb import MultiAdb as Madb
 import time
 import  threading
 import  multiprocessing
+import traceback
 from DreamMultiDevices.tools.Excel import *
 from DreamMultiDevices.tools.Screencap import *
+
 
 _print = print
 def print(*args, **kwargs):
@@ -39,7 +41,6 @@ def calculate_min(sheet):
 def collect_data(madb,sheet,timeout=3600):
     starttime=time.time()
     file=os.getcwd()+"\\"+madb.get_nickname()+".tmp"
-    print("collect_data",file)
     try:
 
         while True:
@@ -63,7 +64,7 @@ def collect_data(madb,sheet,timeout=3600):
             total,free,used=get_memory_info.get_result()
             totalcpu,maxcpu=get_total_cpu.get_result()
             allocatedcpu=get_allocated_cpu.get_result()
-            time.sleep(1)
+            time.sleep(0.5)
             png=get_png.get_result()
 
             get_allocated_memory.join()
@@ -82,7 +83,7 @@ def collect_data(madb,sheet,timeout=3600):
             record_to_excel(sheet,list,png=png)
 
     except Exception as e:
-        print(madb.get_mdevice(),e)
+        print(madb.get_mdevice(),+ traceback.format_exc())
 
 
 class MyThread(threading.Thread):
@@ -99,7 +100,7 @@ class MyThread(threading.Thread):
         try:
             return self.result
         except Exception as e:
-            print(e)
+            print( traceback.format_exc())
             return None
 
 if __name__ == "__main__":
@@ -109,6 +110,7 @@ if __name__ == "__main__":
     for i in range(len(devicesList)):
         madb = Madb(devicesList[i])
         if madb.get_androidversion()<5:
+            print("设备{}的安卓版本低于5，不支持。".format(madb.get_mdevice()))
             break
         pool.apply_async(enter_performance, (madb,))  # 根据设备列表去循环创建进程，对每个进程调用下面的enter_processing方法。
     pool.close()
