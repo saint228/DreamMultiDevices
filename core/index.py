@@ -2,13 +2,15 @@
 __author__ = "无声"
 
 import time
-import multiprocessing
+from multiprocessing import Process, Pipe
 from DreamMultiDevices.core.MultiAdb import MultiAdb as Madb
 from airtest.core.error import *
 from poco.exceptions import *
 from airtest.core.api import *
 from DreamMultiDevices.core import RunTestCase
 import traceback
+from DreamMultiDevices.Performance import *
+
 
 _print = print
 def print(*args, **kwargs):
@@ -24,14 +26,16 @@ def main():
     results=""
     if devicesList:
         try:
-            pool = multiprocessing.Pool(processes=len(devicesList))
             print("启动进程池")
-            results=[]
             for i in range(len(devicesList)):
                 madb=Madb(devicesList[i])
-                pool.apply_async(enter_processing, (i,madb,))  # 根据设备列表去循环创建进程，对每个进程调用下面的enter_processing方法。
-            pool.close()
-            pool.join()
+                # 根据设备列表去循环创建进程，对每个进程调用下面的enter_processing/enter_enter_performance方法。
+                p1=Process(target=enter_performance, args=(madb,))
+                p2=Process(target=enter_processing, args=(i,madb,))
+                p1.start()
+                p2.start()
+                p1.join()
+                p2.join()
             print("进程回收完毕")
             print("测试结束")
         except AirtestError as ae:
@@ -59,19 +63,27 @@ def enter_processing(processNo,madb):
                 installResult = madb.PushApk2Devices()
                 if installResult == "Success":
                     print("{}确定安装成功".format(devices))
-                    madb.StartApp()
-                    time.sleep(madb.get_timeoutaction())
-                    RunTestCase.RunTestCase(madb)
-                    print("{}完成测试".format(devices))
             except Exception as e:
                 print(e)
-                print("{}安装/运行失败，installResult={}".format(devices, installResult))
+                print("{}安装失败，installResult={}".format(devices, installResult))
+
+            try:
+                madb.StartApp()
+            except Exception as e:
+                print(e)
+                print("运行失败")
+            time.sleep(madb.get_timeoutaction())
+            RunTestCase.RunTestCase(madb)
+            print("{}完成测试".format(devices))
+            print("{}madb.finfishflag={}".format(madb.get_mdevice(),madb.get_finishflag()) )
         else:
             print("设备{}连接失败".format(devices))
+
     except Exception as e:
         print(e)
         isconnect="Fail"
         print( "连接设备{}失败".format(devices))
+        madb.set_finishflag("True")
     return isconnect
 
 
