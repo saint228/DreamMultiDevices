@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+__author__ = "无声"
+
 import xlwings as xw
 import os
 import time

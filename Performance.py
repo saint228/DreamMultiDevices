@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
+__author__ = "无声"
+
 from DreamMultiDevices.start import *
 from DreamMultiDevices.core.MultiAdb import MultiAdb as Madb
-import multiprocessing
 import time
 import  threading
 from DreamMultiDevices.tools.Excel import *
@@ -9,12 +11,22 @@ _print = print
 def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
-def enter_performance(madb,timeout=3600):
+def enter_performance(madb,):
+    print("设备{}进入enter_performance方法".format(madb.get_mdevice()))
+    filepath, sheet, wb = create_log_excel(time.localtime(), madb.get_nickname())
+    collect_data(madb,wb,sheet)
+    calculate(sheet)
+
+def calculate(sheet):
+    print("calculate")
+    pass
+
+def collect_data(madb,wb,sheet,timeout=3600):
     starttime=time.time()
     try:
-        filepath, sheet, wb = create_log_excel(time.localtime(), madb.get_nickname())
+
         while True:
-            if time.time()-starttime>timeout:
+            if (time.time()-starttime>timeout):
                 break
             total=allocated= used=free=totalcpu= allocatedcpu=""
             get_allocated_memory = MyThread(madb.get_allocated_memory,args=())

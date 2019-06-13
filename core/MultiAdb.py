@@ -51,6 +51,7 @@ class MultiAdb:
         self._testCasePath=Config.getValue(self._configPath, "testcasepath")
         if self._testCasePath[0]=="":
             self._testCasePath=os.path.join(self._rootPath, "TestCase")
+        self._finishflag="False"
 
     def get_devicesList(self):
         return self._devicesList
@@ -93,6 +94,12 @@ class MultiAdb:
 
     def set_mdevice(self,device):
         self._mdevice=device
+
+    def get_finishflag(self):
+        return self._finishflag
+
+    def set_finishflag(self,bool):
+        self._finishflag=bool
 
     #写回包名、包路径、测试用例路径等等到配置文件
 
@@ -342,7 +349,7 @@ class MultiAdb:
     #判断给定设备运行时的Total/Free/Used内存,一次dump，加快获取速度
     def get_memoryinfo(self):
         command = adb + " -s {} shell dumpsys meminfo ".format(self.get_mdevice())
-        #print(command)
+        print(command)
         memory = os.popen(command)
         androidversion=self.get_androidversion()
         for line in memory:
@@ -383,7 +390,7 @@ class MultiAdb:
             #print(list)
             if len(list)>8:
                 if andversion <7:
-                    print(list)
+                    #print(list)
                     if ("%" in list[2]and list[2]!="CPU%"):
                         cpu=int(list[2][:-1])
                         if cpu!=0:
