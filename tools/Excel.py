@@ -10,14 +10,13 @@ def create_log_excel(nowtime,device):
     create_time=time.strftime("%m%d%H%M", nowtime)
     exclefile = create_time+ "_"+ device + "_log.xlsx"
     app = xw.App(visible=True, add_book=False)
-    if not os.path.exists(exclefile):
-        wb = app.books.add()
-        sheet=wb.sheets("Sheet1")
-        sheet.range('A1').value = ["Time","TotalMemory", "AllocatedMemory","UsedMemory","FreeMemory","TotalCPU","AllocatedCPU"]
-        sheet.range('A1:G1').color=205, 197, 191
-        wb.save(exclefile)
-        print("创建Excel文件：{}".format(exclefile))
-    return exclefile, sheet,wb
+    wb = app.books.add()
+    sheet=wb.sheets("Sheet1")
+    sheet.range('A1').value = ["Time","TotalMemory", "AllocatedMemory","UsedMemory","FreeMemory","TotalCPU","AllocatedCPU"]
+    sheet.range('A1:G1').color=205, 197, 191
+    wb.save(exclefile)
+    print("创建Excel文件：{}".format(exclefile))
+    return exclefile,sheet,wb
 
 def record_to_excel(sheet,list,**kwargs):
     rng = sheet.range('A1').expand()

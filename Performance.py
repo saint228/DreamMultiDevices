@@ -46,26 +46,32 @@ def collect_data(madb,sheet,timeout=3600):
             if (time.time()-starttime>timeout)or not os.path.exists(file):
                 break
             total=allocated= used=free=totalcpu= allocatedcpu=""
-            png = GetScreen(starttime, madb.get_mdevice(), "performance")
+
             get_allocated_memory = MyThread(madb.get_allocated_memory,args=())
             get_memory_info = MyThread(madb.get_memoryinfo,args=())
             get_total_cpu = MyThread(madb.get_totalcpu,args=() )
             get_allocated_cpu = MyThread(madb.get_allocated_cpu,args=() )
+            get_png=MyThread(GetScreen,args=(time.time(), madb.get_mdevice(), "performance"))
 
             get_allocated_memory.start()
             get_memory_info.start()
             get_total_cpu.start()
             get_allocated_cpu.start()
-
+            get_png.start()
+            
             allocated=get_allocated_memory.get_result()
             total,free,used=get_memory_info.get_result()
             totalcpu,maxcpu=get_total_cpu.get_result()
             allocatedcpu=get_allocated_cpu.get_result()
+            time.sleep(1)
+            png=get_png.get_result()
 
             get_allocated_memory.join()
             get_memory_info.join()
             get_total_cpu.join()
             get_allocated_cpu.join()
+            get_png.join()
+
             if maxcpu=="":
                 maxcpu="100%"
 
