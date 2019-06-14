@@ -18,7 +18,22 @@ def create_log_excel(nowtime,device):
     print("创建Excel文件：{}".format(exclefile))
     return exclefile,sheet,wb
 
+def calculate_avg(sheet):
+    rng = sheet.range('A1').expand()
+
+    avglist=["合计："]
+    return avglist
+
+def calculate_max(sheet):
+    maxlist=["最大值："]
+    return maxlist
+def calculate_min(sheet):
+    minlist=["最小值："]
+    return minlist
+
 def record_to_excel(sheet,list,**kwargs):
+    print("list=",list)
+    print("kw=",kwargs)
     rng = sheet.range('A1').expand()
     nrow = rng.last_cell.row
     currentcell="A"+str(nrow+1)

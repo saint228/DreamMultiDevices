@@ -25,17 +25,9 @@ def enter_performance(madb):
     record_to_excel(sheet,avglist,color=(230, 230 ,250))
     record_to_excel(sheet,maxlist,color=(193, 255, 193))
     record_to_excel(sheet,minlist,color=(240, 255 ,240))
+    wb.save()
 
-def calculate_avg(sheet):
-    avglist=["合计："]
-    return avglist
 
-def calculate_max(sheet):
-    maxlist=["最大值："]
-    return maxlist
-def calculate_min(sheet):
-    minlist=["最小值："]
-    return minlist
 
 
 def collect_data(madb,sheet,timeout=3600):
@@ -64,8 +56,9 @@ def collect_data(madb,sheet,timeout=3600):
             total,free,used=get_memory_info.get_result()
             totalcpu,maxcpu=get_total_cpu.get_result()
             allocatedcpu=get_allocated_cpu.get_result()
-            time.sleep(0.5)
             png=get_png.get_result()
+            print("设备",madb.get_mdevice(),"png为",png)
+
 
             get_allocated_memory.join()
             get_memory_info.join()
@@ -73,6 +66,7 @@ def collect_data(madb,sheet,timeout=3600):
             get_allocated_cpu.join()
             get_png.join()
 
+            time.sleep(0.5)
             if maxcpu=="":
                 maxcpu="100%"
 
@@ -83,7 +77,7 @@ def collect_data(madb,sheet,timeout=3600):
             record_to_excel(sheet,list,png=png)
 
     except Exception as e:
-        print(madb.get_mdevice(),+ traceback.format_exc())
+        print(madb.get_mdevice()+ traceback.format_exc())
 
 
 class MyThread(threading.Thread):

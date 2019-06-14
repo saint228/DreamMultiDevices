@@ -194,8 +194,8 @@ class MultiAdb:
             time.sleep(self.get_timeoutaction())
             installcommand = adb + " -s " + str(devices) + " install -r " + apkpath
             result=os.popen(installcommand)
-            for line in result:
-                print("output={}".format(line))
+            #for line in result:
+                #print("output={}".format(line))
             print("正在{}上安装{},安装命令为：{}".format(devices, package, installcommand))
             if self.isinstalled():
                 print("{}上安装成功，退出AppInstall线程".format(devices))
