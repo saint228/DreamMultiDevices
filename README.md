@@ -60,5 +60,6 @@
 
 12新增了Performance.py，用以处理adbdump抓取的性能数据，同时在tools目录下新增了Excel.py。用来处理表格。限于adb的效率，大概4、5秒能抓一次，抓取时会同步截图。
 
+13修改了GetScreen方法，优先采用MiniCap方式截图。
 
 
