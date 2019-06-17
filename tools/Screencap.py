@@ -20,14 +20,14 @@ screenpath = os.path.join(reportpath, "Screen")
 
 def  GetScreen(starttime,devices,action):
     ABIcommand = adb + " -s {} shell getprop ro.product.cpu.abi".format(devices)
-    ABI = os.popen(ABIcommand).read().strip()
-    if ABI == "x86":
-        png= GetScreenbyADB(starttime,devices,action)
-    else:
-        png=GetScreenbyMiniCap(starttime,devices,action)
+    try:
+        png= GetScreenbyMiniCap(starttime,devices,action)
+    except:
+        print("MiniCap截图失败，换ADB截图")
+        png=GetScreenbyADBCap(starttime,devices,action)
     return  png
 
-def GetScreenbyADB(starttime,devices,action):
+def GetScreenbyADBCap(starttime,devices,action):
     if ":" in devices:
         nickname = devices.split(":")[1]
     print("screenpath=",screenpath)
@@ -43,13 +43,7 @@ def GetScreenbyADB(starttime,devices,action):
     print("<img src='" + png + "' width=600 />")
     return png
 
-    # 图片压缩批处理
-
-
-
 def GetScreenbyMiniCap(starttime,devices,action):
-
-
     if ":" in devices:
         nickname = devices.split(":")[1]
     png = screenpath + "\\" + time.strftime("%Y%m%d_%H%M%S_", time.localtime(starttime)) + nickname + "_" + action + ".png"
@@ -59,12 +53,13 @@ def GetScreenbyMiniCap(starttime,devices,action):
     screen=adb  + " -s {} shell \" LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P {}@{}/0 -s > /sdcard/screencap.png\"".format(devices,size, size)
     print(screen)
     result=os.popen(screen).read()
-    print(result)
+    #print(result)
     os.system(adb + " -s " + devices + " pull /sdcard/screencap.png " + png)
     print("<img src='" + png + "' width=600 />")
     print("返回的png为",png)
     return png
 
+    # 图片压缩批处理
 def compressImage(path,cr=0.2,left=0,right=1,top=0,buttom=1):
     # 打开原图片压缩
     sImg =Image.open(path)

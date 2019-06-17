@@ -28,6 +28,7 @@ def Main(devices):
             # 每个函数里分别实例poco，否则容易出现pocoserver无限重启的情况
             print("我是TC102的test_01_of_102方法")
             poco = UnityPoco()
+            time.sleep(20)
             t = 1
             self.assertEquals(1, t)
 

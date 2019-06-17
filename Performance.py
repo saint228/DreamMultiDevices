@@ -19,12 +19,12 @@ def enter_performance(madb):
     print("设备{}进入enter_performance方法".format(madb.get_mdevice()))
     filepath, sheet, wb = create_log_excel(time.localtime(), madb.get_nickname())
     collect_data(madb,sheet)
-    avglist=calculate_avg(sheet)
-    maxlist=calculate_max(sheet)
-    minlist=calculate_min(sheet)
+    avglist,maxlist,minlist=calculate(sheet)
     record_to_excel(sheet,avglist,color=(230, 230 ,250))
     record_to_excel(sheet,maxlist,color=(193, 255, 193))
     record_to_excel(sheet,minlist,color=(240, 255 ,240))
+
+
     wb.save()
 
 
