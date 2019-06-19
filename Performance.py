@@ -16,7 +16,7 @@ _print = print
 def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
-def enter_performance(madb,flag):
+def enter_performance(madb,flag,start):
     print("设备{}进入enter_performance方法".format(madb.get_mdevice()))
     #创表
     filepath, sheet, wb = create_log_excel(time.localtime(), madb.get_nickname())
@@ -28,6 +28,9 @@ def enter_performance(madb,flag):
     record_to_excel(sheet,maxlist,color=(193, 255, 193))
     record_to_excel(sheet,minlist,color=(240, 255 ,240))
     wb.save()
+    nowtime = time.strftime("%H%M%S", start)
+    filename = madb.get_nickname() + "_" + str(nowtime)+"html"
+    print("要操作的文件名为：",filename)
 
 #接受设备madb类对象、excel的sheet对象、共享内存flag、默认延时一小时
 def collect_data(madb,sheet,flag,timeout=3600):

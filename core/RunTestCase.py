@@ -11,7 +11,7 @@ _print = print
 def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
-def RunTestCase(madb):
+def RunTestCase(madb,start):
     devices=madb.get_mdevice()
     print("进入{}的RunTestCase".format(devices))
     # 获取路径
@@ -41,7 +41,7 @@ def RunTestCase(madb):
             suite.addTests(result)
     #聚合报告到BR
     unittestReport = BeautifulReport(suite)
-    nowtime=time.strftime("%H%M%S")
+    nowtime=time.strftime("%H%M%S",start)
     #unittestReport.report(filename=madb.get_nickdevice()+"_"+str(nowtime),description=package, report_dir=reportpath,rundevice=madb.get_mdevice())
     unittestReport.report(filename=madb.get_nickname()+"_"+str(nowtime),description=package, report_dir=reportpath)
     stop_app(package)

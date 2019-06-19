@@ -120,7 +120,7 @@ class MultiAdb:
                 if devices.find("emulator")<0:
                     if devices.split("\t")[1] == "device\n":
                         deviceslist.append(devices.split("\t")[0])
-                        print("设备{}被添加到deviceslist中".format(deviceslist))
+                        print("设备{}被添加到deviceslist中".format(devices))
         return deviceslist
 
     def StartApp(self):

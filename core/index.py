@@ -29,6 +29,7 @@ def main():
             print("启动进程池")
             list=[]
             for i in range(len(devicesList)):
+                start=time.localtime()
                 madb=Madb(devicesList[i])
                 # 根据设备列表去循环创建进程，对每个进程调用下面的enter_processing/enter_enter_performance方法。
                 if madb.get_androidversion()<5:
@@ -37,9 +38,9 @@ def main():
                 else:
                     #进程通信变量flag，默认为0，完成测试时修改为1。
                     flag = Value('i', 0)
-                    p1 = Process(target=enter_performance, args=(madb,flag,))
+                    p1 = Process(target=enter_performance, args=(madb,flag,start,))
                     list.append(p1)
-                p2=Process(target=enter_processing, args=(i,madb,flag,))
+                p2=Process(target=enter_processing, args=(i,madb,flag,start,))
                 list.append(p2)
             for p in list:
                 p.start()
@@ -56,7 +57,7 @@ def main():
     else:
         print("未找到设备，测试结束")
 
-def enter_processing(processNo,madb,flag):
+def enter_processing(processNo,madb,flag,start):
     devices = madb.get_mdevice()
     print("进入{}进程,devicename={}".format(processNo,devices))
     isconnect=""
@@ -79,9 +80,8 @@ def enter_processing(processNo,madb,flag):
             except Exception as e:
                 print("运行失败"+traceback.format_exc())
             time.sleep(madb.get_timeoutaction())
-            RunTestCase.RunTestCase(madb)
+            RunTestCase.RunTestCase(madb,start)
             print("{}完成测试".format(devices))
-            print(devices,"index,flag=",flag)
         else:
             print("设备{}连接失败".format(devices))
     except Exception as e:
