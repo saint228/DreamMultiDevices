@@ -2,7 +2,7 @@
 __author__ = "无声"
 
 import time
-from multiprocessing import Process, Pipe
+from multiprocessing import Process,Value
 from DreamMultiDevices.core.MultiAdb import MultiAdb as Madb
 from airtest.core.error import *
 from poco.exceptions import *
@@ -18,7 +18,7 @@ def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
 def main():
- 
+    #默认去config.ini里读取期望参与测试的设备，若为空，则选择当前连接的所有状态为“device”的设备
     devicesList = Madb().get_devicesList()
     if devicesList[0] == "":
         devicesList = Madb().getdevices()
@@ -35,9 +35,11 @@ def main():
                     print("设备{}的安卓版本低于5，不支持。".format(madb.get_mdevice()))
                     continue
                 else:
-                    p1 = Process(target=enter_performance, args=(madb,))
+                    #进程通信变量flag，默认为0，完成测试时修改为1。
+                    flag = Value('i', 0)
+                    p1 = Process(target=enter_performance, args=(madb,flag,))
                     list.append(p1)
-                p2=Process(target=enter_processing, args=(i,madb,))
+                p2=Process(target=enter_processing, args=(i,madb,flag,))
                 list.append(p2)
             for p in list:
                 p.start()
@@ -54,10 +56,7 @@ def main():
     else:
         print("未找到设备，测试结束")
 
-def enter_processing(processNo,madb):
-    filepath=os.getcwd() +"\\"+ madb.get_nickname() + '.tmp'
-    file = open(filepath, 'w')
-    file.close()
+def enter_processing(processNo,madb,flag):
     devices = madb.get_mdevice()
     print("进入{}进程,devicename={}".format(processNo,devices))
     isconnect=""
@@ -82,13 +81,14 @@ def enter_processing(processNo,madb):
             time.sleep(madb.get_timeoutaction())
             RunTestCase.RunTestCase(madb)
             print("{}完成测试".format(devices))
+            print(devices,"index,flag=",flag)
         else:
             print("设备{}连接失败".format(devices))
     except Exception as e:
-        isconnect="Fail"
         print( "连接设备{}失败".format(devices)+ traceback.format_exc())
-    os.remove(filepath)
-    return isconnect
+    flag.value = 1
+
+
 
 
 

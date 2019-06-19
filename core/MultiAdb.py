@@ -18,12 +18,15 @@ def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
 adb = ADB().adb_path
+#同文件内用queue进行线程通信
 q = queue.Queue()
 
 class MultiAdb:
 
     def __init__(self,mdevice=""):
+        #获取当前文件的上层路径
         self._parentPath=os.path.abspath(os.path.dirname(inspect.getfile(inspect.currentframe())) + os.path.sep + ".")
+        #获取当前项目的根路径
         self._rootPath=os.path.abspath(os.path.dirname(self._parentPath) + os.path.sep + ".")
         self._configPath=self._rootPath+"\config.ini"
         self._devicesList = Config.getValue(self._configPath, "deviceslist", )
@@ -130,6 +133,7 @@ class MultiAdb:
             # 获取andorid的poco代理对象，准备进行开启应用权限（例如申请文件存储、定位等权限）点击操作
             pocoAndroid = AndroidUiautomationPoco(use_airtest_input=True, screenshot_each_action=False)
             n=self.get_iteration()
+            #以下代码写得极丑陋，以后有机会参数化。
             if devices == "127.0.0.1:62001":
                 # 这里是针对不同机型进行不同控件的选取，需要用户根据自己的实际机型实际控件进行修改
                 count = 0
@@ -193,9 +197,7 @@ class MultiAdb:
                 os.popen(uninstallcommand)
             time.sleep(self.get_timeoutaction())
             installcommand = adb + " -s " + str(devices) + " install -r " + apkpath
-            result=os.popen(installcommand)
-            #for line in result:
-                #print("output={}".format(line))
+            os.popen(installcommand)
             print("正在{}上安装{},安装命令为：{}".format(devices, package, installcommand))
             if self.isinstalled():
                 print("{}上安装成功，退出AppInstall线程".format(devices))
@@ -217,6 +219,7 @@ class MultiAdb:
         pocoAndroid = AndroidUiautomationPoco(use_airtest_input=True, screenshot_each_action=False)
         # 这里是针对不同机型进行不同控件的选取，需要用户根据自己的实际机型实际控件进行修改
         n = self.get_iteration()
+        #先实现功能，以后有空参数化函数
         if devices == "127.0.0.1:62021":
             count = 0
             # 找n次或找到对象以后跳出，否则等5秒重试。
@@ -413,11 +416,8 @@ class MultiAdb:
                             break
                     except:
                         pass
-
-        #print(time.time()-starttime,"cputotal=",cputotal,"%")
         totalcpu=str(format(cputotal, ".2f")) + "%"
         q.put(totalcpu,maxcpu)
-        #print(totalcpu,maxcpu)
         return  totalcpu,maxcpu
 
     #判断给定设备运行时的总使用CPU
@@ -446,9 +446,6 @@ class MultiAdb:
             q.put(cpu)
             return cpu
 
-if __name__ == "__main__":
-    madb = MultiAdb("127.0.0.1:62025")
-    madb.get_totalcpu()
 
 
 
