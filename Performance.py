@@ -28,9 +28,14 @@ def enter_performance(madb,flag,start):
     record_to_excel(sheet,maxlist,color=(193, 255, 193))
     record_to_excel(sheet,minlist,color=(240, 255 ,240))
     wb.save()
-    nowtime = time.strftime("%H%M%S", start)
-    filename = madb.get_nickname() + "_" + str(nowtime)+"html"
-    print("要操作的文件名为：",filename)
+    #nowtime = time.strftime("%H%M%S", start)
+    #filename = madb.get_rootPath()+"\\Report\\"+madb.get_nickname() + "_" + str(nowtime)+".html"
+    #print("要操作的文件名为：",filename)
+    #Time_series=get_series(sheet,"Time")
+    #TotalMemory_series=get_series(sheet," TotalMemory")
+
+
+
 
 #接受设备madb类对象、excel的sheet对象、共享内存flag、默认延时一小时
 def collect_data(madb,sheet,flag,timeout=3600):
