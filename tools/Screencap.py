@@ -30,6 +30,8 @@ def  GetScreen(starttime,devices,action):
 def GetScreenbyADBCap(starttime,devices,action):
     if ":" in devices:
         nickname = devices.split(":")[1]
+    else:
+        nickname=devices
     print("screenpath=",screenpath)
     png = screenpath +"\\"+ time.strftime('%Y%m%d_%H%M%S',time.localtime(starttime))+ nickname+ "_" + action+ ".png"
     print("png=",png)
@@ -46,6 +48,8 @@ def GetScreenbyADBCap(starttime,devices,action):
 def GetScreenbyMiniCap(starttime,devices,action):
     if ":" in devices:
         nickname = devices.split(":")[1]
+    else:
+        nickname=devices
     png = screenpath + "\\" + time.strftime("%Y%m%d_%H%M%S_", time.localtime(starttime)) + nickname + "_" + action + ".png"
     wmsizecommand = adb + " -s {} shell wm size".format(devices)
     size = os.popen(wmsizecommand).read()
