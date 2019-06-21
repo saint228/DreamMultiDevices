@@ -10,8 +10,6 @@ from airtest.core.api import *
 from DreamMultiDevices.core import RunTestCase
 import traceback
 from DreamMultiDevices.Performance import *
-import queue
-
 
 _print = print
 def print(*args, **kwargs):
@@ -78,6 +76,7 @@ def enter_processing(processNo,madb,flag,start):
             except Exception as e:
                 print("{}安装失败，installResult={}".format(devices, installResult)+ traceback.format_exc())
             try:
+                time.sleep(madb.get_timeoustartspp())
                 madb.StartApp()
             except Exception as e:
                 print("运行失败"+traceback.format_exc())

@@ -10,6 +10,7 @@ import traceback
 from DreamMultiDevices.tools.Excel import *
 from DreamMultiDevices.tools.Screencap import *
 from multiprocessing import Process,Value
+import json
 
 
 _print = print
@@ -28,12 +29,10 @@ def enter_performance(madb,flag,start):
     record_to_excel(sheet,maxlist,color=(193, 255, 193))
     record_to_excel(sheet,minlist,color=(240, 255 ,240))
     wb.save()
-    #nowtime = time.strftime("%H%M%S", start)
-    #filename = madb.get_rootPath()+"\\Report\\"+madb.get_nickname() + "_" + str(nowtime)+".html"
-    #print("要操作的文件名为：",filename)
-    #Time_series=get_series(sheet,"Time")
-    #TotalMemory_series=get_series(sheet," TotalMemory")
-
+    nowtime = time.strftime("%H%M%S", start)
+    filename = madb.get_rootPath()+"\\Report\\"+madb.get_nickname() + "_" + str(nowtime)+".html"
+    print("要操作的文件名为：",filename)
+    print(get_json(sheet,"Time"),get_json(sheet,"FreeMemory(MB)"))
 
 
 
@@ -77,7 +76,7 @@ def collect_data(madb,sheet,flag,timeout=3600):
             #将性能数据填充到一个数组里，塞进excel
             nowtime = time.localtime()
             inputtime = str(time.strftime("%H:%M:%S", nowtime))
-            list = [inputtime, total, allocated, used, free, totalcpu+"/"+maxcpu, allocatedcpu]
+            list = [str(inputtime), total, allocated, used, free, totalcpu+"/"+maxcpu, allocatedcpu]
             record_to_excel(sheet,list,png=png)
 
     except Exception as e:

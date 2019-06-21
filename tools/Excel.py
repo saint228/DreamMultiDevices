@@ -4,8 +4,9 @@ __author__ = "无声"
 import xlwings as xw
 import os
 import time
+import json
 
-
+#创建一个log_excel用以记录性能数据
 def create_log_excel(nowtime,device):
     create_time=time.strftime("%m%d%H%M", nowtime)
     exclefile = create_time+ "_"+ device + "_log.xlsx"
@@ -18,6 +19,7 @@ def create_log_excel(nowtime,device):
     print("创建Excel文件：{}".format(exclefile))
     return exclefile,sheet,wb
 
+#计算一个sheet里已存在的所有数据，然后返回该sheet里的各项的平均、最大、最小值。
 def calculate(sheet):
     rng = sheet.range('A1').expand()
     nrow = rng.last_cell.row
@@ -56,6 +58,7 @@ def calculate(sheet):
     minlist = ["最小值：","",min_am,min_um,min_fm,min_tc,min_ac]
     return avglist,maxlist,minlist
 
+#统计一个list的平均、最大、最小值
 def getcount(list):
     sum = avg = max = min = 0
     flag = 0
@@ -82,6 +85,7 @@ def getcount(list):
         avg = float(format(sum / flag,".2f"))
     return avg,max,min
 
+#读取传过来的list和excel，将list写入excel的下一行
 def record_to_excel(sheet,list,**kwargs):
     rng = sheet.range('A1').expand()
     nrow = rng.last_cell.row
@@ -100,21 +104,26 @@ def record_to_excel(sheet,list,**kwargs):
             sheet.range(currentcellpng).add_hyperlink(value,"截图","提示：点击打开截图")
     sheet.autofit()
 
+#在excel里查找指定键名的列，将该列所有数值（不算最后3行统计行）返回成一个serieslist
 def get_series(sheet,Key):
     rng = sheet.range('A1').expand()
     nrow = rng.last_cell.row-3
     rng2=sheet.range('A1:G1')
-    print(rng2)
+    serieslist = []
     for key in rng2:
         if key.value==Key:
             cum=key.address
             cum=cum.split("$")[1]
-            print(cum)
             tmp=cum+"2:"+cum+str(nrow)
-            print(tmp)
-            serieslist=sheet.range(tmp)
-            print(serieslist.value)
+            serieslist=sheet.range(tmp).value
             break
+    return  serieslist
+
+#在序列表里查询指定键值对，转成json返回
+def get_json(sheet,Key):
+    series = get_series(sheet, Key)
+    series_json=json.dumps({Key:series})
+    return series_json
 
 
 if __name__ == "__main__":
