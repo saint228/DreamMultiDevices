@@ -76,7 +76,8 @@ def collect_data(madb,sheet,flag,timeout=3600):
             #将性能数据填充到一个数组里，塞进excel
             nowtime = time.localtime()
             inputtime = str(time.strftime("%H:%M:%S", nowtime))
-            list = [str(inputtime), total, allocated, used, free, totalcpu+"/"+maxcpu, allocatedcpu]
+            print(inputtime,type(inputtime))
+            list = ["'"+inputtime, total, allocated, used, free, totalcpu+"/"+maxcpu, allocatedcpu]
             record_to_excel(sheet,list,png=png)
 
     except Exception as e:

@@ -128,7 +128,9 @@ def get_json(sheet,Key):
 
 if __name__ == "__main__":
     file,sheet, wb = create_log_excel(time.localtime(), "7429")
-    list=["1","2","3","4","5","6","7"]
+    nowtime = time.localtime()
+    inputtime = str(time.strftime("%H:%M:%S", nowtime))
+    list=[inputtime,"2","3","4","5","6","7"]
     record_to_excel(sheet,list)
     record_to_excel(sheet, list)
     record_to_excel(sheet, list)
@@ -138,5 +140,9 @@ if __name__ == "__main__":
     record_to_excel(sheet, list)
     record_to_excel(sheet, list)
     record_to_excel(sheet, list)
-    get_series(sheet,"AllocatedMemory(MB)")
+    #get_series(sheet,"AllocatedMemory(MB)")
+    rng=sheet.range("A2")
+    print(rng.number_format)
+
+    print(rng.value)
 
