@@ -100,7 +100,34 @@ def record_to_excel(sheet,list,**kwargs):
             sheet.range(currentcellpng).add_hyperlink(value,"截图","提示：点击打开截图")
     sheet.autofit()
 
+def get_series(sheet,Key):
+    rng = sheet.range('A1').expand()
+    nrow = rng.last_cell.row-3
+    rng2=sheet.range('A1:G1')
+    print(rng2)
+    for key in rng2:
+        if key.value==Key:
+            cum=key.address
+            cum=cum.split("$")[1]
+            print(cum)
+            tmp=cum+"2:"+cum+str(nrow)
+            print(tmp)
+            serieslist=sheet.range(tmp)
+            print(serieslist.value)
+            break
+
+
 if __name__ == "__main__":
-    list=['合计：', "", 'N/a', "", "", "", ""]
     file,sheet, wb = create_log_excel(time.localtime(), "7429")
-    record_to_excel(sheet,list,color=(230, 230 ,250))
+    list=["1","2","3","4","5","6","7"]
+    record_to_excel(sheet,list)
+    record_to_excel(sheet, list)
+    record_to_excel(sheet, list)
+    record_to_excel(sheet, list)
+    record_to_excel(sheet, list)
+    record_to_excel(sheet, list)
+    record_to_excel(sheet, list)
+    record_to_excel(sheet, list)
+    record_to_excel(sheet, list)
+    get_series(sheet,"AllocatedMemory(MB)")
+

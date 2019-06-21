@@ -23,6 +23,7 @@ def main():
     if devicesList[0] == "":
         devicesList = Madb().getdevices()
     print("最终的devicesList=",devicesList)
+    need_performance=Madb().get_needperformance()
     print("测试开始")
     if devicesList:
         try:
@@ -38,8 +39,9 @@ def main():
                 else:
                     #进程通信变量flag，默认为0，完成测试时修改为1。
                     flag = Value('i', 0)
-                    p1 = Process(target=enter_performance, args=(madb,flag,start,))
-                    list.append(p1)
+                    if need_performance=="True":
+                        p1 = Process(target=enter_performance, args=(madb,flag,start,))
+                        list.append(p1)
                 p2=Process(target=enter_processing, args=(i,madb,flag,start,))
                 list.append(p2)
             for p in list:

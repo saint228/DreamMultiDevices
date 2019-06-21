@@ -54,6 +54,7 @@ class MultiAdb:
         self._testCasePath=Config.getValue(self._configPath, "testcasepath")
         if self._testCasePath[0]=="":
             self._testCasePath=os.path.join(self._rootPath, "TestCase")
+        self._needPerformance=Config.getValue(self._configPath,"needPerformance")[0]
 
 
     def get_devicesList(self):
@@ -94,6 +95,12 @@ class MultiAdb:
 
     def get_TestCasePath(self):
         return self._testCasePath
+
+    def get_rootPath(self):
+        return self._rootPath
+
+    def get_needperformance(self):
+        return self._needPerformance
 
     def set_mdevice(self,device):
         self._mdevice=device
