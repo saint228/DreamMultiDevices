@@ -27,7 +27,9 @@ def  GetScreen(starttime,devices,action):
         png=GetScreenbyADBCap(starttime,devices,action)
     return  png
 
+#用ADBCAP的方法截图
 def GetScreenbyADBCap(starttime,devices,action):
+    #先给昵称赋值，防止生成图片的命名格式问题。
     if ":" in devices:
         nickname = devices.split(":")[1]
     else:
@@ -41,29 +43,34 @@ def GetScreenbyADBCap(starttime,devices,action):
     fp.close()
     os.system(adb + " -s " + devices + " pull /sdcard/screencap.png " + png)
     time.sleep(0.5)
+    #ADB截图过大，需要压缩，默认压缩比为0.2，全屏。
     compressImage(png)
     print("<img src='" + png + "' width=600 />")
     return png
 
+#用MiniCap的方法截图，使用前需要确保手机上已经安装MiniCap和MiniCap.so。一般用过STF和airtestide的手机会自动安装，若未安装，则可以执行Init_MiniCap.py，手动安装。
 def GetScreenbyMiniCap(starttime,devices,action):
+    # 先给昵称赋值，防止生成图片的命名格式问题。
     if ":" in devices:
         nickname = devices.split(":")[1]
     else:
         nickname=devices
+    #创建图片
     png = screenpath + "\\" + time.strftime("%Y%m%d_%H%M%S_", time.localtime(starttime)) + nickname + "_" + action + ".png"
+    #获取设备分辨率
     wmsizecommand = adb + " -s {} shell wm size".format(devices)
     size = os.popen(wmsizecommand).read()
     size = size.split(":")[1].strip()
+    #将设备号和分辨率填入minicap的命令，获得截图。
     screen=adb  + " -s {} shell \" LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P {}@{}/0 -s > /sdcard/screencap.png\"".format(devices,size, size)
     print(screen)
-    result=os.popen(screen).read()
-    #print(result)
+    os.popen(screen).read()
     os.system(adb + " -s " + devices + " pull /sdcard/screencap.png " + png)
     print("<img src='" + png + "' width=600 />")
     print("返回的png为",png)
     return png
 
-    # 图片压缩批处理
+    # 图片压缩批处理，cr为压缩比，其他参数为屏幕截取范围
 def compressImage(path,cr=0.2,left=0,right=1,top=0,buttom=1):
     # 打开原图片压缩
     sImg =Image.open(path)
@@ -71,7 +78,8 @@ def compressImage(path,cr=0.2,left=0,right=1,top=0,buttom=1):
     box=(int(w*left),int(h*top),int(w*right),int(h*buttom))
     sImg=sImg.crop(box)
     time.sleep(0.1)
-    dImg = sImg.resize((int(w*cr), int(h*cr)), Image.ANTIALIAS)  # 设置压缩尺寸和选项
+    # 设置压缩尺寸和选项
+    dImg = sImg.resize((int(w*cr), int(h*cr)), Image.ANTIALIAS)
     time.sleep(0.1)
     # 压缩图片路径名称
     dImg.save(path)  # save这个函数后面可以加压缩编码选项JPEG之类的

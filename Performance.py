@@ -42,6 +42,7 @@ def collect_data(madb,sheet,flag,timeout=3600):
     try:
         while True:
             #当执行一小时或flag为1时，跳出。
+            # Performance.py可以单独执行，检查apk的性能，此时要把下面的flag.value注掉。因为这个是用于进程通信的，单独执行性能时没有必要。
             if (time.time() - starttime > timeout) or flag.value==1:
                 break
             total=allocated= used=free=totalcpu= allocatedcpu=""

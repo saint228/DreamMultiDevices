@@ -11,6 +11,7 @@ _print = print
 def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
+#运行Testcase的主函数
 def RunTestCase(madb,start):
     devices=madb.get_mdevice()
     print("进入{}的RunTestCase".format(devices))

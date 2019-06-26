@@ -21,16 +21,18 @@ def main():
     if devicesList[0] == "":
         devicesList = Madb().getdevices()
     print("最终的devicesList=",devicesList)
+    #读取是否需要同步性能测试的配置。
     need_performance=Madb().get_needperformance()
     print("测试开始")
     if devicesList:
         try:
             print("启动进程池")
             list=[]
+            # 根据设备列表去循环创建进程，对每个进程调用下面的enter_processing/enter_enter_performance方法。
             for i in range(len(devicesList)):
+                #start会被传递到2个进程函数里，作为区分最终产物html和excel的标志
                 start=time.localtime()
                 madb=Madb(devicesList[i])
-                # 根据设备列表去循环创建进程，对每个进程调用下面的enter_processing/enter_enter_performance方法。
                 if madb.get_androidversion()<5:
                     print("设备{}的安卓版本低于5，不支持。".format(madb.get_mdevice()))
                     continue
@@ -62,6 +64,7 @@ def enter_processing(processNo,madb,flag,start):
     print("进入{}进程,devicename={}".format(processNo,devices))
     isconnect=""
     try:
+        #调用airtest的各个方法连接设备
         connect_device("Android:///" + devices)
         time.sleep(madb.get_timeoutaction())
         auto_setup(__file__)
@@ -70,6 +73,7 @@ def enter_processing(processNo,madb,flag,start):
         if isconnect == "Pass":
             try:
                 print("设备{}开始安装apk".format(devices))
+                #尝试推送apk到设备上
                 installResult = madb.PushApk2Devices()
                 if installResult == "Success":
                     print("{}确定安装成功".format(devices))
@@ -77,16 +81,19 @@ def enter_processing(processNo,madb,flag,start):
                 print("{}安装失败，installResult={}".format(devices, installResult)+ traceback.format_exc())
             try:
                 time.sleep(madb.get_timeoustartspp())
+                #尝试启动应用
                 madb.StartApp()
             except Exception as e:
                 print("运行失败"+traceback.format_exc())
             time.sleep(madb.get_timeoutaction())
+            #应用启动成功则开始运行用例
             RunTestCase.RunTestCase(madb,start)
             print("{}完成测试".format(devices))
         else:
             print("设备{}连接失败".format(devices))
     except Exception as e:
         print( "连接设备{}失败".format(devices)+ traceback.format_exc())
+    #无论结果如何，将flag置为1，通知Performance停止记录。
     flag.value = 1
 
 

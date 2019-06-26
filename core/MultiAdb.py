@@ -56,52 +56,64 @@ class MultiAdb:
             self._testCasePath=os.path.join(self._rootPath, "TestCase")
         self._needPerformance=Config.getValue(self._configPath,"needPerformance")[0]
 
-
+    #获取设备列表
     def get_devicesList(self):
         return self._devicesList
-
+    #获取apk的本地路径
     def get_apkpath(self):
         return self._packagePath
-
+    #获取包名
     def get_packagename(self):
         return self._packageName
-
+    #获取是否需要在安装应用时点击二次确认框的flag
     def get_needclickinstall(self):
         return self._needClickInstall
 
+    #获取是否需要在打开应用时点击二次确认框的flag
     def get_needclickstartapp(self):
         return self._needClickStartApp
 
+    #获取当前设备id
     def get_mdevice(self):
         return self._mdevice
 
+    #获取当前设备id的昵称，主要是为了防范模拟器和远程设备带来的冒号问题。windows的文件命名规范里不允许有冒号。
     def get_nickname(self):
         return self._nickName
 
+    #获取启动app的延时时间
     def get_timeoustartspp(self):
         return self._timeoutStartApp
 
+    #获取每步操作的延时时间
     def get_timeoutaction(self):
         return self._timeoutAction
 
+    #获取运行循环点击处理脚本的循环次数
     def get_iteration(self):
         return self._iteration
 
+    #获取所有的用例名称列表
     def get_alltestcase(self):
         return self._allTestcase
 
+    #获取针对特定设备的用例列表
     def get_testcaseforselfdevice(self):
         return self._testcaseForSelfDevice
 
+    #获取测试用例路径，不填是默认根目录TestCase
     def get_TestCasePath(self):
         return self._testCasePath
 
+    #获取项目的根目录绝对路径
     def get_rootPath(self):
         return self._rootPath
 
+    #获取是否需要性能测试的开关
     def get_needperformance(self):
         return self._needPerformance
 
+    #修改当前设备的方法
     def set_mdevice(self,device):
         self._mdevice=device
 
@@ -130,6 +142,7 @@ class MultiAdb:
                         print("设备{}被添加到deviceslist中".format(devices))
         return deviceslist
 
+    #启动APP的方法，核心是airtest的start_app函数，后面的一大堆if else 是用来根据设备进行点击操作的。需要用户自行完成。
     def StartApp(self):
         devices=self.get_mdevice()
         needclickstartapp=self.get_needclickstartapp()
@@ -140,7 +153,8 @@ class MultiAdb:
             # 获取andorid的poco代理对象，准备进行开启应用权限（例如申请文件存储、定位等权限）点击操作
             pocoAndroid = AndroidUiautomationPoco(use_airtest_input=True, screenshot_each_action=False)
             n=self.get_iteration()
-            #以下代码写得极丑陋，以后有机会参数化。
+
+            #以下代码写得极丑陋，以后有空再重构，期望是参数化。
             if devices == "127.0.0.1:62001":
                 # 这里是针对不同机型进行不同控件的选取，需要用户根据自己的实际机型实际控件进行修改
                 count = 0
@@ -172,11 +186,14 @@ class MultiAdb:
     def PushApk2Devices(self):
         device=self.get_mdevice()
         needclickinstall=self.get_needclickinstall()
+        #启动一个线程，执行AppInstall函数
         try:
             installThread = threading.Thread(target=self.AppInstall, args=())
             installThread.start()
+            #从queue里获取线程函数的返回值
             result = q.get()
             if needclickinstall=="True":
+                #如果配置上needclickinstall为True，则再开一个线程，执行安装权限点击操作
                 print("设备{}，needclickinstall为{}，开始进行安装点击权限操作".format(device,needclickinstall))
                 inputThread = threading.Thread(target=self.InputEvent, args=(self,))
                 inputThread.start()
@@ -192,6 +209,7 @@ class MultiAdb:
             print(e)
             pass
 
+    #安装应用的方法，先判断应用包是否已安装，如已安装则卸载，然后按配置路径去重新安装。
     def AppInstall(self):
         devices=self.get_mdevice()
         apkpath=self.get_apkpath()
@@ -208,6 +226,7 @@ class MultiAdb:
             print("正在{}上安装{},安装命令为：{}".format(devices, package, installcommand))
             if self.isinstalled():
                 print("{}上安装成功，退出AppInstall线程".format(devices))
+                #将线程函数的返回值放入queue
                 q.put("Install Success")
                 return True
             else:
@@ -218,6 +237,7 @@ class MultiAdb:
             print("{}上安装异常".format(devices))
             print(e)
             q.put("Install Fail")
+
 
     def InputEvent(self):
         devices=self.get_mdevice()
@@ -430,6 +450,7 @@ class MultiAdb:
     #判断给定设备运行时的总使用CPU
     def get_allocated_cpu(self):
         start=time.time()
+        #包名过长时，包名会在adbdump里被折叠显示，所以需要提前将包名压缩，取其前11位基本可以保证不被压缩也不被混淆
         packagename=self.get_packagename()[0:11]
         command = adb + " -s {} shell top -n 1 |findstr {} ".format(self.get_mdevice(),packagename)
         print(command)

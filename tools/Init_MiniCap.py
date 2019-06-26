@@ -16,6 +16,7 @@ def print(*args, **kwargs):
 
 adb = ADB().adb_path
 
+#用来给设备初始化MiniCap的，介绍见 https://blog.csdn.net/saint_228/article/details/92142914
 def ini_MiniCap(devices):
     try:
         parent_path = os.path.abspath(os.path.dirname(inspect.getfile(inspect.currentframe())) + os.path.sep + ".")

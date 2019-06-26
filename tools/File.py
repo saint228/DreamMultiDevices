@@ -2,6 +2,7 @@
 __author__ = "无声"
 import os
 
+#从一个目录里获取所有的文件名并返回一个列表，剔除其中的__init__.py和__pycache__。
 def GetPyList(filePath):
     dirList = os.listdir(filePath)
     pyList = []

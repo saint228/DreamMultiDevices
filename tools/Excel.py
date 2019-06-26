@@ -5,6 +5,7 @@ import xlwings as xw
 import os
 import time
 import json
+import matplotlib.pyplot as plot
 
 #创建一个log_excel用以记录性能数据
 def create_log_excel(nowtime,device):
@@ -126,7 +127,10 @@ def get_json(sheet,Key):
     return series_json
 
 
+
+
 if __name__ == "__main__":
+    '''
     file,sheet, wb = create_log_excel(time.localtime(), "7429")
     nowtime = time.localtime()
     inputtime = str(time.strftime("%H:%M:%S", nowtime))
@@ -145,4 +149,25 @@ if __name__ == "__main__":
     print(rng.number_format)
 
     print(rng.value)
+    '''
+    app = xw.App(visible=True, add_book=False)
+    filepath="D:\\Python3.7\\Lib\\site-packages\\DreamMultiDevices\\06241127_7401_log.xlsx"
+    wb = app.books.open(filepath)
+    sheet=wb.sheets['sheet1']
+    time_series=get_series(sheet,"Time")
+    am_series=get_series(sheet,"AllocatedCPU")
+    tm_series=get_series(sheet,"TotalCPU")
+    for i in range(len(tm_series)):
+        tm_series[i]=tm_series[i].split("/")[0]
+
+    for i in range(len(am_series)):
+        if am_series[i]=="N/a":
+            am_series[i]=0
+    plot.figure()
+    plot.yticks(tm_series)
+    plot.plot(time_series)
+    plot.show()
+
+
+
 
