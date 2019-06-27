@@ -64,7 +64,7 @@ def GetScreenbyMiniCap(starttime,devices,action):
     #将设备号和分辨率填入minicap的命令，获得截图。
     screen=adb  + " -s {} shell \" LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P {}@{}/0 -s > /sdcard/screencap.png\"".format(devices,size, size)
     print(screen)
-    os.popen(screen).read()
+    os.popen(screen)
     os.system(adb + " -s " + devices + " pull /sdcard/screencap.png " + png)
     print("<img src='" + png + "' width=600 />")
     print("返回的png为",png)
