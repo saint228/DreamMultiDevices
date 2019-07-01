@@ -35,6 +35,7 @@
     timeoutperaction填写全局sleep时间，int；
     timeoutofstartapp填写安装app等待时间，int；
     iteration填写权限脚本循环次数，int。
+    needPerformance填写是否需要同步进行性能监控，填写True或False，不为True则不执行。
     
     [TestCaseforDevice]
     按设备配置执行用例，不填则默认全部
@@ -43,23 +44,20 @@
 3./start.py。可以使用pycharm运行，也可以被其他方法调用运行。
 
 4./core/index index是整个框架的索引，负责根据devices分发进程，让每个设备各自去运行enterprocess()函数。该函数里进行设备的初始化，在确保初始化成功、安装包成功的情况下，启动待测试apk并调用RunTestCase函数，进行测试用例的分发。
+当needPerformance为True时，还会同步运行enter_performance()函数，对设备进行性能监控并同步记录在excel文件里。
 
 5./core/MultiADB Madb类，集成了各个与device有关的方法。
 
 6./tools/PushApk2Devices 负责安装apk到设备上，会先判断待测包是否已存在，存在则删除并重装，重装时会自动调用inputThread进行安装权限的点击。这里的代码需要用户自行完成，具体写法请参考inputThread里已经提供的示范代码。
 
-7./tools/StartApp 。StartApp负责启动apk，然后会进行应用开启权限的点击，此处代码也需要用户自行完成。
+7.MultiAdb.py里的StartApp函数 。StartApp负责启动apk，然后会进行应用开启权限的点击，此处代码也需要用户自行完成。
 
 8./core/RunTestCase。RunTestCase是运行测试用例的分发函数，读取之前配置表上的testcase元组并与TestCase目录下的文件进行比对，一致的则列入测试范围。
 
 9./TestCase目录。本目录下放置所有的待测试用例。用例须以TC_开头，用例采用标准的unittest格式。每条用例的执行结果会是一个suite对象，并在全部执行完以后，聚合到RunTestCase的report对象上。可以通过set_TestCasePath("")方法重置。
 
-10./TestCast/TC_******.py 单个用例的执行文件，由用户自行编写，最后须符合unittest格式。特别要说明一点，BeautifulReport的默认截图方法是异常时触发语法糖截图。使用时略有不便，我新增了GetScreen()函数，可以在任意需要时实时截图。
+10./TestCast/TC_******.py 单个用例的执行文件，由用户自行编写，最后须符合unittest格式。特别要说明一点，BeautifulReport的默认截图方法是异常时触发语法糖截图。使用时略有不便，我新增了GetScreen()函数，可以在任意需要时实时截图，优先采用MiniCap方式截图。
 
 11./Report/Html报告。RunTestCase使用BeautifulReport库进行报告输出。会在调用文件所在的目录生成一个Report目录，输出内容在Report目录下，以设备名和时间命名，相关截图则存储在Report/Screen目录下。
 
 12新增了Performance.py，用以处理adbdump抓取的性能数据，同时在tools目录下新增了Excel.py。用来处理表格。限于adb的效率，大概4、5秒能抓一次，抓取时会同步截图。
-
-13修改了GetScreen方法，优先采用MiniCap方式截图。
-
-
