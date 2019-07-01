@@ -20,11 +20,15 @@ screenpath = os.path.join(reportpath, "Screen")
 
 def  GetScreen(starttime,devices,action):
     ABIcommand = adb + " -s {} shell getprop ro.product.cpu.abi".format(devices)
-    try:
-        png= GetScreenbyMiniCap(starttime,devices,action)
-    except:
-        print("MiniCap截图失败，换ADB截图")
-        png=GetScreenbyADBCap(starttime,devices,action)
+    ABI = os.popen(ABIcommand).read().strip()
+    if ABI=="x86":
+        png = GetScreenbyADBCap(starttime, devices, action)
+    else:
+        try:
+            png= GetScreenbyMiniCap(starttime,devices,action)
+        except:
+            print("MiniCap截图失败，换ADB截图")
+            png=GetScreenbyADBCap(starttime,devices,action)
     return  png
 
 #用ADBCAP的方法截图
