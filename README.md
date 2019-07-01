@@ -4,7 +4,7 @@
 
 
 1.本框架由无声andTreize编写，落落测试。
-须事先安装如下环境：python3.6以上、airtest、pocoui、BeautifulReport、unittest。
+须事先安装如下环境：python3.6以上、airtest、pocoui、BeautifulReport、unittest、xlwings。
 安装方法
     
     pip install DreamMultiDevices
