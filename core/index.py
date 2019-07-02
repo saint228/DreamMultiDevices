@@ -70,6 +70,8 @@ def enter_processing(processNo,madb,flag,start):
         auto_setup(__file__)
         isconnect="Pass"
         print("设备{}连接成功".format(devices))
+        installflag=""
+        startflag=""
         if isconnect == "Pass":
             try:
                 print("设备{}开始安装apk".format(devices))
@@ -77,18 +79,23 @@ def enter_processing(processNo,madb,flag,start):
                 installResult = madb.PushApk2Devices()
                 if installResult == "Success":
                     print("{}确定安装成功".format(devices))
+                    installflag="Success"
             except Exception as e:
                 print("{}安装失败，installResult={}".format(devices, installResult)+ traceback.format_exc())
             try:
                 time.sleep(madb.get_timeoustartspp())
                 #尝试启动应用
                 madb.StartApp()
+                startflag = "Success"
             except Exception as e:
                 print("运行失败"+traceback.format_exc())
             time.sleep(madb.get_timeoutaction())
             #应用启动成功则开始运行用例
-            RunTestCase.RunTestCase(madb,start)
-            print("{}完成测试".format(devices))
+            if (installflag=="Success" and startflag=="Success"):
+                RunTestCase.RunTestCase(madb,start)
+                print("{}完成测试".format(devices))
+            else:
+                print("{}未运行测试。".format(devices))
         else:
             print("设备{}连接失败".format(devices))
     except Exception as e:
