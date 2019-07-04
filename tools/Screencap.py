@@ -69,7 +69,7 @@ def GetScreenbyMiniCap(starttime,devices,action):
     screen=adb  + " -s {} shell \" LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P {}@{}/0 -s > /sdcard/screencap.png\"".format(devices,size, size)
     print(screen)
     os.popen(screen)
-    time.sleep(0.2)
+    time.sleep(0.5)
     os.system(adb + " -s " + devices + " pull /sdcard/screencap.png " + png)
     print("<img src='" + png + "' width=600 />")
     print("返回的png为",png)
