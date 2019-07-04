@@ -82,16 +82,17 @@ def enter_processing(processNo,madb,flag,start):
                     installflag="Success"
             except Exception as e:
                 print("{}安装失败，installResult={}".format(devices, installResult)+ traceback.format_exc())
-            try:
-                time.sleep(madb.get_timeoustartspp())
-                #尝试启动应用
-                madb.StartApp()
-                startflag = "Success"
-            except Exception as e:
-                print("运行失败"+traceback.format_exc())
+            if installflag=="Success":
+                try:
+                    time.sleep(madb.get_timeoustartspp())
+                    #尝试启动应用
+                    madb.StartApp()
+                    startflag = "Success"
+                except Exception as e:
+                    print("运行失败"+traceback.format_exc())
             time.sleep(madb.get_timeoutaction())
             #应用启动成功则开始运行用例
-            if (installflag=="Success" and startflag=="Success"):
+            if (startflag=="Success"):
                 RunTestCase.RunTestCase(madb,start)
                 print("{}完成测试".format(devices))
             else:
