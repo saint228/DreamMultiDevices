@@ -12,6 +12,9 @@ from airtest.core.error import *
 from poco.drivers.android.uiautomation import AndroidUiautomationPoco
 from airtest.core.android.adb import ADB
 import  subprocess
+from airtest.utils.apkparser import APK
+
+
 
 _print = print
 def print(*args, **kwargs):
@@ -31,7 +34,8 @@ class MultiAdb:
         self._configPath=self._rootPath+"\config.ini"
         self._devicesList = Config.getValue(self._configPath, "deviceslist", )
         self._packagePath = Config.getValue(self._configPath, "apkpath")[0]
-        self._packageName = Config.getValue(self._configPath, "packName")[0]
+        self._packageName = Config.getValue(self._configPath, "packname")[0]
+        self._activityName = Config.getValue(self._configPath, "activityname")[0]
         self._needClickInstall = Config.getValue(self._configPath, "needclickinstall")[0]
         self._needClickStartApp = Config.getValue(self._configPath, "needclickstartapp")[0]
         self._startTime=time.time()
@@ -55,6 +59,8 @@ class MultiAdb:
         if self._testCasePath[0]=="":
             self._testCasePath=os.path.join(self._rootPath, "TestCase")
         self._needPerformance=Config.getValue(self._configPath,"needPerformance")[0]
+        if self._activityName=="":
+            self._activityName=APK(self.get_apkpath()).activities[0]
 
     #获取设备列表
     def get_devicesList(self):
@@ -65,6 +71,10 @@ class MultiAdb:
     #获取包名
     def get_packagename(self):
         return self._packageName
+    #获取Activity类名
+    def get_activityname(self):
+        return self._activityName
+
     #获取是否需要在安装应用时点击二次确认框的flag
     def get_needclickinstall(self):
         return self._needClickInstall
@@ -474,6 +484,93 @@ class MultiAdb:
                 cpu = cpuresult[8]+"%"
             q.put(cpu)
             return cpu
+
+    def get_fps(self):
+        device=self.get_mdevice()
+        package=self.get_packagename()
+        activity=self.get_activityname()
+        androidversion=self.get_androidversion()
+        command=""
+        if androidversion<7:
+            command=adb+ " -s {} shell dumpsys SurfaceFlinger --latency 'SurfaceView'".format(device)
+        elif androidversion==7:
+            command=adb+ " -s {} shell \"dumpsys SurfaceFlinger --latency 'SurfaceView - {}/{}'\"".format(device,package,activity)
+        elif androidversion>7:
+            command = adb + " -s {} shell \"dumpsys SurfaceFlinger --latency 'SurfaceView - {}/{}#0'\"".format(device, package, activity)
+        print(command)
+        results=os.popen(command)#.read()
+        if not results:
+            print("nothing")
+            return (None, None)
+        #print(device,results.read())
+        timestamps = []
+        #纳秒
+        nanoseconds_per_second = 1e9
+        #刷新间隔
+        refresh_period = 16666666 / nanoseconds_per_second
+        #挂起时间戳
+        pending_fence_timestamp = (1 << 63) - 1
+        #print("pending_fence_timestamp=",pending_fence_timestamp)
+
+        for line in results:
+            print(line)
+            line = line.strip()
+            list = line.split("\t")
+
+            if len(list) != 3:
+                continue
+            timestamp = float(list[1])
+            print("timestamp=", timestamp)
+            # 当时间戳等于挂起时间戳时，舍弃
+            if timestamp == pending_fence_timestamp:
+                continue
+            timestamp /= nanoseconds_per_second
+            if timestamp!=0:
+                timestamps.append(timestamp)
+
+        print("timestames=", timestamps)
+        frame_count = len(timestamps)
+         #获取帧列表总长、规范化帧列表总长
+        frame_lengths, normalized_frame_lengths = MultiAdb._GetNormalizedDeltas(timestamps, refresh_period, 0.5)
+        if len(frame_lengths) < frame_count - 1:
+            print('Skipping frame lengths that are too short.')
+        frame_count = len(frame_lengths) + 1
+        if not refresh_period or not len(timestamps) >= 3 or len(frame_lengths) == 0:
+            print("未收集到有效数据")
+            return None, None
+        seconds = timestamps[-1] - timestamps[0]
+        length_changes, normalized_changes = MultiAdb._GetNormalizedDeltas(frame_lengths, refresh_period)
+        jankiness = [max(0, round(change)) for change in normalized_changes]
+        pause_threshold = 20
+        jank_count = sum(1 for change in jankiness  if change > 0 and change < pause_threshold)
+        fps = int(round((frame_count - 1) / seconds))
+        return fps, jank_count
+
+    def _GetNormalizedDeltas(data, refresh_period, min_normalized_delta=None):
+        deltas = [t2 - t1 for t1, t2 in zip(data, data[1:])]
+        if min_normalized_delta != None:
+            deltas = filter(lambda d: d / refresh_period >= min_normalized_delta,
+                          deltas)
+
+        return (list(deltas), [delta / refresh_period for delta in deltas])
+
+if __name__=="__main__":
+    #android 8
+    #madb1=MultiAdb("172.16.6.82:7573")
+    #android 7
+    madb2=MultiAdb("172.16.6.82:7457")
+    print("activityname=",madb2.get_activityname())
+    #android 6
+    #madb3=MultiAdb("172.16.6.82:7461")
+    #android 9
+    madb4=MultiAdb("172.16.6.82:7409")
+
+    i=0
+    while i<100:
+        print("fps,jank=",madb2.get_fps())
+        #print(madb4.get_fps())
+        i+=1
+        time.sleep(1)
 
 
 
