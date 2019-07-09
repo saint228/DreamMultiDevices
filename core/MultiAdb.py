@@ -173,7 +173,7 @@ class MultiAdb:
                     if count >= n:
                         break
                     if pocoAndroid("com.android.packageinstaller:id/permission_allow_button").exists():
-                        pocoAndroid("com.android.packageinstaller:id/permission_allow_button").oclick()
+                        pocoAndroid("com.android.packageinstaller:id/permission_allow_button").click()
                     else:
                         time.sleep(self.get_timeoutaction())
                         count += 1
@@ -485,6 +485,7 @@ class MultiAdb:
             q.put(cpu)
             return cpu
 
+    #算法提取自 https://github.com/ChromiumWebApps/chromium/tree/master/build/android/pylib
     def get_fps(self):
         device=self.get_mdevice()
         package=self.get_packagename()
@@ -498,55 +499,61 @@ class MultiAdb:
         elif androidversion>7:
             command = adb + " -s {} shell \"dumpsys SurfaceFlinger --latency 'SurfaceView - {}/{}#0'\"".format(device, package, activity)
         print(command)
-        results=os.popen(command)#.read()
+        results=os.popen(command)
         if not results:
             print("nothing")
             return (None, None)
         #print(device,results.read())
         timestamps = []
-        #纳秒
+        #定义纳秒
         nanoseconds_per_second = 1e9
-        #刷新间隔
+        #定义刷新间隔
         refresh_period = 16666666 / nanoseconds_per_second
-        #挂起时间戳
+        #定义挂起时间戳
         pending_fence_timestamp = (1 << 63) - 1
-        #print("pending_fence_timestamp=",pending_fence_timestamp)
-
+        #遍历结果集
         for line in results:
-            print(line)
+            #去空格并分列
             line = line.strip()
             list = line.split("\t")
-
+            #剔除非数据列
             if len(list) != 3:
                 continue
+            #取中间一列数据
             timestamp = float(list[1])
-            print("timestamp=", timestamp)
             # 当时间戳等于挂起时间戳时，舍弃
             if timestamp == pending_fence_timestamp:
                 continue
             timestamp /= nanoseconds_per_second
+            #安卓7的adbdump提供255行数据，127行0以及128行真实数据，所以需要将0行剔除
             if timestamp!=0:
                 timestamps.append(timestamp)
-
-        print("timestames=", timestamps)
+        #获得总帧数
         frame_count = len(timestamps)
          #获取帧列表总长、规范化帧列表总长
-        frame_lengths, normalized_frame_lengths = MultiAdb._GetNormalizedDeltas(timestamps, refresh_period, 0.5)
+        frame_lengths, normalized_frame_lengths = self._GetNormalizedDeltas(timestamps, refresh_period, 0.5)
         if len(frame_lengths) < frame_count - 1:
             print('Skipping frame lengths that are too short.')
         frame_count = len(frame_lengths) + 1
+        #数据不足时，返回None
         if not refresh_period or not len(timestamps) >= 3 or len(frame_lengths) == 0:
             print("未收集到有效数据")
             return None, None
+        #总秒数为时间戳序列最后一位减第一位
         seconds = timestamps[-1] - timestamps[0]
-        length_changes, normalized_changes = MultiAdb._GetNormalizedDeltas(frame_lengths, refresh_period)
+        fps = int(round((frame_count - 1) / seconds))
+        #这部分计算掉帧率。思路是先将序列化过的帧列表重新序列化，由于min_normalized_delta此时为None，故直接求出frame_lengths数组中各个元素的差值保存到数组deltas中。
+        length_changes, normalized_changes = self.GetNormalizedDeltas(frame_lengths, refresh_period)
+        #求出normalized_changes数组中比0大的数，这部分就是掉帧。
         jankiness = [max(0, round(change)) for change in normalized_changes]
         pause_threshold = 20
+        #normalized_changes数组中大于0小于20的总和记为jank_count。这块算法是看明白了，但思路get不到。。。
         jank_count = sum(1 for change in jankiness  if change > 0 and change < pause_threshold)
-        fps = int(round((frame_count - 1) / seconds))
         return fps, jank_count
 
-    def _GetNormalizedDeltas(data, refresh_period, min_normalized_delta=None):
+    #将时间戳序列分2列并相减，得到时间差的序列。
+    #时间差序列中，除刷新间隔大于0.5的时间差重新序列化
+    def GetNormalizedDeltas(data, refresh_period, min_normalized_delta=None):
         deltas = [t2 - t1 for t1, t2 in zip(data, data[1:])]
         if min_normalized_delta != None:
             deltas = filter(lambda d: d / refresh_period >= min_normalized_delta,
