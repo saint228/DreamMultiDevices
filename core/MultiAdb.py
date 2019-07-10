@@ -232,9 +232,8 @@ class MultiAdb:
                 os.popen(uninstallcommand)
             time.sleep(self.get_timeoutaction())
             installcommand = adb + " -s " + str(devices) + " install -r " + apkpath
-            os.popen(installcommand)
             print("正在{}上安装{},安装命令为：{}".format(devices, package, installcommand))
-            time.sleep(self.get_timeoustartspp())
+            os.system(installcommand)
             if self.isinstalled():
                 print("{}上安装成功，退出AppInstall线程".format(devices))
                 #将线程函数的返回值放入queue
@@ -476,7 +475,8 @@ class MultiAdb:
             while '' in cpuresult:
                 cpuresult.remove('')
             #print(self.get_mdevice(),"cpuresult=",cpuresult)
-            if version==6:
+            cpu=""
+            if version<7:
                 cpu = cpuresult[2]
             elif version ==7:
                 cpu=cpuresult[4]
@@ -531,14 +531,14 @@ class MultiAdb:
         #获得总帧数
         frame_count = len(timestamps)
          #获取帧列表总长、规范化帧列表总长
-        frame_lengths, normalized_frame_lengths = self._GetNormalizedDeltas(timestamps, refresh_period, 0.5)
+        frame_lengths, normalized_frame_lengths = self.GetNormalizedDeltas(timestamps, refresh_period, 0.5)
         if len(frame_lengths) < frame_count - 1:
             print('Skipping frame lengths that are too short.')
         frame_count = len(frame_lengths) + 1
         #数据不足时，返回None
         if not refresh_period or not len(timestamps) >= 3 or len(frame_lengths) == 0:
             print("未收集到有效数据")
-            return None, None
+            return "N/a", "N/a"
         #总秒数为时间戳序列最后一位减第一位
         seconds = timestamps[-1] - timestamps[0]
         fps = int(round((frame_count - 1) / seconds))
@@ -553,7 +553,7 @@ class MultiAdb:
 
     #将时间戳序列分2列并相减，得到时间差的序列。
     #时间差序列中，除刷新间隔大于0.5的时间差重新序列化
-    def GetNormalizedDeltas(data, refresh_period, min_normalized_delta=None):
+    def GetNormalizedDeltas(self,data, refresh_period, min_normalized_delta=None):
         deltas = [t2 - t1 for t1, t2 in zip(data, data[1:])]
         if min_normalized_delta != None:
             deltas = filter(lambda d: d / refresh_period >= min_normalized_delta,
@@ -565,7 +565,7 @@ if __name__=="__main__":
     #android 8
     #madb1=MultiAdb("172.16.6.82:7573")
     #android 7
-    madb2=MultiAdb("172.16.6.82:7457")
+    madb2=MultiAdb("172.16.6.82:7425")
     print("activityname=",madb2.get_activityname())
     #android 6
     #madb3=MultiAdb("172.16.6.82:7461")

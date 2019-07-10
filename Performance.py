@@ -56,32 +56,37 @@ def collect_data(madb,sheet,flag,timeout=3600):
             get_total_cpu = MyThread(madb.get_totalcpu,args=() )
             get_allocated_cpu = MyThread(madb.get_allocated_cpu,args=() )
             get_png=MyThread(GetScreen,args=(time.time(), madb.get_mdevice(), "performance"))
+            get_fps = MyThread(madb.get_fps, args=())
             #批量执行
             get_allocated_memory.start()
             get_memory_info.start()
             get_total_cpu.start()
             get_allocated_cpu.start()
             get_png.start()
+            get_fps.start()
             #批量获得结果
             allocated=get_allocated_memory.get_result()
             total,free,used=get_memory_info.get_result()
             totalcpu,maxcpu=get_total_cpu.get_result()
             allocatedcpu=get_allocated_cpu.get_result()
             png=get_png.get_result()
+            fps,jank_count=get_fps.get_result()
             #批量回收线程
             get_allocated_memory.join()
             get_memory_info.join()
             get_total_cpu.join()
             get_allocated_cpu.join()
             get_png.join()
+            get_fps.join()
             #对安卓7以下的设备，默认不区分cpu内核数，默认值改成100%
             if maxcpu=="":
                 maxcpu="100%"
             #将性能数据填充到一个数组里，塞进excel
+
             nowtime = time.localtime()
             inputtime = str(time.strftime("%H:%M:%S", nowtime))
             #print(inputtime,type(inputtime))
-            list = ["'"+inputtime, total, allocated, used, free, totalcpu+"/"+maxcpu, allocatedcpu]
+            list = ["'"+inputtime, total, allocated, used, free, totalcpu+"/"+maxcpu, allocatedcpu,fps,jank_count]
             record_to_excel(sheet,list,png=png)
 
     except Exception as e:

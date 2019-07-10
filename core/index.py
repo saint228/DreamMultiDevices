@@ -84,7 +84,6 @@ def enter_processing(processNo,madb,flag,start):
                 print("{}安装失败，installResult={}".format(devices, installResult)+ traceback.format_exc())
             if installflag=="Success":
                 try:
-                    time.sleep(madb.get_timeoustartspp())
                     #尝试启动应用
                     madb.StartApp()
                     startflag = "Success"
