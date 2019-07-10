@@ -113,7 +113,14 @@ class MyThread(threading.Thread):
 #调试代码，单独执行的话，flag默认为1。
 if __name__ == "__main__":
     devicesList = Madb().getdevices()
+    print("最终的devicesList=",devicesList)
     pool = multiprocessing.Pool(processes=len(devicesList))
+    start=time.localtime()
+
+    madb = Madb(devicesList[0])
+    flag = Value('i', 0)
+    enter_performance (madb, flag, start,)
+    '''
     print("启动进程池")
     for i in range(len(devicesList)):
         madb = Madb(devicesList[i])
@@ -121,7 +128,8 @@ if __name__ == "__main__":
         if madb.get_androidversion()<5:
             print("设备{}的安卓版本低于5，不支持。".format(madb.get_mdevice()))
             break
-        pool.apply_async(enter_performance, (madb,flag))  # 根据设备列表去循环创建进程，对每个进程调用下面的enter_processing方法。
+        pool.apply_async(enter_performance, (madb,flag,start,))  # 根据设备列表去循环创建进程，对每个进程调用下面的enter_processing方法。
     pool.close()
     pool.join()
+    '''
     print("性能测试结束")

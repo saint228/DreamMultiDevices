@@ -498,6 +498,7 @@ class MultiAdb:
             command=adb+ " -s {} shell \"dumpsys SurfaceFlinger --latency 'SurfaceView - {}/{}'\"".format(device,package,activity)
         elif androidversion>7:
             command = adb + " -s {} shell \"dumpsys SurfaceFlinger --latency 'SurfaceView - {}/{}#0'\"".format(device, package, activity)
+            #command= adb + " -s {} shell \"dumpsys SurfaceFlinger --latency\"".format(device)
         print(command)
         results=os.popen(command)
         if not results:
@@ -573,11 +574,11 @@ if __name__=="__main__":
     madb4=MultiAdb("172.16.6.82:7409")
 
     i=0
-    while i<100:
+    while i<10000:
         print("fps,jank=",madb2.get_fps())
         #print(madb4.get_fps())
         i+=1
-        time.sleep(1)
+
 
 
 

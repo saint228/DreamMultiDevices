@@ -22,10 +22,6 @@ def RunTestCase(madb,start):
     if not os.path.exists(TestCasePath):
         print("测试用例需放到‘TestCase’文件目录下")
     reportpath = os.path.join(os.getcwd(), "Report")
-    #没有Report目录时自动创建
-    if not os.path.exists(reportpath):
-        os.mkdir(reportpath)
-        os.mkdir(reportpath+"/Screen")
     #读取ini文件，获得期望测试的用例列表
     TestList=madb.get_testcaseforselfdevice()
     print("{}的待测用例为：{}".format(madb.get_mdevice(),TestList))

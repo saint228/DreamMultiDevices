@@ -23,6 +23,11 @@ def main():
     print("最终的devicesList=",devicesList)
     #读取是否需要同步性能测试的配置。
     need_performance=Madb().get_needperformance()
+    reportpath = os.path.join(os.getcwd(), "Report")
+    # 没有Report目录时自动创建
+    if not os.path.exists(reportpath):
+        os.mkdir(reportpath)
+        os.mkdir(reportpath + "/Screen")
     print("测试开始")
     if devicesList:
         try:
