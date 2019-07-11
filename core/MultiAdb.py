@@ -544,13 +544,13 @@ class MultiAdb:
         seconds = timestamps[-1] - timestamps[0]
         fps = int(round((frame_count - 1) / seconds))
         #这部分计算掉帧率。思路是先将序列化过的帧列表重新序列化，由于min_normalized_delta此时为None，故直接求出frame_lengths数组中各个元素的差值保存到数组deltas中。
-        length_changes, normalized_changes = self.GetNormalizedDeltas(frame_lengths, refresh_period)
+        #length_changes, normalized_changes = self.GetNormalizedDeltas(frame_lengths, refresh_period)
         #求出normalized_changes数组中比0大的数，这部分就是掉帧。
-        jankiness = [max(0, round(change)) for change in normalized_changes]
-        pause_threshold = 20
+        #jankiness = [max(0, round(change)) for change in normalized_changes]
+        #pause_threshold = 20
         #normalized_changes数组中大于0小于20的总和记为jank_count。这块算法是看明白了，但思路get不到。。。
-        jank_count = sum(1 for change in jankiness  if change > 0 and change < pause_threshold)
-        return fps, jank_count
+        #jank_count = sum(1 for change in jankiness  if change > 0 and change < pause_threshold)
+        return fps
 
     #将时间戳序列分2列并相减，得到时间差的序列。
     #时间差序列中，除刷新间隔大于0.5的时间差重新序列化

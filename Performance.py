@@ -11,7 +11,7 @@ from DreamMultiDevices.tools.Excel import *
 from DreamMultiDevices.tools.Screencap import *
 from multiprocessing import Process,Value
 import json
-
+from collections import deque
 
 _print = print
 def print(*args, **kwargs):
@@ -39,6 +39,7 @@ def enter_performance(madb,flag,start):
 #接受设备madb类对象、excel的sheet对象、共享内存flag、默认延时一小时
 def collect_data(madb,sheet,flag,timeout=3600):
     starttime=time.time()
+    dequelist = deque([])
     n=0
     try:
         while True:
@@ -56,21 +57,37 @@ def collect_data(madb,sheet,flag,timeout=3600):
             get_total_cpu = MyThread(madb.get_totalcpu,args=() )
             get_allocated_cpu = MyThread(madb.get_allocated_cpu,args=() )
             get_png=MyThread(GetScreen,args=(time.time(), madb.get_mdevice(), "performance"))
-            get_fps = MyThread(madb.get_fps, args=())
+            #为了避免重复场景不渲染导致的fps统计为0，fps取过去一秒内的最大值（约8次）。
+            Threadlist=[]
+            for i in range(8):
+                get_fps = MyThread(madb.get_fps, args=())
+                Threadlist.append(get_fps)
+
+
+
             #批量执行
             get_allocated_memory.start()
             get_memory_info.start()
             get_total_cpu.start()
             get_allocated_cpu.start()
             get_png.start()
-            get_fps.start()
+            for p in Threadlist:
+                p.start()
+                fpstmp = p.get_result()
+                if len(dequelist) < 9:
+                    dequelist.append(fpstmp)
+                else:
+                    dequelist.popleft()
+                    dequelist.append(fpstmp)
+            fps=max(dequelist)
+
             #批量获得结果
             allocated=get_allocated_memory.get_result()
             total,free,used=get_memory_info.get_result()
             totalcpu,maxcpu=get_total_cpu.get_result()
             allocatedcpu=get_allocated_cpu.get_result()
             png=get_png.get_result()
-            fps,jank_count=get_fps.get_result()
+
             #批量回收线程
             get_allocated_memory.join()
             get_memory_info.join()
@@ -78,6 +95,9 @@ def collect_data(madb,sheet,flag,timeout=3600):
             get_allocated_cpu.join()
             get_png.join()
             get_fps.join()
+            for p in Threadlist:
+                p.join()
+
             #对安卓7以下的设备，默认不区分cpu内核数，默认值改成100%
             if maxcpu=="":
                 maxcpu="100%"
@@ -86,7 +106,7 @@ def collect_data(madb,sheet,flag,timeout=3600):
             nowtime = time.localtime()
             inputtime = str(time.strftime("%H:%M:%S", nowtime))
             #print(inputtime,type(inputtime))
-            list = ["'"+inputtime, total, allocated, used, free, totalcpu+"/"+maxcpu, allocatedcpu,fps,jank_count]
+            list = ["'"+inputtime, total, allocated, used, free, totalcpu+"/"+maxcpu, allocatedcpu,fps]
             record_to_excel(sheet,list,png=png)
 
     except Exception as e:

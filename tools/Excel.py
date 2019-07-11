@@ -14,8 +14,10 @@ def create_log_excel(nowtime,device):
     app = xw.App(visible=True, add_book=False)
     wb = app.books.add()
     sheet=wb.sheets("Sheet1")
-    sheet.range('A1').value = ["Time","TotalMemory(MB)", "AllocatedMemory(MB)","UsedMemory(MB)","FreeMemory(MB)","TotalCPU","AllocatedCPU","FPS","JankCount"]
-    sheet.range('A1:I1').color=205, 197, 191
+    sheet.range('A1').value = ["Time","TotalMemory(MB)", "AllocatedMemory(MB)","UsedMemory(MB)","FreeMemory(MB)","TotalCPU","AllocatedCPU","FPS"]
+    sheet.range('A1:H1').color=205, 197, 191
+    if os.path.exists(exclefile):
+        raise Exception( "FileHasExisted")
     wb.save(exclefile)
     print("创建Excel文件：{}".format(exclefile))
     return exclefile,sheet,wb
@@ -30,7 +32,7 @@ def calculate(sheet):
     TotalCPU=sheet.range("F2:F{}".format(nrow)).value
     AllocatedCPU=sheet.range("G2:G{}".format(nrow)).value
     FPS=sheet.range("H2:H{}".format(nrow)).value
-    JankCount=sheet.range("I2:I{}".format(nrow)).value
+
     sum_TotalCPU=[]
     while "N/a" in AllocatedMemory:
         AllocatedMemory.remove("N/a")
@@ -38,8 +40,7 @@ def calculate(sheet):
         AllocatedCPU.remove("N/a")
     while "N/a" in FPS:
         FPS.remove("N/a")
-    while "N/a" in JankCount:
-        JankCount.remove("N/a")
+
     for i in range(len(TotalCPU)):
         tmp=float(TotalCPU[i].split("%")[0])
         sum_TotalCPU.append(tmp)
@@ -49,7 +50,7 @@ def calculate(sheet):
     avg_tc,max_tc,min_tc=getcount(sum_TotalCPU)
     avg_ac,max_ac,min_ac=getcount(AllocatedCPU)
     avg_fps,max_fps,min_fps=getcount(FPS)
-    avg_jc, max_jc, min_jc = getcount(JankCount)
+
     if avg_tc=="N/a":
         pass
     else:
@@ -62,9 +63,9 @@ def calculate(sheet):
         avg_ac = str(format(avg_ac * 100,".2f")) + "%"
         max_ac = str(format(max_ac * 100,".2f")) + "%"
         min_ac = str(format(min_ac * 100,".2f")) + "%"
-    avglist = ["平均值","",avg_am,avg_um,avg_fm,avg_tc,avg_ac,avg_fps,avg_jc]
-    maxlist = ["最大值：","",max_am,max_um,max_fm,max_tc,max_ac,max_fps,max_jc]
-    minlist = ["最小值：","",min_am,min_um,min_fm,min_tc,min_ac,min_fps,min_jc]
+    avglist = ["平均值","",avg_am,avg_um,avg_fm,avg_tc,avg_ac,avg_fps]
+    maxlist = ["最大值：","",max_am,max_um,max_fm,max_tc,max_ac,max_fps]
+    minlist = ["最小值：","",min_am,min_um,min_fm,min_tc,min_ac,min_fps]
     return avglist,maxlist,minlist
 
 #统计一个list的平均、最大、最小值
@@ -100,7 +101,7 @@ def record_to_excel(sheet,list,**kwargs):
     nrow = rng.last_cell.row
     currentcell="A"+str(nrow+1)
     currentcellpng="J"+str(nrow+1)
-    currentcellrange=currentcell+":"+"I"+str(nrow+1)
+    currentcellrange=currentcell+":"+"H"+str(nrow+1)
     sheet.range(currentcell).value =list
     if nrow % 2 == 0:
         sheet.range(currentcellrange).color = 173, 216, 230
