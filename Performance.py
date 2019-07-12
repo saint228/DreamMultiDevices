@@ -74,11 +74,14 @@ def collect_data(madb,sheet,flag,timeout=3600):
             for p in Threadlist:
                 p.start()
                 fpstmp = p.get_result()
-                if len(dequelist) < 9:
+                if fpstmp=="N/a":
+                    fpstmp=0
+                if len(dequelist) < 9 :
                     dequelist.append(fpstmp)
                 else:
                     dequelist.popleft()
                     dequelist.append(fpstmp)
+                    print("dequelist=",dequelist)
             fps=max(dequelist)
 
             #批量获得结果
