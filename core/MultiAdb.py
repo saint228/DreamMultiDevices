@@ -539,7 +539,7 @@ class MultiAdb:
         #数据不足时，返回None
         if not refresh_period or not len(timestamps) >= 3 or len(frame_lengths) == 0:
             print("未收集到有效数据")
-            return "N/a", "N/a"
+            return "N/a"
         #总秒数为时间戳序列最后一位减第一位
         seconds = timestamps[-1] - timestamps[0]
         fps = int(round((frame_count - 1) / seconds))

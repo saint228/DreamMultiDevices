@@ -1,0 +1,15 @@
+.reportBtn {
+    color:#7AD7BE;
+    font-size:18px;
+    font-weight:600;
+}
+.disableReport {
+    color:#70AD47!important;
+}
+.Screen {
+    text-align:center;
+}
+.Screen img {
+    max-width:100%;
+    max-height:420px;
+}
