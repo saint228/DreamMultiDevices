@@ -16,7 +16,7 @@
     from DreamMultiDevices.core.MultiAdb import *
     madb=MultiAdb()
     madb.set_packagename("")#填待测apk的包名
-    madb.set_apkpath("")#填待测apk在硬盘上的绝对路径
+    madb.set_packagepath("")#填待测apk在硬盘上的绝对路径
     madb.set_TestCasePath("")#填本地测试用例目录的绝对路径
     
 调用方法
