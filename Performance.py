@@ -22,6 +22,7 @@ def enter_performance(madb,flag,start):
     #创表
     filepath, sheet, wb = create_log_excel(time.localtime(), madb.get_nickname())
     #塞数据
+    #flag = Value('i', 0)
     collect_data(madb,sheet,flag)
     #计算各平均值最大值最小值等并塞数据
     avglist,maxlist,minlist=calculate(sheet)
@@ -137,22 +138,29 @@ class MyThread(threading.Thread):
 if __name__ == "__main__":
     devicesList = Madb().getdevices()
     print("最终的devicesList=",devicesList)
-    pool = multiprocessing.Pool(processes=len(devicesList))
-    start=time.localtime()
 
+    start=time.localtime()
+    '''
     madb = Madb(devicesList[0])
     flag = Value('i', 0)
     enter_performance (madb, flag, start,)
     '''
     print("启动进程池")
+    flag = Value('i', 0)
+    Processlist=[]
     for i in range(len(devicesList)):
         madb = Madb(devicesList[i])
-        flag = Value('i', 1)
         if madb.get_androidversion()<5:
             print("设备{}的安卓版本低于5，不支持。".format(madb.get_mdevice()))
             break
-        pool.apply_async(enter_performance, (madb,flag,start,))  # 根据设备列表去循环创建进程，对每个进程调用下面的enter_processing方法。
-    pool.close()
-    pool.join()
-    '''
+        print("{}开始进行性能测试".format(madb.get_mdevice()))
+        # 根据设备列表去循环创建进程，对每个进程调用下面的enter_processing方法。
+        p = Process(target=enter_performance, args=(madb, flag, start,))
+        Processlist.append(p)
+    for p in Processlist:
+        p.start()
+    for p in Processlist:
+        p.join()
+
+
     print("性能测试结束")
