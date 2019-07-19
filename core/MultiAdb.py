@@ -14,8 +14,6 @@ from airtest.core.android.adb import ADB
 import  subprocess
 from airtest.utils.apkparser import APK
 
-
-
 _print = print
 def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)

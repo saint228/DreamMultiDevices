@@ -32,13 +32,16 @@ def enter_performance(madb,flag,start):
     wb.save()
     nowtime = time.strftime("%H%M%S", start)
     filename = madb.get_rootPath()+"\\Report\\"+madb.get_nickname() + "_" + str(nowtime)+".html"
+    filename = "D:\\Python3.7\\lib\\site-packages\\DreamMultiDevices\\Report\\7401_160717.html"
     print("要操作的文件名为：",filename)
-    print(get_json(sheet,"Time"),get_json(sheet,"FreeMemory(MB)"))
+    #print(get_json(sheet,"Time"),get_json(sheet,"FreeMemory(MB)"))
+    reportPlusPath = EditReport(filename,wb)
+    print("设备{}生成报告：{}完毕".format(madb.get_mdevice(),reportPlusPath))
 
 
 
 #接受设备madb类对象、excel的sheet对象、共享内存flag、默认延时一小时
-def collect_data(madb,sheet,flag,timeout=3600):
+def collect_data(madb,sheet,flag,timeout=10):
     starttime=time.time()
     dequelist = deque([])
     n=0
@@ -133,6 +136,72 @@ class MyThread(threading.Thread):
         except Exception as e:
             print( traceback.format_exc())
             return None
+
+
+def EditReport(path, wb):
+    # 读取报告文件
+    f = open(path, "r+", encoding="UTF-8")
+    fr = f.read()
+    f.close()
+
+    # 拼接CSS样式
+    fr_prev, fr_next = GetHtmlContent(fr, "</style>", True, 1)
+    css = open("./template/app.css", "r+", encoding='UTF-8')
+    css_str = css.read()
+    css.close()
+    fr = fr_prev + "\n" + css_str + "\n" + fr_next
+
+    # 拼接头部按钮
+    fr_prev, fr_next = GetHtmlContent(fr, "<div", False, 3)
+    header = open("./template/header.html", "r+", encoding='UTF-8')
+    header_str = header.read()
+    header.close()
+    fr = fr_prev + "\n" + header_str + "\n" + fr_next
+
+    # 添加功能测试标记
+    fr_prev, fr_next = GetHtmlContent(fr, "class=", False, 8)
+    fr = fr_prev + 'id="functionReport" ' + fr_next
+
+    # 拼接页面主体
+    fr_prev, fr_next = GetHtmlContent(fr, "<script", False, 1)
+    performance = open("./template/performance.html", "r+", encoding='UTF-8')
+    performance_str = performance.read()
+    performance.close()
+    fr = fr_prev + "\n" + performance_str + "\n" + fr_next
+
+    # 拼接JS脚本
+    fr_prev, fr_next = GetHtmlContent(fr, "</body>", True, 1)
+    js = open("./template/app.js", "r+", encoding='UTF-8')
+    js_str = js.read()
+    js.close()
+    fr = fr_prev + "\n" + js_str + "\n" + fr_next
+
+    # 写入文件
+    newPath = path.replace(".html", "_PLUS.html")
+    f = open( newPath, "w", encoding="UTF-8")
+    f.write(fr)
+    f.close()
+
+    # 删除Json文件
+    # os.remove(json_path)
+
+    return newPath
+
+# 获取需要插入性能图表的节点
+def GetHtmlContent(content, tag, reverse=False, round_num=1):
+    fr_r_index = ""
+    if reverse:
+        fr_r_index = content.rfind(tag)
+    else:
+        fr_r_index = content.find(tag)
+    for i in range(1, round_num):
+        if reverse:
+            fr_r_index = content.rfind(tag, 0, fr_r_index)
+        else:
+            fr_r_index = content.find(tag, fr_r_index + 1)
+    fr_prev = content[0:fr_r_index]
+    fr_next = content[fr_r_index:len(content)]
+    return fr_prev, fr_next
 
 #调试代码，单独执行的话，flag默认为1。
 if __name__ == "__main__":
