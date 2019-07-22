@@ -1,4 +1,4 @@
-<script src="/highcharts.js"></script>
+<script src="../template/highcharts.js"></script>
 <script type="text/javascript">
     var data = // tag data
     

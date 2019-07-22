@@ -23,7 +23,7 @@ def enter_performance(madb,flag,start):
     filepath, sheet, wb = create_log_excel(time.localtime(), madb.get_nickname())
     #塞数据
     #flag = Value('i', 0)
-    collect_data(madb,sheet,flag)
+    collect_data(madb,sheet,flag,timeout=10)
     #计算各平均值最大值最小值等并塞数据
     avglist,maxlist,minlist=calculate(sheet)
     record_to_excel(sheet,avglist,color=(230, 230 ,250))
@@ -41,7 +41,7 @@ def enter_performance(madb,flag,start):
 
 
 #接受设备madb类对象、excel的sheet对象、共享内存flag、默认延时一小时
-def collect_data(madb,sheet,flag,timeout=10):
+def collect_data(madb,sheet,flag,timeout=3600):
     starttime=time.time()
     dequelist = deque([])
     n=0
