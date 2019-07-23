@@ -1,7 +1,7 @@
 <script src="../template/highcharts.js"></script>
 <script type="text/javascript">
-    var data = // tag data
-    
+    var Time_series = // tag data
+
     function showFunction(obj) {
         $(".disableReport").removeClass("disableReport")
         $(obj).addClass("disableReport")
@@ -30,7 +30,7 @@
         var cpuData = {
             title: commonTitle,
             xAxis: {
-                categories: data["YList"],
+                categories: Time_series["Time"],
             },
             tooltip: {
                 valueSuffix: '%',
@@ -39,10 +39,10 @@
             series: [
                 {
                     name: '总CPU占比',
-                    data: data["TotalCPU"],
+                    data: TotalCPU["TotalCPU"],
                     events: {
                         click: function(event) {
-                            imgSrc = data["ScreencapPNG"][event.point.x];
+                            imgSrc = PNG["PNGAddress"][event.point.x];
                             htmlStr = "<img src='" + imgSrc + "'>";
                             $("#CpuScreen").html(htmlStr);
                         },
@@ -50,10 +50,10 @@
                 }, 
                 {
                     name: 'CPU占比',
-                    data: data["AllocatedCPU"],
+                    data: AllocatedCPU["AllocatedCPU"],
                     events: {
                         click: function(event) {
-                            imgSrc = data["ScreencapPNG"][event.point.x];
+                            imgSrc = PNG["PNGAddress"][event.point.x];
                             htmlStr = "<img src='" + imgSrc + "'>";
                             $("#CpuScreen").html(htmlStr);
                         },
@@ -66,7 +66,7 @@
         var memeryData = {
             title: commonTitle,
             xAxis: {
-                categories: data["YList"],
+                categories: Time_series["Time"],
             },
             tooltip: {
                 valueSuffix: 'MB',
@@ -75,10 +75,10 @@
             series: [
                 {
                     name: '内存占用',
-                    data: data["AllocatedMemory"],
+                    data: AllocatedMemory["AllocatedMemory(MB)"],
                     events: {
                         click: function(event) {
-                            imgSrc = data["ScreencapPNG"][event.point.x];
+                            imgSrc = PNG["PNGAddress"][event.point.x];
                             htmlStr = "<img src='" + imgSrc + "'>";
                             $("#MemeryScreen").html(htmlStr);
                         },
@@ -86,10 +86,10 @@
                 }, 
                 {
                     name: '使用内存',
-                    data: data["UsedMemory"],
+                    data: UsedMemory["UsedMemory(MB)"],
                     events: {
                         click: function(event) {
-                            imgSrc = data["ScreencapPNG"][event.point.x];
+                            PNG["PNGAddress"][event.point.x];
                             htmlStr = "<img src='" + imgSrc + "'>";
                             $("#MemeryScreen").html(htmlStr);
                         },
@@ -97,10 +97,10 @@
                 }, 
                 {
                     name: '空闲内存',
-                    data: data["FreeMemory"],
+                    data: FreeMemory["FreeMemory(MB)"],
                     events: {
                         click: function(event) {
-                            imgSrc = data["ScreencapPNG"][event.point.x];
+                            imgSrc = PNG["PNGAddress"][event.point.x];
                             htmlStr = "<img src='" + imgSrc + "'>";
                             $("#MemeryScreen").html(htmlStr);
                         },
@@ -113,7 +113,7 @@
         var FPSData = {
             title: commonTitle,
             xAxis: {
-                categories: data["YList"],
+                 categories: Time_series["Time"],
             },
             tooltip: {
                 valueSuffix: '',
@@ -122,10 +122,10 @@
             series: [
                 {
                     name: '运行帧数',
-                    data: data["AllocatedFPS"],
+                    data: FPS["FPS"],
                     events: {
                         click: function(event) {
-                            imgSrc = data["ScreencapPNG"][event.point.x];
+                            imgSrc = PNG["PNGAddress"][event.point.x];
                             htmlStr = "<img src='" + imgSrc + "'>";
                             $("#FPSScreen").html(htmlStr);
                         },

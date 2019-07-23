@@ -23,7 +23,7 @@ def enter_performance(madb,flag,start):
     filepath, sheet, wb = create_log_excel(time.localtime(), madb.get_nickname())
     #塞数据
     #flag = Value('i', 0)
-    collect_data(madb,sheet,flag,timeout=10)
+    collect_data(madb,sheet,flag,timeout=15)
     #计算各平均值最大值最小值等并塞数据
     avglist,maxlist,minlist=calculate(sheet)
     record_to_excel(sheet,avglist,color=(230, 230 ,250))
@@ -35,7 +35,7 @@ def enter_performance(madb,flag,start):
     filename = "D:\\Python3.7\\lib\\site-packages\\DreamMultiDevices\\Report\\7401_160717.html"
     print("要操作的文件名为：",filename)
     #print(get_json(sheet,"Time"),get_json(sheet,"FreeMemory(MB)"))
-    reportPlusPath = EditReport(filename,wb)
+    reportPlusPath = EditReport(filename,wb,avglist,maxlist,minlist)
     print("设备{}生成报告：{}完毕".format(madb.get_mdevice(),reportPlusPath))
 
 
@@ -138,7 +138,7 @@ class MyThread(threading.Thread):
             return None
 
 
-def EditReport(path, wb):
+def EditReport(path, wb,avglist,maxlist,minlist):
     # 读取报告文件
     f = open(path, "r+", encoding="UTF-8")
     fr = f.read()
@@ -152,7 +152,7 @@ def EditReport(path, wb):
     fr = fr_prev + "\n" + css_str + "\n" + fr_next
 
     # 拼接头部按钮
-    fr_prev, fr_next = GetHtmlContent(fr, "<div", False, 3)
+    fr_prev, fr_next = GetHtmlContent(fr, "<div", False,3 )
     header = open("./template/header.html", "r+", encoding='UTF-8')
     header_str = header.read()
     header.close()
@@ -175,6 +175,36 @@ def EditReport(path, wb):
     js_str = js.read()
     js.close()
     fr = fr_prev + "\n" + js_str + "\n" + fr_next
+
+    # 嵌入性能测试结果
+    sheet = wb.sheets("Sheet1")
+    Time_series=get_json(sheet,"Time")
+    TotalMemory=get_json(sheet,"TotalMemory(MB)")
+    AllocatedMemory=get_json(sheet,"AllocatedMemory(MB)")
+    UsedMemory=get_json(sheet,"UsedMemory(MB)")
+    FreeMemory=get_json(sheet,"FreeMemory(MB)")
+    TotalCPU=get_json(sheet,"TotalCPU")
+    AllocatedCPU=get_json(sheet,"AllocatedCPU")
+    FPS=get_json(sheet,"FPS")
+    PNG=get_json(sheet,"PNGAddress")
+    Max_AllocatedMemory=maxlist[2]
+    Min_AllocatedMemory=minlist[2]
+    Avg_AllocatedMemory=avglist[2]
+    Max_AllocatedCPU=maxlist[6]
+    Min_AllocatedCPU=minlist[6]
+    Avg_AllocatedCPU=avglist[6]
+    Max_FPS=maxlist[7]
+    Min_FPS=minlist[7]
+    Avg_FPS=avglist[7]
+
+    data_series=Time_series+"\n"+"var TotalMemory="+TotalMemory +"\n"+"var AllocatedMemory="+AllocatedMemory+"\n"+"var UsedMemory="+UsedMemory+"\n"+"var FreeMemory="\
+         +FreeMemory+"\n"+"var TotalCPU="+TotalCPU+"\n"+"var AllocatedCPU="+AllocatedCPU+"\n"+"var FPS="+FPS+"\n"+"var PNG="+PNG+"\n"
+
+    #data_max="var Max_AllocatedMemory="+str(Max_AllocatedMemory)+"var Min_AllocatedMemory="+str(Min_AllocatedMemory)+"var Avg_AllocatedMemory="+str(Avg_AllocatedMemory)+"var Max_AllocatedCPU="+Max_AllocatedCPU+"var Min_AllocatedCPU="+Min_AllocatedCPU+"var Avg_AllocatedCPU="+Avg_AllocatedCPU+"var Max_FPS="+str(Max_FPS)+"var Min_FPS="+str(Min_FPS)+"var Avg_FPS="+str(Avg_FPS)
+
+    fr_prev, fr_next = GetHtmlContent(fr, "// tag data", False, 1)
+    fr= fr_prev+data_series+"\n"+fr_next
+
 
     # 写入文件
     newPath = path.replace(".html", "_PLUS.html")

@@ -14,8 +14,8 @@ def create_log_excel(nowtime,device):
     app = xw.App(visible=True, add_book=False)
     wb = app.books.add()
     sheet=wb.sheets("Sheet1")
-    sheet.range('A1').value = ["Time","TotalMemory(MB)", "AllocatedMemory(MB)","UsedMemory(MB)","FreeMemory(MB)","TotalCPU","AllocatedCPU","FPS"]
-    sheet.range('A1:H1').color=205, 197, 191
+    sheet.range('A1').value = ["Time","TotalMemory(MB)", "AllocatedMemory(MB)","UsedMemory(MB)","FreeMemory(MB)","TotalCPU","AllocatedCPU","FPS","","PNG","PNGAddress"]
+    sheet.range('A1:K1').color=205, 197, 191
     if os.path.exists(exclefile):
         raise Exception( "FileHasExisted")
     wb.save(exclefile)
@@ -101,6 +101,7 @@ def record_to_excel(sheet,list,**kwargs):
     nrow = rng.last_cell.row
     currentcell="A"+str(nrow+1)
     currentcellpng="J"+str(nrow+1)
+    currentcellpngvalue="K"+str(nrow+1)
     currentcellrange=currentcell+":"+"H"+str(nrow+1)
     sheet.range(currentcell).value =list
     if nrow % 2 == 0:
@@ -112,13 +113,14 @@ def record_to_excel(sheet,list,**kwargs):
             sheet.range(currentcellrange).color=value
         if key == "png":
             sheet.range(currentcellpng).add_hyperlink(value,"截图","提示：点击打开截图")
+            sheet.range(currentcellpngvalue).value=value
     sheet.autofit()
 
 #在excel里查找指定键名的列，将该列所有数值（不算最后3行统计行）返回成一个serieslist
 def get_series(sheet,Key):
     rng = sheet.range('A1').expand()
     nrow = rng.last_cell.row-3
-    rng2=sheet.range('A1:G1')
+    rng2=sheet.range('A1:K1')
     serieslist = []
     for key in rng2:
         if key.value==Key:
