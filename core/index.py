@@ -84,6 +84,9 @@ def enter_processing(processNo,madb,flag,start):
                 installResult = madb.PushApk2Devices()
                 if installResult == "Success":
                     print("{}确定安装成功".format(devices))
+                    installflag = "Success"
+                if installResult == "Skip":
+                    print("{}设备跳过PushAPK2Device步骤".format(devices))
                     installflag="Success"
             except Exception as e:
                 print("{}安装失败，installResult={}".format(devices, installResult)+ traceback.format_exc())

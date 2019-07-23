@@ -34,6 +34,7 @@ class MultiAdb:
         self._packagePath = Config.getValue(self._configPath, "apkpath")[0]
         self._packageName = Config.getValue(self._configPath, "packname")[0]
         self._activityName = Config.getValue(self._configPath, "activityname")[0]
+        self._needpush=Config.getValue(self._configPath, "needpush")[0]
         self._needClickInstall = Config.getValue(self._configPath, "needclickinstall")[0]
         self._needClickStartApp = Config.getValue(self._configPath, "needclickstartapp")[0]
         self._startTime=time.time()
@@ -76,6 +77,9 @@ class MultiAdb:
     #获取是否需要在安装应用时点击二次确认框的flag
     def get_needclickinstall(self):
         return self._needClickInstall
+
+    def get_needpush(self):
+        return self._needpush
 
     #获取是否需要在打开应用时点击二次确认框的flag
     def get_needclickstartapp(self):
@@ -192,6 +196,9 @@ class MultiAdb:
 
     #推送apk到设备上的函数，读配置决定要不要进行权限点击操作。
     def PushApk2Devices(self):
+        needpush=self.get_needpush()
+        if needpush!="True":
+            return "Skip"
         device=self.get_mdevice()
         needclickinstall=self.get_needclickinstall()
         #启动一个线程，执行AppInstall函数
