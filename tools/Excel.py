@@ -129,6 +129,21 @@ def get_series(sheet,Key):
             tmp=cum+"2:"+cum+str(nrow)
             serieslist=sheet.range(tmp).value
             break
+    if Key=="TotalCPU":
+        for i in range(len(serieslist)):
+            serieslist[i]=float(format(float(serieslist[i].split("%")[0])/float(serieslist[i].split("%")[1].split("/")[1])*100,"0.2f"))
+            if serieslist[i] == "N/a":
+                serieslist[i] = 0
+        print("TotalCPU",serieslist)
+    if Key=="AllocatedCPU":
+        for i in range(len(serieslist)):
+            if serieslist[i]=="N/a":
+                serieslist[i]=0
+            else:
+                serieslist[i]=float(format(float(serieslist[i])*100,"0.2f"))
+            print("serieslist[{}]={}".format(i,serieslist[i]))
+        print("AllocatedCPU",serieslist)
+
     return  serieslist
 
 #在序列表里查询指定键值对，转成json返回

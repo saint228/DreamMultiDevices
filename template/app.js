@@ -116,7 +116,7 @@
                  categories: Time_series["Time"],
             },
             tooltip: {
-                valueSuffix: '',
+                valueSuffix: '%',
             },
             legend: commonLegend,
             series: [
@@ -143,9 +143,9 @@
                     "</tr>" +
                     "<tr>" +
                         "<td>CPU</td>" +
-                        "<td>" + data_count["Avg_AllocatedCPU"] + "%</td>" +
-                        "<td>" + data_count["Max_AllocatedCPU"] + "%</td>" +
-                        "<td>" + data_count["Min_AllocatedCPU"] + "%</td>" +
+                        "<td>" + data_count["Avg_AllocatedCPU"] + "</td>" +
+                        "<td>" + data_count["Max_AllocatedCPU"] + "</td>" +
+                        "<td>" + data_count["Min_AllocatedCPU"] + "</td>" +
                     "</tr>" +
                     "<tr>" +
                         "<td>FPS</td>" +
