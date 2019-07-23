@@ -197,7 +197,7 @@ class MultiAdb:
     #推送apk到设备上的函数，读配置决定要不要进行权限点击操作。
     def PushApk2Devices(self):
         needpush=self.get_needpush()
-        if needpush!="True":
+        if needpush=="True":
             return "Skip"
         device=self.get_mdevice()
         needclickinstall=self.get_needclickinstall()
