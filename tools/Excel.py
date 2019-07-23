@@ -134,15 +134,12 @@ def get_series(sheet,Key):
             serieslist[i]=float(format(float(serieslist[i].split("%")[0])/float(serieslist[i].split("%")[1].split("/")[1])*100,"0.2f"))
             if serieslist[i] == "N/a":
                 serieslist[i] = 0
-        print("TotalCPU",serieslist)
     if Key=="AllocatedCPU":
         for i in range(len(serieslist)):
             if serieslist[i]=="N/a":
                 serieslist[i]=0
             else:
                 serieslist[i]=float(format(float(serieslist[i])*100,"0.2f"))
-            print("serieslist[{}]={}".format(i,serieslist[i]))
-        print("AllocatedCPU",serieslist)
 
     return  serieslist
 
