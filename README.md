@@ -62,7 +62,9 @@
 
 11./Report/Html报告。RunTestCase使用BeautifulReport库进行报告输出。会在调用文件所在的目录生成一个Report目录，输出内容在Report目录下，以设备名和时间命名，相关截图则存储在Report/Screen目录下。
 
-12新增了Performance.py，用以处理adbdump抓取的性能数据，同时在tools目录下新增了Excel.py。用来处理表格。限于adb的效率，大概4、5秒能抓一次，抓取时会同步截图。
+12.新增了Performance.py，用以处理adbdump抓取的性能数据，同时在tools目录下新增了Excel.py。用来处理表格。限于adb的效率，大概4、5秒能抓一次，抓取时会同步截图。
+
+13.完成性能测试后，会在/Report目录下重新生成xxx_PLUS.html的报告，是在BeautifulReport基础上拼接了性能部分的页面显示。
 
 -------------------------------------------
 微信打赏
