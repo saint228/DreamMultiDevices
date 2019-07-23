@@ -23,7 +23,7 @@ def enter_performance(madb,flag,start):
     filepath, sheet, wb = create_log_excel(time.localtime(), madb.get_nickname())
     #塞数据
     #flag = Value('i', 0)
-    collect_data(madb,sheet,flag,timeout=15)
+    collect_data(madb,sheet,flag)
     #计算各平均值最大值最小值等并塞数据
     avglist,maxlist,minlist=calculate(sheet)
     record_to_excel(sheet,avglist,color=(230, 230 ,250))
@@ -32,9 +32,8 @@ def enter_performance(madb,flag,start):
     wb.save()
     nowtime = time.strftime("%H%M%S", start)
     filename = madb.get_rootPath()+"\\Report\\"+madb.get_nickname() + "_" + str(nowtime)+".html"
-    filename = "D:\\Python3.7\\lib\\site-packages\\DreamMultiDevices\\Report\\7401_160717.html"
+   # filename = "D:\\Python3.7\\lib\\site-packages\\DreamMultiDevices\\Report\\7401_160717.html"
     print("要操作的文件名为：",filename)
-    #print(get_json(sheet,"Time"),get_json(sheet,"FreeMemory(MB)"))
     reportPlusPath = EditReport(filename,wb,avglist,maxlist,minlist)
     print("设备{}生成报告：{}完毕".format(madb.get_mdevice(),reportPlusPath))
 
@@ -199,11 +198,11 @@ def EditReport(path, wb,avglist,maxlist,minlist):
 
     data_series=Time_series+"\n"+"var TotalMemory="+TotalMemory +"\n"+"var AllocatedMemory="+AllocatedMemory+"\n"+"var UsedMemory="+UsedMemory+"\n"+"var FreeMemory="\
          +FreeMemory+"\n"+"var TotalCPU="+TotalCPU+"\n"+"var AllocatedCPU="+AllocatedCPU+"\n"+"var FPS="+FPS+"\n"+"var PNG="+PNG+"\n"
-
-    #data_max="var Max_AllocatedMemory="+str(Max_AllocatedMemory)+"var Min_AllocatedMemory="+str(Min_AllocatedMemory)+"var Avg_AllocatedMemory="+str(Avg_AllocatedMemory)+"var Max_AllocatedCPU="+Max_AllocatedCPU+"var Min_AllocatedCPU="+Min_AllocatedCPU+"var Avg_AllocatedCPU="+Avg_AllocatedCPU+"var Max_FPS="+str(Max_FPS)+"var Min_FPS="+str(Min_FPS)+"var Avg_FPS="+str(Avg_FPS)
-
+    data_count={"Max_AllocatedMemory":[Max_AllocatedMemory],"Min_AllocatedMemory":[Min_AllocatedMemory],"Avg_AllocatedMemory":[Avg_AllocatedMemory],"Max_AllocatedCPU":[Max_AllocatedCPU],"Min_AllocatedCPU":[Min_AllocatedCPU],"Avg_AllocatedCPU":[Avg_AllocatedCPU],"Max_FPS":[Max_FPS],"Min_FPS":[Min_FPS],"Avg_FPS":[Avg_FPS]}
+    data_count="\n"+"var data_count="+json.dumps(data_count)
     fr_prev, fr_next = GetHtmlContent(fr, "// tag data", False, 1)
-    fr= fr_prev+data_series+"\n"+fr_next
+    fr= fr_prev+data_series+"\n"+data_count+"\n"+fr_next
+
 
 
     # 写入文件
@@ -212,8 +211,7 @@ def EditReport(path, wb,avglist,maxlist,minlist):
     f.write(fr)
     f.close()
 
-    # 删除Json文件
-    # os.remove(json_path)
+
 
     return newPath
 

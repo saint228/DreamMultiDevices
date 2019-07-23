@@ -137,29 +137,24 @@
 
         var htmlStr = "<tr>" +
                         "<td>内存</td>" +
-                        "<td>" + data["StatisMemory"][0] + "MB</td>" +
-                        "<td>" + data["StatisMemory"][1] + "MB</td>" +
-                        "<td>" + data["StatisMemory"][2] + "MB</td>" +
+                        "<td>" + data_count["Avg_AllocatedMemory"]+ "MB</td>" +
+                        "<td>" + data_count["Max_AllocatedMemory"] + "MB</td>" +
+                        "<td>" + data_count["Min_AllocatedMemory"]+ "MB</td>" +
                     "</tr>" +
                     "<tr>" +
                         "<td>CPU</td>" +
-                        "<td>" + data["StatisCPU"][0] + "%</td>" +
-                        "<td>" + data["StatisCPU"][1] + "%</td>" +
-                        "<td>" + data["StatisCPU"][2] + "%</td>" +
+                        "<td>" + data_count["Avg_AllocatedCPU"] + "%</td>" +
+                        "<td>" + data_count["Max_AllocatedCPU"] + "%</td>" +
+                        "<td>" + data_count["Min_AllocatedCPU"] + "%</td>" +
                     "</tr>" +
                     "<tr>" +
                         "<td>FPS</td>" +
-                        "<td>" + data["StatisFPS"][0] + "</td>" +
-                        "<td>" + data["StatisFPS"][1] + "</td>" +
-                        "<td>" + data["StatisFPS"][2] + "</td>" +
+                        "<td>" + data_count["Avg_FPS"]+ "</td>" +
+                        "<td>" + data_count["Max_FPS"] + "</td>" +
+                        "<td>" + data_count["Min_FPS"] + "</td>" +
                     "</tr>";
         $("#totalData").html(htmlStr);
 
-        for (var i = 1; i < data["FuncMemory"].length; i ++) {
-            var htmlStr = data["FuncMemory"][i] + "MB / " + data["FuncCPU"][i] + "%";
-            $("#detailBody #Func")[i - 1].append(htmlStr);
-            var htmlStr2 = data["FuncFPS"][i];
-            $("#detailBody #FuncFps")[i - 1].append(htmlStr2);
-        }
+
     });
 </script>
