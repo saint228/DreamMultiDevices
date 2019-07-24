@@ -5,7 +5,7 @@ import xlwings as xw
 import os
 import time
 import json
-import matplotlib.pyplot as plot
+
 
 #创建一个log_excel用以记录性能数据
 def create_log_excel(nowtime,device):
