@@ -63,7 +63,7 @@
 11./Report/Html报告。RunTestCase使用BeautifulReport库进行报告输出。会在调用文件所在的目录生成一个Report目录，输出内容在Report目录下，以设备名和时间命名，相关截图则存储在Report/Screen目录下。
 
 12.新增了Performance.py，用以处理adbdump抓取的性能数据，同时在tools目录下新增了Excel.py。用来处理表格。限于adb的效率，大概4、5秒能抓一次，抓取时会同步截图。
-划重点：性能测试不支持模拟器，所有的手机模拟器都是x86架构，而99%的手机都是arm架构，adb在不同的架构下抓取dump的返回值不同，所以我写的adb抓性能的代码在模拟器上运行会出错。这不是bug，也不会修。
+划重点：性能测试不支持模拟器，所有的手机模拟器都是x86架构，而99%的安卓手机都是arm架构，adb在不同的架构下抓取dump的返回值不同，所以我写的adb抓性能的代码在模拟器上运行会出错。这不是bug，也不会修。
 
 13.完成性能测试后，会在/Report目录下重新生成xxx_PLUS.html的报告，是在BeautifulReport基础上拼接了性能部分的页面显示。
 
