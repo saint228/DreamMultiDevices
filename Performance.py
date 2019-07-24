@@ -85,7 +85,7 @@ def collect_data(madb,sheet,flag,timeout=3600):
                 else:
                     dequelist.popleft()
                     dequelist.append(fpstmp)
-                    print("dequelist=",dequelist)
+                    #print("dequelist=",dequelist)
             fps=max(dequelist)
 
             #批量获得结果
@@ -179,7 +179,6 @@ def EditReport(path, wb,avglist,maxlist,minlist):
     fr_prev, fr_next = GetHtmlContent(fr, "</body>", True, 1)
     highchartspath=templatePath+"\\highcharts.js"
     highcharts_str="<script src = "+highchartspath+" > </script >"
-    print(highcharts_str)
     js = open(templatePath+"\\app.js", "r+", encoding='UTF-8')
     js_str = js.read()
     js.close()

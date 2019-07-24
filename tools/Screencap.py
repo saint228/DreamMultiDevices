@@ -51,7 +51,7 @@ def GetScreenbyADBCap(starttime,devices,action):
     return png
 
 #用MiniCap的方法截图，使用前需要确保手机上已经安装MiniCap和MiniCap.so。一般用过STF和airtestide的手机会自动安装，若未安装，则可以执行Init_MiniCap.py，手动安装。
-def GetScreenbyMiniCap(starttime,devices,action):
+def GetScreenbyMiniCap(starttime,devices,action,ssFlipped=False):
     # 先给昵称赋值，防止生成图片的命名格式问题。
     if ":" in devices:
         nickname = devices.split(":")[1]
@@ -63,6 +63,10 @@ def GetScreenbyMiniCap(starttime,devices,action):
     wmsizecommand = adb + " -s {} shell wm size".format(devices)
     size = os.popen(wmsizecommand).read()
     size = size.split(":")[1].strip()
+    if ssFlipped:
+        slist = size.split("x")
+        size = slist[1] + "x" + slist[0]
+
     #将设备号和分辨率填入minicap的命令，获得截图。
     screen=adb  + " -s {} shell \" LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P {}@{}/0 -s > /sdcard/screencap.png\"".format(devices,size, size)
     print(screen)
