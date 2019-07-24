@@ -28,6 +28,7 @@ def main():
     if not os.path.exists(reportpath):
         os.mkdir(reportpath)
         os.mkdir(reportpath + "/Screen")
+        print(reportpath)
     print("测试开始")
     if devicesList:
         try:

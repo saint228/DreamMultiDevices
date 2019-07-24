@@ -31,8 +31,9 @@ def enter_performance(madb,flag,start):
     record_to_excel(sheet,minlist,color=(240, 255 ,240))
     wb.save()
     nowtime = time.strftime("%H%M%S", start)
-    filename = madb.get_rootPath()+"\\Report\\"+madb.get_nickname() + "_" + str(nowtime)+".html"
-   # filename = "D:\\Python3.7\\lib\\site-packages\\DreamMultiDevices\\Report\\7401_160717.html"
+    reportpath = os.path.join(os.getcwd(), "Report")
+    filename = reportpath+"\\"+madb.get_nickname() + "_" + str(nowtime)+".html"
+    #filename = "D:\\Python3.7\\lib\\site-packages\\DreamMultiDevices\\Report\\7429_184046.html"
     print("要操作的文件名为：",filename)
     reportPlusPath = EditReport(filename,wb,avglist,maxlist,minlist)
     print("设备{}生成报告：{}完毕".format(madb.get_mdevice(),reportPlusPath))
@@ -138,21 +139,27 @@ class MyThread(threading.Thread):
 
 
 def EditReport(path, wb,avglist,maxlist,minlist):
+    #取项目的绝对路径
+
+    rootPath = os.path.abspath(os.path.dirname(inspect.getfile(inspect.currentframe())) + os.path.sep + ".")
+    templatePath= os.path.join(rootPath, "template")
     # 读取报告文件
     f = open(path, "r+", encoding="UTF-8")
     fr = f.read()
     f.close()
 
+
+
     # 拼接CSS样式
     fr_prev, fr_next = GetHtmlContent(fr, "</style>", True, 1)
-    css = open("./template/app.css", "r+", encoding='UTF-8')
+    css = open(templatePath+"\\app.css", "r+", encoding='UTF-8')
     css_str = css.read()
     css.close()
     fr = fr_prev + "\n" + css_str + "\n" + fr_next
 
     # 拼接头部按钮
     fr_prev, fr_next = GetHtmlContent(fr, "<div", False,3 )
-    header = open("./template/header.html", "r+", encoding='UTF-8')
+    header = open(templatePath+"\\header.html", "r+", encoding='UTF-8')
     header_str = header.read()
     header.close()
     fr = fr_prev + "\n" + header_str + "\n" + fr_next
@@ -163,17 +170,20 @@ def EditReport(path, wb,avglist,maxlist,minlist):
 
     # 拼接页面主体
     fr_prev, fr_next = GetHtmlContent(fr, "<script", False, 1)
-    performance = open("./template/performance.html", "r+", encoding='UTF-8')
+    performance = open(templatePath+"\\performance.html", "r+", encoding='UTF-8')
     performance_str = performance.read()
     performance.close()
     fr = fr_prev + "\n" + performance_str + "\n" + fr_next
 
     # 拼接JS脚本
     fr_prev, fr_next = GetHtmlContent(fr, "</body>", True, 1)
-    js = open("./template/app.js", "r+", encoding='UTF-8')
+    highchartspath=templatePath+"\\highcharts.js"
+    highcharts_str="<script src = "+highchartspath+" > </script >"
+    print(highcharts_str)
+    js = open(templatePath+"\\app.js", "r+", encoding='UTF-8')
     js_str = js.read()
     js.close()
-    fr = fr_prev + "\n" + js_str + "\n" + fr_next
+    fr = fr_prev + "\n" + highcharts_str+"\n"+js_str + "\n" + fr_next
 
     # 嵌入性能测试结果
     sheet = wb.sheets("Sheet1")

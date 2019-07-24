@@ -13,9 +13,7 @@ def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
 adb = ADB().adb_path
-parentPath = os.path.abspath(os.path.dirname(inspect.getfile(inspect.currentframe())) + os.path.sep + ".")
-rootPath = os.path.abspath(os.path.dirname(parentPath) + os.path.sep + ".")
-reportpath = os.path.join(rootPath, "Report")
+reportpath = os.path.join(os.getcwd(), "Report")
 screenpath = os.path.join(reportpath, "Screen")
 
 def  GetScreen(starttime,devices,action):
