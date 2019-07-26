@@ -13,10 +13,11 @@ from multiprocessing import Process,Value
 import json
 from collections import deque
 
-_print = print
+'''
+performance_print = print
 def print(*args, **kwargs):
-    _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
-
+    performance_print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
+'''
 def enter_performance(madb,flag,start):
     print("设备{}进入enter_performance方法".format(madb.get_mdevice()))
     #创表

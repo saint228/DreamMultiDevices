@@ -7,11 +7,11 @@ import time
 from PIL import Image
 from airtest.core.android.adb import ADB
 
-
+'''
 _print = print
 def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
-
+'''
 adb = ADB().adb_path
 reportpath = os.path.join(os.getcwd(), "Report")
 screenpath = os.path.join(reportpath, "Screen")

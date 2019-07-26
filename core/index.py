@@ -11,9 +11,9 @@ from DreamMultiDevices.core import RunTestCase
 import traceback
 from DreamMultiDevices.Performance import *
 
-_print = print
+index_print = print
 def print(*args, **kwargs):
-    _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
+    index_print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
 def main():
     #默认去config.ini里读取期望参与测试的设备，若为空，则选择当前连接的所有状态为“device”的设备
