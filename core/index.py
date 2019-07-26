@@ -21,6 +21,9 @@ def main():
     if devicesList[0] == "":
         devicesList = Madb().getdevices()
     print("最终的devicesList=",devicesList)
+    if Madb().get_apkpath()=="" or Madb().get_packagename()=="":
+        print("配置文件填写不全，packagename和apkpath是必填项")
+        devicesList=None
     #读取是否需要同步性能测试的配置。
     need_performance=Madb().get_needperformance()
     reportpath = os.path.join(os.getcwd(), "Report")
