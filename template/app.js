@@ -88,7 +88,7 @@
                     data: UsedMemory["UsedMemory(MB)"],
                     events: {
                         click: function(event) {
-                            PNG["PNGAddress"][event.point.x];
+                            imgSrc = PNG["PNGAddress"][event.point.x];
                             htmlStr = "<img src='" + imgSrc + "'>";
                             $("#MemeryScreen").html(htmlStr);
                         },
