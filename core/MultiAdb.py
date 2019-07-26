@@ -34,12 +34,13 @@ class MultiAdb:
         self._packagePath = Config.getValue(self._configPath, "apkpath")[0]
         self._packageName = Config.getValue(self._configPath, "packname")[0]
         self._activityName = Config.getValue(self._configPath, "activityname")[0]
-        self._needpush=Config.getValue(self._configPath, "needpush")[0]
-        self._needClickInstall = Config.getValue(self._configPath, "needclickinstall")[0]
-        self._needClickStartApp = Config.getValue(self._configPath, "needclickstartapp")[0]
+        self._skip_pushapk2devices=Config.getValue(self._configPath, "skip_pushapk2devices")[0]
+        self._skip_check_of_install = Config.getValue(self._configPath, "skip_check_of_install")[0]
+        self._skip_check_of_startapp = Config.getValue(self._configPath, "skip_check_of_startapp")[0]
+        self._skip_performance=Config.getValue(self._configPath,"skip_performance")[0]
         self._startTime=time.time()
-        self._timeoutAction=int(Config.getValue(self._configPath, "timeoutperaction")[0])
-        self._timeoutStartApp=int(Config.getValue(self._configPath, "timeoutofstartapp")[0])
+        self._timeout_of_per_action=int(Config.getValue(self._configPath, "timeout_of_per_action")[0])
+        self._timeout_of_startapp=int(Config.getValue(self._configPath, "timeout_of_startapp")[0])
         self._mdevice=mdevice
         # 处理模拟器端口用的冒号
         if ":" in self._mdevice:
@@ -57,7 +58,7 @@ class MultiAdb:
         self._testCasePath=Config.getValue(self._configPath, "testcasepath")
         if self._testCasePath[0]=="":
             self._testCasePath=os.path.join(self._rootPath, "TestCase")
-        self._needPerformance=Config.getValue(self._configPath,"needPerformance")[0]
+
         if self._activityName=="":
             self._activityName=APK(self.get_apkpath()).activities[0]
 
@@ -74,16 +75,18 @@ class MultiAdb:
     def get_activityname(self):
         return self._activityName
 
-    #获取是否需要在安装应用时点击二次确认框的flag
-    def get_needclickinstall(self):
-        return self._needClickInstall
+    #获取是否跳过安装apk步骤的flag
+    def get_skip_pushapk2devices(self):
+        return self._skip_pushapk2devices
 
-    def get_needpush(self):
-        return self._needpush
+    #获取是否需要在安装应用时点击二次确认框的flag
+    def get_skip_check_of_install(self):
+        return self._skip_check_of_install
+
 
     #获取是否需要在打开应用时点击二次确认框的flag
-    def get_needclickstartapp(self):
-        return self._needClickStartApp
+    def get_skip_check_of_startapp(self):
+        return self._skip_check_of_startapp
 
     #获取当前设备id
     def get_mdevice(self):
@@ -94,12 +97,12 @@ class MultiAdb:
         return self._nickName
 
     #获取启动app的延时时间
-    def get_timeoustartspp(self):
-        return self._timeoutStartApp
+    def get_timeout_of_startapp(self):
+        return self._timeout_of_startapp
 
     #获取每步操作的延时时间
-    def get_timeoutaction(self):
-        return self._timeoutAction
+    def get_timeout_of_per_action(self):
+        return self._timeout_of_per_action
 
     #获取运行循环点击处理脚本的循环次数
     def get_iteration(self):
@@ -122,8 +125,8 @@ class MultiAdb:
         return self._rootPath
 
     #获取是否需要性能测试的开关
-    def get_needperformance(self):
-        return self._needPerformance
+    def get_skip_performance(self):
+        return self._skip_performance
 
     #修改当前设备的方法
     def set_mdevice(self,device):
@@ -157,11 +160,11 @@ class MultiAdb:
     #启动APP的方法，核心是airtest的start_app函数，后面的一大堆if else 是用来根据设备进行点击操作的。需要用户自行完成。
     def StartApp(self):
         devices=self.get_mdevice()
-        needclickstartapp=self.get_needclickstartapp()
+        skip_check_of_startapp=self.get_skip_check_of_startapp()
         print("{}进入StartAPP函数".format(devices))
         start_app(self.get_packagename())
-        if needclickstartapp=="True":
-            print("设备{}，needclickstartapp为{}，开始初始化pocoui，处理应用权限".format(devices,needclickstartapp))
+        if skip_check_of_startapp=="False":
+            print("设备{}，needclickstartapp为{}，开始初始化pocoui，处理应用权限".format(devices,skip_check_of_startapp))
             # 获取andorid的poco代理对象，准备进行开启应用权限（例如申请文件存储、定位等权限）点击操作
             pocoAndroid = AndroidUiautomationPoco(use_airtest_input=True, screenshot_each_action=False)
             n=self.get_iteration()
@@ -196,20 +199,20 @@ class MultiAdb:
 
     #推送apk到设备上的函数，读配置决定要不要进行权限点击操作。
     def PushApk2Devices(self):
-        needpush=self.get_needpush()
-        if needpush=="True":
+        skip_pushapk2devices=self.get_skip_pushapk2devices()
+        if skip_pushapk2devices=="True":
             return "Skip"
         device=self.get_mdevice()
-        needclickinstall=self.get_needclickinstall()
+        skip_check_of_install=self.get_skip_check_of_install()
         #启动一个线程，执行AppInstall函数
         try:
             installThread = threading.Thread(target=self.AppInstall, args=())
             installThread.start()
             #从queue里获取线程函数的返回值
             result = q.get()
-            if needclickinstall=="True":
+            if skip_check_of_install=="False":
                 #如果配置上needclickinstall为True，则再开一个线程，执行安装权限点击操作
-                print("设备{}，needclickinstall为{}，开始进行安装点击权限操作".format(device,needclickinstall))
+                print("设备{}，needclickinstall为{}，开始进行安装点击权限操作".format(device,skip_check_of_install))
                 inputThread = threading.Thread(target=self.InputEvent, args=(self,))
                 inputThread.start()
                 inputThread.join()

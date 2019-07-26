@@ -152,45 +152,5 @@ def get_json(sheet,Key):
 
 
 
-if __name__ == "__main__":
-    '''
-    file,sheet, wb = create_log_excel(time.localtime(), "7429")
-    nowtime = time.localtime()
-    inputtime = str(time.strftime("%H:%M:%S", nowtime))
-    list=[inputtime,"2","3","4","5","6","7"]
-    record_to_excel(sheet,list)
-    record_to_excel(sheet, list)
-    record_to_excel(sheet, list)
-    record_to_excel(sheet, list)
-    record_to_excel(sheet, list)
-    record_to_excel(sheet, list)
-    record_to_excel(sheet, list)
-    record_to_excel(sheet, list)
-    record_to_excel(sheet, list)
-    #get_series(sheet,"AllocatedMemory(MB)")
-    rng=sheet.range("A2")
-    print(rng.number_format)
-
-    print(rng.value)
-    '''
-    app = xw.App(visible=True, add_book=False)
-    filepath="D:\\Python3.7\\Lib\\site-packages\\DreamMultiDevices\\06241127_7401_log.xlsx"
-    wb = app.books.open(filepath)
-    sheet=wb.sheets['sheet1']
-    time_series=get_series(sheet,"Time")
-    am_series=get_series(sheet,"AllocatedCPU")
-    tm_series=get_series(sheet,"TotalCPU")
-    for i in range(len(tm_series)):
-        tm_series[i]=tm_series[i].split("/")[0]
-
-    for i in range(len(am_series)):
-        if am_series[i]=="N/a":
-            am_series[i]=0
-    plot.figure()
-    plot.yticks(tm_series)
-    plot.plot(time_series)
-    plot.show()
-
-
 
 

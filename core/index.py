@@ -25,7 +25,7 @@ def main():
         print("配置文件填写不全，packagename和apkpath是必填项")
         devicesList=None
     #读取是否需要同步性能测试的配置。
-    need_performance=Madb().get_needperformance()
+    skip_performance=Madb().get_skip_performance()
     reportpath = os.path.join(os.getcwd(), "Report")
     # 没有Report目录时自动创建
     if not os.path.exists(reportpath):
@@ -48,7 +48,7 @@ def main():
                 else:
                     #进程通信变量flag，默认为0，完成测试时修改为1。
                     flag = Value('i', 0)
-                    if need_performance=="True":
+                    if skip_performance=="False":
                         p1 = Process(target=enter_performance, args=(madb,flag,start,))
                         list.append(p1)
                 p2=Process(target=enter_processing, args=(i,madb,flag,start,))
@@ -75,7 +75,7 @@ def enter_processing(processNo,madb,flag,start):
     try:
         #调用airtest的各个方法连接设备
         connect_device("Android:///" + devices)
-        time.sleep(madb.get_timeoutaction())
+        time.sleep(madb.get_timeout_of_per_action())
         auto_setup(__file__)
         isconnect="Pass"
         print("设备{}连接成功".format(devices))
@@ -101,7 +101,7 @@ def enter_processing(processNo,madb,flag,start):
                     startflag = "Success"
                 except Exception as e:
                     print("运行失败"+traceback.format_exc())
-            time.sleep(madb.get_timeoutaction())
+            time.sleep(madb.get_timeout_of_per_action())
             #应用启动成功则开始运行用例
             if (startflag=="Success"):
                 RunTestCase.RunTestCase(madb,start)
