@@ -49,7 +49,7 @@ def main():
                     #进程通信变量flag，默认为0，完成测试时修改为1。
                     flag = Value('i', 0)
                     if skip_performance=="False":
-                        p1 = Process(target=enter_performance, args=(madb,flag,start,))
+                        p1 = Process(target=enter_performance, args=(madb,flag,start,False))
                         list.append(p1)
                 p2=Process(target=enter_processing, args=(i,madb,flag,start,))
                 list.append(p2)

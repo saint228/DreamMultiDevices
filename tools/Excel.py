@@ -7,6 +7,7 @@ import time
 import json
 
 
+
 #创建一个log_excel用以记录性能数据
 def create_log_excel(nowtime,device):
     create_time=time.strftime("%m%d%H%M", nowtime)
@@ -21,6 +22,10 @@ def create_log_excel(nowtime,device):
     wb.save(exclefile)
     print("创建Excel文件：{}".format(exclefile))
     return exclefile,sheet,wb
+
+
+
+
 
 #计算一个sheet里已存在的所有数据，然后返回该sheet里的各项的平均、最大、最小值。
 def calculate(sheet):

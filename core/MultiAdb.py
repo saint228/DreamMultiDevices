@@ -180,7 +180,7 @@ class MultiAdb:
                     if pocoAndroid("com.android.packageinstaller:id/permission_allow_button").exists():
                         pocoAndroid("com.android.packageinstaller:id/permission_allow_button").click()
                     else:
-                        time.sleep(self.get_timeoutaction())
+                        time.sleep(self.get_timeout_of_per_action())
                         count += 1
             elif devices == "127.0.0.1:62025":
                 count = 0
@@ -213,7 +213,7 @@ class MultiAdb:
             if skip_check_of_install=="False":
                 #如果配置上needclickinstall为True，则再开一个线程，执行安装权限点击操作
                 print("设备{}，needclickinstall为{}，开始进行安装点击权限操作".format(device,skip_check_of_install))
-                inputThread = threading.Thread(target=self.InputEvent, args=(self,))
+                inputThread = threading.Thread(target=self.InputEvent, args=())
                 inputThread.start()
                 inputThread.join()
             else:
@@ -238,7 +238,7 @@ class MultiAdb:
                 uninstallcommand = adb + " -s " + str(devices) + " uninstall " + package
                 print("正在{}上卸载{},卸载命令为：{}".format(devices, package, uninstallcommand))
                 os.popen(uninstallcommand)
-            time.sleep(self.get_timeoutaction())
+            time.sleep(self.get_timeout_of_startapp())
             installcommand = adb + " -s " + str(devices) + " install -r " + apkpath
             print("正在{}上安装{},安装命令为：{}".format(devices, package, installcommand))
             os.system(installcommand)

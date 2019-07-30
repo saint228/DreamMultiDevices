@@ -8,6 +8,7 @@ import  threading
 import  multiprocessing
 import traceback
 from DreamMultiDevices.tools.Excel import *
+from DreamMultiDevices.tools.Json import *
 from DreamMultiDevices.tools.Screencap import *
 from multiprocessing import Process,Value
 import json
@@ -18,31 +19,44 @@ performance_print = print
 def print(*args, **kwargs):
     performance_print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 '''
-def enter_performance(madb,flag,start):
+def enter_performance(madb,flag,start,storage_by_excel=True):
     print("设备{}进入enter_performance方法".format(madb.get_mdevice()))
-    #创表
-    filepath, sheet, wb = create_log_excel(time.localtime(), madb.get_nickname())
-    #塞数据
-    #flag = Value('i', 0)
-    collect_data(madb,sheet,flag)
-    #计算各平均值最大值最小值等并塞数据
-    avglist,maxlist,minlist=calculate(sheet)
-    record_to_excel(sheet,avglist,color=(230, 230 ,250))
-    record_to_excel(sheet,maxlist,color=(193, 255, 193))
-    record_to_excel(sheet,minlist,color=(240, 255 ,240))
-    wb.save()
+    wb=""
+    jsonfilepath=""
+    if storage_by_excel:
+        #创表
+        filepath, sheet, wb = create_log_excel(time.localtime(), madb.get_nickname())
+        #塞数据
+        #flag = Value('i', 0)
+        collect_data_by_excel(madb,sheet,flag)
+        #计算各平均值最大值最小值等并塞数据
+        avglist,maxlist,minlist=calculate(sheet)
+        record_to_excel(sheet,avglist,color=(230, 230 ,250))
+        record_to_excel(sheet,maxlist,color=(193, 255, 193))
+        record_to_excel(sheet,minlist,color=(240, 255 ,240))
+        wb.save()
+
+    else:
+        #创建json文件
+        jsonfilepath = create_log_json(time.localtime(),madb.get_nickname())
+        print("创建json文件成功:{}".format(jsonfilepath))
+        collect_data_by_json(madb, jsonfilepath, flag)
+        avglist, maxlist, minlist = calculate_by_json(jsonfilepath)
     nowtime = time.strftime("%H%M%S", start)
     reportpath = os.path.join(os.getcwd(), "Report")
-    filename = reportpath+"\\"+madb.get_nickname() + "_" + str(nowtime)+".html"
-    #filename = "D:\\Python3.7\\lib\\site-packages\\DreamMultiDevices\\Report\\7429_184046.html"
-    print("要操作的文件名为：",filename)
-    reportPlusPath = EditReport(filename,wb,avglist,maxlist,minlist)
-    print("设备{}生成报告：{}完毕".format(madb.get_mdevice(),reportPlusPath))
+    filename = reportpath + "\\" + madb.get_nickname() + "_" + str(nowtime) + ".html"
+    print("要操作的文件名为：", filename)
+    if storage_by_excel:
+        reportPlusPath = EditReport_by_excel(filename, wb, avglist, maxlist, minlist)
+    else:
+        reportPlusPath = EditReport_by_json(filename, jsonfilepath, avglist, maxlist, minlist)
+    print("设备{}生成报告：{}完毕".format(madb.get_mdevice(), reportPlusPath))
+
 
 
 
 #接受设备madb类对象、excel的sheet对象、共享内存flag、默认延时一小时
-def collect_data(madb,sheet,flag,timeout=3600):
+def collect_data_by_excel(madb,sheet,flag,timeout=3600):
     starttime=time.time()
     dequelist = deque([])
     n=0
@@ -139,7 +153,7 @@ class MyThread(threading.Thread):
             return None
 
 
-def EditReport(path, wb,avglist,maxlist,minlist):
+def EditReport_by_excel(path, wb,avglist,maxlist,minlist):
     #取项目的绝对路径
 
     rootPath = os.path.abspath(os.path.dirname(inspect.getfile(inspect.currentframe())) + os.path.sep + ".")
