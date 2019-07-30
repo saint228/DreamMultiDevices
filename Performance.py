@@ -35,7 +35,6 @@ def enter_performance(madb,flag,start,storage_by_excel=True):
         record_to_excel(sheet,maxlist,color=(193, 255, 193))
         record_to_excel(sheet,minlist,color=(240, 255 ,240))
         wb.save()
-
     else:
         #创建json文件
         jsonfilepath = create_log_json(time.localtime(),madb.get_nickname())

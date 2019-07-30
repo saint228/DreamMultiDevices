@@ -26,6 +26,8 @@ def main():
         devicesList=None
     #读取是否需要同步性能测试的配置。
     skip_performance=Madb().get_skip_performance()
+    skip_performance=True if skip_performance=="1" else False
+    is_storaged_by_excel=Madb().get_storage_by_excel()
     reportpath = os.path.join(os.getcwd(), "Report")
     # 没有Report目录时自动创建
     if not os.path.exists(reportpath):
@@ -48,8 +50,8 @@ def main():
                 else:
                     #进程通信变量flag，默认为0，完成测试时修改为1。
                     flag = Value('i', 0)
-                    if skip_performance=="False":
-                        p1 = Process(target=enter_performance, args=(madb,flag,start,False))
+                    if not skip_performance:
+                        p1 = Process(target=enter_performance, args=(madb,flag,start,is_storaged_by_excel))
                         list.append(p1)
                 p2=Process(target=enter_processing, args=(i,madb,flag,start,))
                 list.append(p2)

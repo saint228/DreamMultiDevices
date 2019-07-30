@@ -38,6 +38,7 @@ class MultiAdb:
         self._skip_check_of_install = Config.getValue(self._configPath, "skip_check_of_install")[0]
         self._skip_check_of_startapp = Config.getValue(self._configPath, "skip_check_of_startapp")[0]
         self._skip_performance=Config.getValue(self._configPath,"skip_performance")[0]
+        self._storage_by_excel=Config.getValue(self._configPath,"storage_by_excel")[0]
         self._startTime=time.time()
         self._timeout_of_per_action=int(Config.getValue(self._configPath, "timeout_of_per_action")[0])
         self._timeout_of_startapp=int(Config.getValue(self._configPath, "timeout_of_startapp")[0])
@@ -128,6 +129,10 @@ class MultiAdb:
     def get_skip_performance(self):
         return self._skip_performance
 
+    #获取是否需要用excel来存储性能数据
+    def get_storage_by_excel(self):
+        return self._storage_by_excel
+
     #修改当前设备的方法
     def set_mdevice(self,device):
         self._mdevice=device
@@ -161,9 +166,10 @@ class MultiAdb:
     def StartApp(self):
         devices=self.get_mdevice()
         skip_check_of_startapp=self.get_skip_check_of_startapp()
+        skip_check_of_startapp = True if skip_check_of_startapp == "1" else False
         print("{}进入StartAPP函数".format(devices))
         start_app(self.get_packagename())
-        if skip_check_of_startapp=="False":
+        if not skip_check_of_startapp:
             print("设备{}，needclickstartapp为{}，开始初始化pocoui，处理应用权限".format(devices,skip_check_of_startapp))
             # 获取andorid的poco代理对象，准备进行开启应用权限（例如申请文件存储、定位等权限）点击操作
             pocoAndroid = AndroidUiautomationPoco(use_airtest_input=True, screenshot_each_action=False)
@@ -194,23 +200,25 @@ class MultiAdb:
                         time.sleep(3)
                         count += 1
         else:
-            print("设备{}，needclickstartapp不为True，不做开启权限点击操作".format(devices))
+            print("设备{}，skip_check_of_startapp{}，不做开启权限点击操作".format(devices,skip_check_of_startapp))
         return None
 
     #推送apk到设备上的函数，读配置决定要不要进行权限点击操作。
     def PushApk2Devices(self):
         skip_pushapk2devices=self.get_skip_pushapk2devices()
-        if skip_pushapk2devices=="True":
+        skip_pushapk2devices = True if skip_pushapk2devices == "1" else False
+        if skip_pushapk2devices:
             return "Skip"
         device=self.get_mdevice()
         skip_check_of_install=self.get_skip_check_of_install()
+        skip_check_of_install = True if skip_check_of_install == "1" else False
         #启动一个线程，执行AppInstall函数
         try:
             installThread = threading.Thread(target=self.AppInstall, args=())
             installThread.start()
             #从queue里获取线程函数的返回值
             result = q.get()
-            if skip_check_of_install=="False":
+            if not skip_check_of_install:
                 #如果配置上needclickinstall为True，则再开一个线程，执行安装权限点击操作
                 print("设备{}，needclickinstall为{}，开始进行安装点击权限操作".format(device,skip_check_of_install))
                 inputThread = threading.Thread(target=self.InputEvent, args=())
