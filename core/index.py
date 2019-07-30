@@ -28,6 +28,8 @@ def main():
     skip_performance=Madb().get_skip_performance()
     skip_performance=True if skip_performance=="1" else False
     is_storaged_by_excel=Madb().get_storage_by_excel()
+    is_storaged_by_excel=True if is_storaged_by_excel=="1" else False
+    print("is_storaged",is_storaged_by_excel)
     reportpath = os.path.join(os.getcwd(), "Report")
     # 没有Report目录时自动创建
     if not os.path.exists(reportpath):

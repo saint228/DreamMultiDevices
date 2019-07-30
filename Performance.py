@@ -28,7 +28,7 @@ def enter_performance(madb,flag,start,storage_by_excel=True):
         filepath, sheet, wb = create_log_excel(time.localtime(), madb.get_nickname())
         #塞数据
         #flag = Value('i', 0)
-        collect_data_by_excel(madb,sheet,flag)
+        collect_data(madb,flag,storage_by_excel,sheet=sheet)
         #计算各平均值最大值最小值等并塞数据
         avglist,maxlist,minlist=calculate(sheet)
         record_to_excel(sheet,avglist,color=(230, 230 ,250))
@@ -39,7 +39,7 @@ def enter_performance(madb,flag,start,storage_by_excel=True):
         #创建json文件
         jsonfilepath = create_log_json(time.localtime(),madb.get_nickname())
         print("创建json文件成功:{}".format(jsonfilepath))
-        collect_data_by_json(madb, jsonfilepath, flag)
+        collect_data(madb,flag,storage_by_excel,jsonfilepath=jsonfilepath)
         avglist, maxlist, minlist = calculate_by_json(jsonfilepath)
     nowtime = time.strftime("%H%M%S", start)
     reportpath = os.path.join(os.getcwd(), "Report")
@@ -55,7 +55,7 @@ def enter_performance(madb,flag,start,storage_by_excel=True):
 
 
 #接受设备madb类对象、excel的sheet对象、共享内存flag、默认延时一小时
-def collect_data_by_excel(madb,sheet,flag,timeout=3600):
+def collect_data(madb,flag,storage_by_excel,sheet="",jsonfilepath="",timeout=3600):
     starttime=time.time()
     dequelist = deque([])
     n=0
@@ -122,13 +122,18 @@ def collect_data_by_excel(madb,sheet,flag,timeout=3600):
             #对安卓7以下的设备，默认不区分cpu内核数，默认值改成100%
             if maxcpu=="":
                 maxcpu="100%"
+
+
             #将性能数据填充到一个数组里，塞进excel
 
             nowtime = time.localtime()
             inputtime = str(time.strftime("%H:%M:%S", nowtime))
             #print(inputtime,type(inputtime))
             list = ["'"+inputtime, total, allocated, used, free, totalcpu+"/"+maxcpu, allocatedcpu,fps]
-            record_to_excel(sheet,list,png=png)
+            if storage_by_excel:
+                record_to_excel(sheet,list,png=png)
+            else:
+                record_to_json(jsonfilepath,list,png=png)
 
     except Exception as e:
         print(madb.get_mdevice()+ traceback.format_exc())

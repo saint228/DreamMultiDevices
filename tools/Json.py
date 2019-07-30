@@ -12,10 +12,27 @@ def create_log_json(nowtime,device):
     if os.path.exists(jsonfile):
         raise Exception( "FileHasExisted")
     f = open(jsonfile, "w")
+    resultData = {
+        "FuncMemory": [],
+        "FuncCPU": [],
+        "FuncFPS": [],
+        "ScreencapPNG": [],
+        "YList": [],
+        "AllocatedMemory": [],
+        "UsedMemory": [],
+        "FreeMemory": [],
+        "TotalCPU": [],
+        "AllocatedCPU": [],
+        "AllocatedFPS": [],
+        "StatisMemory": [],
+        "StatisCPU": [],
+        "StatisFPS": [],
+    }
+    resultJson = json.dumps(resultData)
+    f.write(resultJson)
     f.close()
 
-def collect_data_by_json(madb, jsonfilepath, flag):
-    print("enter collect_data_by_json")
+def  record_to_json(jsonfilepath,list,png):
     pass
 
 def calculate_by_json(file):

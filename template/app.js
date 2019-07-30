@@ -115,7 +115,7 @@
                  categories: Time_series["Time"],
             },
             tooltip: {
-                valueSuffix: '%',
+                valueSuffix: 'fps',
             },
             legend: commonLegend,
             series: [
