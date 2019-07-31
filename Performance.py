@@ -223,6 +223,7 @@ def EditReport(origin_html_path,storage_by_excelavglist,avglist="",maxlist="",mi
                       "Min_AllocatedCPU": [Min_AllocatedCPU], "Avg_AllocatedCPU": [Avg_AllocatedCPU],
                       "Max_FPS": [Max_FPS],
                       "Min_FPS": [Min_FPS], "Avg_FPS": [Avg_FPS]}
+        data_count = "\n" + "var data_count=" + json.dumps(data_count)
 
     else:
         jsonfilepath=(os.getcwd() + "\\" + jsonfilepath)
@@ -237,18 +238,12 @@ def EditReport(origin_html_path,storage_by_excelavglist,avglist="",maxlist="",mi
         AllocatedCPU=json.dumps({"AllocatedCPU":jsondata["AllocatedCPU"]})
         FPS=json.dumps({"FPS":jsondata["FPS"]})
         PNG=json.dumps({"PNGAddress":jsondata["PNGAddress"]})
-        #Max_AllocatedMemory=jsondata["data_count"]["max"][1]
-        #Min_AllocatedMemory=jsondata["data_count"]["min"][1]
-       # Avg_AllocatedMemory=jsondata["data_count"]["avg"][1]
         data_count=json.dumps(jsondata["data_count"])
         data_count=data_count[1:-1]
-        print(data_count)
+        data_count = "\n" + "var data_count=" + data_count
 
     data_series = Time_series + "\n" + "var TotalMemory=" + TotalMemory + "\n" + "var AllocatedMemory=" + AllocatedMemory + "\n" + "var UsedMemory=" + UsedMemory + "\n" + "var FreeMemory=" \
                   + FreeMemory + "\n" + "var TotalCPU=" + TotalCPU + "\n" + "var AllocatedCPU=" + AllocatedCPU + "\n" + "var FPS=" + FPS + "\n" + "var PNG=" + PNG + "\n"
-
-    data_count = "\n" + "var data_count=" + data_count
-    print(data_count)
     fr_prev, fr_next = GetHtmlContent(fr, "// tag data", False, 1)
     fr = fr_prev + data_series + "\n" + data_count + "\n" + fr_next
 
@@ -258,8 +253,6 @@ def EditReport(origin_html_path,storage_by_excelavglist,avglist="",maxlist="",mi
     f = open( newPath, "w", encoding="UTF-8")
     f.write(fr)
     f.close()
-
-
 
     return newPath
 

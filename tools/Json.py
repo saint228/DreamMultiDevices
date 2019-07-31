@@ -41,6 +41,7 @@ def  record_to_json(jsonfilepath,list):
     list[5]=float(list[5])*100
     list[6]=float(list[6].split("%")[0])
     list[7]=float(list[7])
+    print("list=",list)
     f = open(jsonfilepath, "r+")
     strdata=f.read()
     f.seek(0)
@@ -55,6 +56,7 @@ def  record_to_json(jsonfilepath,list):
     dictdata["FPS"].append(list[7])
     dictdata["PNGAddress"].append(list[8])
     strdata=json.dumps(dictdata)
+    print("str_data=",strdata)
     f.write(strdata)
     f.close()
 
@@ -63,22 +65,25 @@ def calculate_by_json(jsonfile):
     strdata=f.read()
     f.seek(0)
     dictdata=json.loads(strdata)
-    Max_AllocatedMemory=max(dictdata["AllocatedMemory"])
+    memorylist=list(dictdata["AllocatedMemory"])
+    cpulist=list(dictdata["AllocatedCPU"])
+    fpslist=list(dictdata["FPS"])
     for i in range(len(dictdata["AllocatedMemory"])):
-        if (dictdata["AllocatedMemory"][i-1]) == 0:
-            dictdata["AllocatedMemory"].remove(dictdata["AllocatedMemory"][i-1])
-        if (dictdata["AllocatedCPU"][i-1]) == 0:
-            dictdata["AllocatedCPU"].remove(dictdata["AllocatedCPU"][i-1])
-        if (dictdata["FPS"][i-1]) == 0:
-            dictdata["FPS"].remove(dictdata["FPS"][i-1])
-    Min_AllocatedMemory=min(dictdata["AllocatedMemory"])
-    Avg_AllocatedMemory=format(np.average(dictdata["AllocatedMemory"]),".2f")
-    Max_AllocatedCPU=max(dictdata["AllocatedCPU"])
-    Min_AllocatedCPU=min(dictdata["AllocatedCPU"])
-    Avg_AllocatedCPU=format(np.average(dictdata["AllocatedCPU"]),".2f")
-    Max_FPS=max(dictdata["FPS"])
-    Min_FPS=min(dictdata["FPS"])
-    Avg_FPS=format(np.average(dictdata["FPS"]),".2f")
+        if (memorylist[i-1]) == 0:
+            memorylist.remove(memorylist[i-1])
+        if (cpulist[i-1]) == 0:
+            cpulist.remove(cpulist[i-1])
+        if (fpslist[i-1]) == 0:
+            fpslist.remove(fpslist[i-1])
+    Max_AllocatedMemory=max(memorylist)
+    Min_AllocatedMemory=min(memorylist)
+    Avg_AllocatedMemory=format(np.average(memorylist),".2f")
+    Max_AllocatedCPU=max(cpulist)
+    Min_AllocatedCPU=min(cpulist)
+    Avg_AllocatedCPU=format(np.average(cpulist),".2f")
+    Max_FPS=max(fpslist)
+    Min_FPS=min(fpslist)
+    Avg_FPS=format(np.average(fpslist),".2f")
     dictdata["data_count"].append({"Max_AllocatedMemory": [Max_AllocatedMemory], "Min_AllocatedMemory": [Min_AllocatedMemory], "Avg_AllocatedMemory": [Avg_AllocatedMemory], "Max_AllocatedCPU": [str(Max_AllocatedCPU)+"%"], "Min_AllocatedCPU": [str(Min_AllocatedCPU)+"%"], "Avg_AllocatedCPU": [str(Avg_AllocatedCPU)+"%"], "Max_FPS": [Max_FPS], "Min_FPS": [Min_FPS], "Avg_FPS": [Avg_FPS]})
     strdata=json.dumps(dictdata)
     print("strdata=",strdata)
