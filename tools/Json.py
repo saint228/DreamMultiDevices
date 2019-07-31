@@ -56,7 +56,6 @@ def  record_to_json(jsonfilepath,list):
     dictdata["FPS"].append(list[7])
     dictdata["PNGAddress"].append(list[8])
     strdata=json.dumps(dictdata)
-    print("str_data=",strdata)
     f.write(strdata)
     f.close()
 
@@ -68,13 +67,12 @@ def calculate_by_json(jsonfile):
     memorylist=list(dictdata["AllocatedMemory"])
     cpulist=list(dictdata["AllocatedCPU"])
     fpslist=list(dictdata["FPS"])
-    for i in range(len(dictdata["AllocatedMemory"])):
-        if (memorylist[i-1]) == 0:
-            memorylist.remove(memorylist[i-1])
-        if (cpulist[i-1]) == 0:
-            cpulist.remove(cpulist[i-1])
-        if (fpslist[i-1]) == 0:
-            fpslist.remove(fpslist[i-1])
+    while 0 in memorylist:
+        memorylist.remove(0)
+    while 0 in cpulist:
+        cpulist.remove(0)
+    while 0 in fpslist:
+        fpslist.remove(0)
     Max_AllocatedMemory=max(memorylist)
     Min_AllocatedMemory=min(memorylist)
     Avg_AllocatedMemory=format(np.average(memorylist),".2f")

@@ -296,7 +296,7 @@ class MultiAdb:
                     print("{}退出InputEvent线程".format(devices))
                     break
                 if pocoAndroid("com.coloros.safecenter:id/et_login_passwd_edit").exists():
-                    pocoAndroid("com.coloros.safecenter:id/et_login_passwd_edit").set_text("qatest2019")
+                    pocoAndroid("com.coloros.safecenter:id/et_login_passwd_edit").set_text("123456")
                     time.sleep(2)
                     if pocoAndroid("android.widget.FrameLayout").offspring("android:id/buttonPanel").offspring("android:id/button1").exists():
                         pocoAndroid("android.widget.FrameLayout").offspring("android:id/buttonPanel").offspring(
