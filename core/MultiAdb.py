@@ -36,7 +36,7 @@ class MultiAdb:
         self._activityName = Config.getValue(self._configPath, "activityname")[0]
         self._skip_pushapk2devices=Config.getValue(self._configPath, "skip_pushapk2devices")[0]
         self._auto_delete_package=Config.getValue(self._configPath,"auto_delete_package")[0]
-        self._auto_install_pachage=Config.getValue(self._configPath,"auto_install_pachage")[0]
+        self._auto_install_package=Config.getValue(self._configPath,"auto_install_package")[0]
         self._skip_check_of_install = Config.getValue(self._configPath, "skip_check_of_install")[0]
         self._skip_check_of_startapp = Config.getValue(self._configPath, "skip_check_of_startapp")[0]
         self._skip_performance=Config.getValue(self._configPath,"skip_performance")[0]
@@ -131,8 +131,8 @@ class MultiAdb:
     def auto_delete_package(self):
         return self._auto_delete_package
 
-    def auto_install_pachage(self):
-        return self._auto_install_pachage
+    def auto_install_package(self):
+        return self._auto_install_package
     #获取是否需要性能测试的开关
     def get_skip_performance(self):
         return self._skip_performance
@@ -251,8 +251,8 @@ class MultiAdb:
         print("设备{}开始进行自动安装".format(devices))
         auto_delete_package=self.auto_delete_package()
         auto_delete_package = True if auto_delete_package == "1" else False
-        auto_install_pachage=self.auto_install_pachage()
-        auto_install_pachage = True if auto_install_pachage == "1" else False
+        auto_install_package=self.auto_install_package()
+        auto_install_package = True if auto_install_package == "1" else False
         try:
             if auto_delete_package:
                 if self.isinstalled():
@@ -262,7 +262,7 @@ class MultiAdb:
             #time.sleep(self.get_timeout_of_startapp())
             installcommand = adb + " -s " + str(devices) + " install -r " + apkpath
             print("正在{}上安装{},安装命令为：{}".format(devices, package, installcommand))
-            if auto_install_pachage:
+            if auto_install_package:
                 os.system(installcommand)
             if self.isinstalled():
                 print("{}上安装成功，退出AppInstall线程".format(devices))
