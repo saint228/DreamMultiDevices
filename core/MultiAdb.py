@@ -35,6 +35,7 @@ class MultiAdb:
         self._packageName = Config.getValue(self._configPath, "packname")[0]
         self._activityName = Config.getValue(self._configPath, "activityname")[0]
         self._skip_pushapk2devices=Config.getValue(self._configPath, "skip_pushapk2devices")[0]
+        self._auto_delete_package=Config.getValue(self._configPath,"auto_delete_package")[0]
         self._skip_check_of_install = Config.getValue(self._configPath, "skip_check_of_install")[0]
         self._skip_check_of_startapp = Config.getValue(self._configPath, "skip_check_of_startapp")[0]
         self._skip_performance=Config.getValue(self._configPath,"skip_performance")[0]
@@ -124,6 +125,10 @@ class MultiAdb:
     #获取项目的根目录绝对路径
     def get_rootPath(self):
         return self._rootPath
+
+    #获取是否要自动删除包的开关
+    def auto_delete_package(self):
+        return self._auto_delete_package
 
     #获取是否需要性能测试的开关
     def get_skip_performance(self):
@@ -241,11 +246,14 @@ class MultiAdb:
         apkpath=self.get_apkpath()
         package=self.get_packagename()
         print("设备{}开始进行自动安装".format(devices))
+        auto_delete_package=self.auto_delete_package()
+        auto_delete_package = True if auto_delete_package == "1" else False
         try:
-            if self.isinstalled():
-                uninstallcommand = adb + " -s " + str(devices) + " uninstall " + package
-                print("正在{}上卸载{},卸载命令为：{}".format(devices, package, uninstallcommand))
-                os.popen(uninstallcommand)
+            if auto_delete_package:
+                if self.isinstalled():
+                    uninstallcommand = adb + " -s " + str(devices) + " uninstall " + package
+                    print("正在{}上卸载{},卸载命令为：{}".format(devices, package, uninstallcommand))
+                    os.popen(uninstallcommand)
             #time.sleep(self.get_timeout_of_startapp())
             installcommand = adb + " -s " + str(devices) + " install -r " + apkpath
             print("正在{}上安装{},安装命令为：{}".format(devices, package, installcommand))

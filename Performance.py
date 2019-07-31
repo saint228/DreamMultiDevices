@@ -196,6 +196,7 @@ def EditReport(origin_html_path,storage_by_excelavglist,avglist="",maxlist="",mi
     fr = fr_prev + "\n" + highcharts_str+"\n"+js_str + "\n" + fr_next
     Time_series=TotalMemory=AllocatedMemory=UsedMemory=FreeMemory=TotalCPU=AllocatedCPU=FPS=PNG=""
     Max_AllocatedMemory=Min_AllocatedMemory=Avg_AllocatedMemory=Max_AllocatedCPU=Min_AllocatedCPU=Avg_AllocatedCPU=Max_FPS=Min_FPS=Avg_FPS=0
+    data_count=""
     if storage_by_excelavglist:
         # 嵌入性能测试结果
         sheet = wb.sheets("Sheet1")
@@ -217,7 +218,11 @@ def EditReport(origin_html_path,storage_by_excelavglist,avglist="",maxlist="",mi
         Max_FPS=maxlist[7]
         Min_FPS=minlist[7]
         Avg_FPS=avglist[7]
-
+        data_count = {"Max_AllocatedMemory": [Max_AllocatedMemory], "Min_AllocatedMemory": [Min_AllocatedMemory],
+                      "Avg_AllocatedMemory": [Avg_AllocatedMemory], "Max_AllocatedCPU": [Max_AllocatedCPU],
+                      "Min_AllocatedCPU": [Min_AllocatedCPU], "Avg_AllocatedCPU": [Avg_AllocatedCPU],
+                      "Max_FPS": [Max_FPS],
+                      "Min_FPS": [Min_FPS], "Avg_FPS": [Avg_FPS]}
 
     else:
         jsonfilepath=(os.getcwd() + "\\" + jsonfilepath)
@@ -235,17 +240,18 @@ def EditReport(origin_html_path,storage_by_excelavglist,avglist="",maxlist="",mi
         #Max_AllocatedMemory=jsondata["data_count"]["max"][1]
         #Min_AllocatedMemory=jsondata["data_count"]["min"][1]
        # Avg_AllocatedMemory=jsondata["data_count"]["avg"][1]
+        data_count=json.dumps(jsondata["data_count"])
+        data_count=data_count[1:-1]
+        print(data_count)
 
     data_series = Time_series + "\n" + "var TotalMemory=" + TotalMemory + "\n" + "var AllocatedMemory=" + AllocatedMemory + "\n" + "var UsedMemory=" + UsedMemory + "\n" + "var FreeMemory=" \
                   + FreeMemory + "\n" + "var TotalCPU=" + TotalCPU + "\n" + "var AllocatedCPU=" + AllocatedCPU + "\n" + "var FPS=" + FPS + "\n" + "var PNG=" + PNG + "\n"
-    data_count = {"Max_AllocatedMemory": [Max_AllocatedMemory], "Min_AllocatedMemory": [Min_AllocatedMemory],
-                      "Avg_AllocatedMemory": [Avg_AllocatedMemory], "Max_AllocatedCPU": [Max_AllocatedCPU],
-                  "Min_AllocatedCPU": [Min_AllocatedCPU], "Avg_AllocatedCPU": [Avg_AllocatedCPU],
-                  "Max_FPS": [Max_FPS],
-                  "Min_FPS": [Min_FPS], "Avg_FPS": [Avg_FPS]}
-    data_count = "\n" + "var data_count=" + json.dumps(data_count)
+
+    data_count = "\n" + "var data_count=" + data_count
+    print(data_count)
     fr_prev, fr_next = GetHtmlContent(fr, "// tag data", False, 1)
     fr = fr_prev + data_series + "\n" + data_count + "\n" + fr_next
+
 
     # 写入文件
     newPath = origin_html_path.replace(".html", "_PLUS.html")
