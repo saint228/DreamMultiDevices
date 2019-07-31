@@ -246,7 +246,7 @@ class MultiAdb:
                 uninstallcommand = adb + " -s " + str(devices) + " uninstall " + package
                 print("正在{}上卸载{},卸载命令为：{}".format(devices, package, uninstallcommand))
                 os.popen(uninstallcommand)
-            time.sleep(self.get_timeout_of_startapp())
+            #time.sleep(self.get_timeout_of_startapp())
             installcommand = adb + " -s " + str(devices) + " install -r " + apkpath
             print("正在{}上安装{},安装命令为：{}".format(devices, package, installcommand))
             os.system(installcommand)

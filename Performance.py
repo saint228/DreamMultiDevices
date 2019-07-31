@@ -23,6 +23,7 @@ def enter_performance(madb,flag,start,storage_by_excel=True):
     print("设备{}进入enter_performance方法".format(madb.get_mdevice()))
     wb=""
     jsonfilepath=""
+    print("storage_by_excel",storage_by_excel)
     if storage_by_excel:
         #创表
         filepath, sheet, wb = create_log_excel(time.localtime(), madb.get_nickname())
@@ -40,15 +41,15 @@ def enter_performance(madb,flag,start,storage_by_excel=True):
         jsonfilepath = create_log_json(time.localtime(),madb.get_nickname())
         print("创建json文件成功:{}".format(jsonfilepath))
         collect_data(madb,flag,storage_by_excel,jsonfilepath=jsonfilepath)
-        avglist, maxlist, minlist = calculate_by_json(jsonfilepath)
+        calculate_by_json(jsonfilepath)
     nowtime = time.strftime("%H%M%S", start)
     reportpath = os.path.join(os.getcwd(), "Report")
     filename = reportpath + "\\" + madb.get_nickname() + "_" + str(nowtime) + ".html"
     print("要操作的文件名为：", filename)
     if storage_by_excel:
-        reportPlusPath = EditReport_by_excel(filename, wb, avglist, maxlist, minlist)
+        reportPlusPath = EditReport(filename,storage_by_excel,avglist, maxlist, minlist,wb=wb)
     else:
-        reportPlusPath = EditReport_by_json(filename, jsonfilepath, avglist, maxlist, minlist)
+        reportPlusPath = EditReport(filename,storage_by_excel, jsonfilepath=jsonfilepath)
     print("设备{}生成报告：{}完毕".format(madb.get_mdevice(), reportPlusPath))
 
 
@@ -56,6 +57,7 @@ def enter_performance(madb,flag,start,storage_by_excel=True):
 
 #接受设备madb类对象、excel的sheet对象、共享内存flag、默认延时一小时
 def collect_data(madb,flag,storage_by_excel,sheet="",jsonfilepath="",timeout=3600):
+    print("nowjsonfile=", jsonfilepath)
     starttime=time.time()
     dequelist = deque([])
     n=0
@@ -80,9 +82,6 @@ def collect_data(madb,flag,storage_by_excel,sheet="",jsonfilepath="",timeout=360
             for i in range(8):
                 get_fps = MyThread(madb.get_fps, args=())
                 Threadlist.append(get_fps)
-
-
-
             #批量执行
             get_allocated_memory.start()
             get_memory_info.start()
@@ -99,16 +98,13 @@ def collect_data(madb,flag,storage_by_excel,sheet="",jsonfilepath="",timeout=360
                 else:
                     dequelist.popleft()
                     dequelist.append(fpstmp)
-                    #print("dequelist=",dequelist)
             fps=max(dequelist)
-
             #批量获得结果
             allocated=get_allocated_memory.get_result()
             total,free,used=get_memory_info.get_result()
             totalcpu,maxcpu=get_total_cpu.get_result()
             allocatedcpu=get_allocated_cpu.get_result()
             png=get_png.get_result()
-
             #批量回收线程
             get_allocated_memory.join()
             get_memory_info.join()
@@ -118,22 +114,19 @@ def collect_data(madb,flag,storage_by_excel,sheet="",jsonfilepath="",timeout=360
             get_fps.join()
             for p in Threadlist:
                 p.join()
-
             #对安卓7以下的设备，默认不区分cpu内核数，默认值改成100%
             if maxcpu=="":
                 maxcpu="100%"
-
-
             #将性能数据填充到一个数组里，塞进excel
-
             nowtime = time.localtime()
             inputtime = str(time.strftime("%H:%M:%S", nowtime))
             #print(inputtime,type(inputtime))
-            list = ["'"+inputtime, total, allocated, used, free, totalcpu+"/"+maxcpu, allocatedcpu,fps]
             if storage_by_excel:
+                list = ["'" + inputtime, total, allocated, used, free, totalcpu + "/" + maxcpu, allocatedcpu, fps]
                 record_to_excel(sheet,list,png=png)
             else:
-                record_to_json(jsonfilepath,list,png=png)
+                list =[inputtime, total, allocated, used, free, format(float(totalcpu.split("%")[0])/float(maxcpu.split("%")[0]),".2f"), allocatedcpu, fps,png]
+                record_to_json(jsonfilepath,list)
 
     except Exception as e:
         print(madb.get_mdevice()+ traceback.format_exc())
@@ -157,17 +150,15 @@ class MyThread(threading.Thread):
             return None
 
 
-def EditReport_by_excel(path, wb,avglist,maxlist,minlist):
+def EditReport(origin_html_path,storage_by_excelavglist,avglist="",maxlist="",minlist="",wb="",jsonfilepath=""):
     #取项目的绝对路径
 
     rootPath = os.path.abspath(os.path.dirname(inspect.getfile(inspect.currentframe())) + os.path.sep + ".")
     templatePath= os.path.join(rootPath, "template")
     # 读取报告文件
-    f = open(path, "r+", encoding="UTF-8")
+    f = open(origin_html_path, "r+", encoding="UTF-8")
     fr = f.read()
     f.close()
-
-
 
     # 拼接CSS样式
     fr_prev, fr_next = GetHtmlContent(fr, "</style>", True, 1)
@@ -203,39 +194,61 @@ def EditReport_by_excel(path, wb,avglist,maxlist,minlist):
     js_str = js.read()
     js.close()
     fr = fr_prev + "\n" + highcharts_str+"\n"+js_str + "\n" + fr_next
+    Time_series=TotalMemory=AllocatedMemory=UsedMemory=FreeMemory=TotalCPU=AllocatedCPU=FPS=PNG=""
+    Max_AllocatedMemory=Min_AllocatedMemory=Avg_AllocatedMemory=Max_AllocatedCPU=Min_AllocatedCPU=Avg_AllocatedCPU=Max_FPS=Min_FPS=Avg_FPS=0
+    if storage_by_excelavglist:
+        # 嵌入性能测试结果
+        sheet = wb.sheets("Sheet1")
+        Time_series=get_json(sheet,"Time")
+        TotalMemory=get_json(sheet,"TotalMemory(MB)")
+        AllocatedMemory=get_json(sheet,"AllocatedMemory(MB)")
+        UsedMemory=get_json(sheet,"UsedMemory(MB)")
+        FreeMemory=get_json(sheet,"FreeMemory(MB)")
+        TotalCPU=get_json(sheet,"TotalCPU")
+        AllocatedCPU=get_json(sheet,"AllocatedCPU")
+        FPS=get_json(sheet,"FPS")
+        PNG=get_json(sheet,"PNGAddress")
+        Max_AllocatedMemory=maxlist[2]
+        Min_AllocatedMemory=minlist[2]
+        Avg_AllocatedMemory=avglist[2]
+        Max_AllocatedCPU=maxlist[6]
+        Min_AllocatedCPU=minlist[6]
+        Avg_AllocatedCPU=avglist[6]
+        Max_FPS=maxlist[7]
+        Min_FPS=minlist[7]
+        Avg_FPS=avglist[7]
 
-    # 嵌入性能测试结果
-    sheet = wb.sheets("Sheet1")
-    Time_series=get_json(sheet,"Time")
-    TotalMemory=get_json(sheet,"TotalMemory(MB)")
-    AllocatedMemory=get_json(sheet,"AllocatedMemory(MB)")
-    UsedMemory=get_json(sheet,"UsedMemory(MB)")
-    FreeMemory=get_json(sheet,"FreeMemory(MB)")
-    TotalCPU=get_json(sheet,"TotalCPU")
-    AllocatedCPU=get_json(sheet,"AllocatedCPU")
-    FPS=get_json(sheet,"FPS")
-    PNG=get_json(sheet,"PNGAddress")
-    Max_AllocatedMemory=maxlist[2]
-    Min_AllocatedMemory=minlist[2]
-    Avg_AllocatedMemory=avglist[2]
-    Max_AllocatedCPU=maxlist[6]
-    Min_AllocatedCPU=minlist[6]
-    Avg_AllocatedCPU=avglist[6]
-    Max_FPS=maxlist[7]
-    Min_FPS=minlist[7]
-    Avg_FPS=avglist[7]
 
-    data_series=Time_series+"\n"+"var TotalMemory="+TotalMemory +"\n"+"var AllocatedMemory="+AllocatedMemory+"\n"+"var UsedMemory="+UsedMemory+"\n"+"var FreeMemory="\
-         +FreeMemory+"\n"+"var TotalCPU="+TotalCPU+"\n"+"var AllocatedCPU="+AllocatedCPU+"\n"+"var FPS="+FPS+"\n"+"var PNG="+PNG+"\n"
-    data_count={"Max_AllocatedMemory":[Max_AllocatedMemory],"Min_AllocatedMemory":[Min_AllocatedMemory],"Avg_AllocatedMemory":[Avg_AllocatedMemory],"Max_AllocatedCPU":[Max_AllocatedCPU],"Min_AllocatedCPU":[Min_AllocatedCPU],"Avg_AllocatedCPU":[Avg_AllocatedCPU],"Max_FPS":[Max_FPS],"Min_FPS":[Min_FPS],"Avg_FPS":[Avg_FPS]}
-    data_count="\n"+"var data_count="+json.dumps(data_count)
+    else:
+        jsonfilepath=(os.getcwd() + "\\" + jsonfilepath)
+        jsondata = open(jsonfilepath, "r+", encoding='UTF-8')
+        jsondata = json.load(jsondata)
+        Time_series=json.dumps({"Time":jsondata["Time_series"]})
+        TotalMemory=json.dumps({"TotalMemory(MB)":jsondata["TotalMemory"]})
+        AllocatedMemory=json.dumps({"AllocatedMemory(MB)":jsondata["AllocatedMemory"]})
+        UsedMemory=json.dumps({"UsedMemory(MB)":jsondata["UsedMemory"]})
+        FreeMemory=json.dumps({"FreeMemory(MB)":jsondata["FreeMemory"]})
+        TotalCPU=json.dumps({"TotalCPU":jsondata["TotalCPU"]})
+        AllocatedCPU=json.dumps({"AllocatedCPU":jsondata["AllocatedCPU"]})
+        FPS=json.dumps({"FPS":jsondata["FPS"]})
+        PNG=json.dumps({"PNGAddress":jsondata["PNGAddress"]})
+        #Max_AllocatedMemory=jsondata["data_count"]["max"][1]
+        #Min_AllocatedMemory=jsondata["data_count"]["min"][1]
+       # Avg_AllocatedMemory=jsondata["data_count"]["avg"][1]
+
+    data_series = Time_series + "\n" + "var TotalMemory=" + TotalMemory + "\n" + "var AllocatedMemory=" + AllocatedMemory + "\n" + "var UsedMemory=" + UsedMemory + "\n" + "var FreeMemory=" \
+                  + FreeMemory + "\n" + "var TotalCPU=" + TotalCPU + "\n" + "var AllocatedCPU=" + AllocatedCPU + "\n" + "var FPS=" + FPS + "\n" + "var PNG=" + PNG + "\n"
+    data_count = {"Max_AllocatedMemory": [Max_AllocatedMemory], "Min_AllocatedMemory": [Min_AllocatedMemory],
+                      "Avg_AllocatedMemory": [Avg_AllocatedMemory], "Max_AllocatedCPU": [Max_AllocatedCPU],
+                  "Min_AllocatedCPU": [Min_AllocatedCPU], "Avg_AllocatedCPU": [Avg_AllocatedCPU],
+                  "Max_FPS": [Max_FPS],
+                  "Min_FPS": [Min_FPS], "Avg_FPS": [Avg_FPS]}
+    data_count = "\n" + "var data_count=" + json.dumps(data_count)
     fr_prev, fr_next = GetHtmlContent(fr, "// tag data", False, 1)
-    fr= fr_prev+data_series+"\n"+data_count+"\n"+fr_next
-
-
+    fr = fr_prev + data_series + "\n" + data_count + "\n" + fr_next
 
     # 写入文件
-    newPath = path.replace(".html", "_PLUS.html")
+    newPath = origin_html_path.replace(".html", "_PLUS.html")
     f = open( newPath, "w", encoding="UTF-8")
     f.write(fr)
     f.close()
