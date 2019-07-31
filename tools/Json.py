@@ -5,6 +5,8 @@ import xlwings as xw
 import os
 import time
 import json
+import numpy as np
+
 
 def create_log_json(nowtime,device):
     create_time = time.strftime("%m%d%H%M", nowtime)
@@ -29,7 +31,6 @@ def create_log_json(nowtime,device):
     return jsonfile
 
 def  record_to_json(jsonfilepath,list):
-    print("json=",jsonfilepath)
     for i in range(len(list)):
         if list[i] =="N/a":
             list[i] = "0"
@@ -42,8 +43,7 @@ def  record_to_json(jsonfilepath,list):
     list[7]=float(list[7])
     f = open(jsonfilepath, "r+")
     strdata=f.read()
-    print("strdata=",strdata)
-    f.close()
+    f.seek(0)
     dictdata=json.loads(strdata)
     dictdata["Time_series"].append(list[0])
     dictdata["TotalMemory"].append(list[1])
@@ -55,23 +55,33 @@ def  record_to_json(jsonfilepath,list):
     dictdata["FPS"].append(list[7])
     dictdata["PNGAddress"].append(list[8])
     strdata=json.dumps(dictdata)
-    f = open(jsonfilepath, "w")
     f.write(strdata)
     f.close()
 
 def calculate_by_json(jsonfile):
-    print("enter calculate_by_json")
-    avglist=[1234,123,653]
-    maxlist=[5643,654,654]
-    minlist=[589,65,321]
-    f = open(jsonfile, "r")
+    f = open(jsonfile, "r+")
     strdata=f.read()
-    f.close()
+    f.seek(0)
     dictdata=json.loads(strdata)
-    dictdata["data_count"].append({"Max_AllocatedMemory": [110.97], "Min_AllocatedMemory": [5.31], "Avg_AllocatedMemory": [81.78], "Max_AllocatedCPU": ["15.00%"], "Min_AllocatedCPU": ["4.00%"], "Avg_AllocatedCPU": ["6.00%"], "Max_FPS": [59.0], "Min_FPS": [30.0], "Avg_FPS": [31.68]})
+    Max_AllocatedMemory=max(dictdata["AllocatedMemory"])
+    for i in range(len(dictdata["AllocatedMemory"])):
+        if (dictdata["AllocatedMemory"][i-1]) == 0:
+            dictdata["AllocatedMemory"].remove(dictdata["AllocatedMemory"][i-1])
+        if (dictdata["AllocatedCPU"][i-1]) == 0:
+            dictdata["AllocatedCPU"].remove(dictdata["AllocatedCPU"][i-1])
+        if (dictdata["FPS"][i-1]) == 0:
+            dictdata["FPS"].remove(dictdata["FPS"][i-1])
+    Min_AllocatedMemory=min(dictdata["AllocatedMemory"])
+    Avg_AllocatedMemory=format(np.average(dictdata["AllocatedMemory"]),".2f")
+    Max_AllocatedCPU=max(dictdata["AllocatedCPU"])
+    Min_AllocatedCPU=min(dictdata["AllocatedCPU"])
+    Avg_AllocatedCPU=format(np.average(dictdata["AllocatedCPU"]),".2f")
+    Max_FPS=max(dictdata["FPS"])
+    Min_FPS=min(dictdata["FPS"])
+    Avg_FPS=format(np.average(dictdata["FPS"]),".2f")
+    dictdata["data_count"].append({"Max_AllocatedMemory": [Max_AllocatedMemory], "Min_AllocatedMemory": [Min_AllocatedMemory], "Avg_AllocatedMemory": [Avg_AllocatedMemory], "Max_AllocatedCPU": [str(Max_AllocatedCPU)+"%"], "Min_AllocatedCPU": [str(Min_AllocatedCPU)+"%"], "Avg_AllocatedCPU": [str(Avg_AllocatedCPU)+"%"], "Max_FPS": [Max_FPS], "Min_FPS": [Min_FPS], "Avg_FPS": [Avg_FPS]})
     strdata=json.dumps(dictdata)
     print("strdata=",strdata)
-    f = open(jsonfile, "w")
     f.write(strdata)
     f.close()
 
