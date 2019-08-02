@@ -224,8 +224,6 @@ class MultiAdb:
         try:
             installThread = threading.Thread(target=self.AppInstall, args=())
             installThread.start()
-            #从queue里获取线程函数的返回值
-            result = q.get()
             if not skip_check_of_install:
                 #如果配置上skip_check_of_install为True，则再开一个线程，执行安装权限点击操作
                 print("设备{}，skip_check_of_install为{}，开始进行安装点击权限操作".format(device,skip_check_of_install))
@@ -235,6 +233,8 @@ class MultiAdb:
             else:
                 print("设备{}，skip_check_of_install为{}，不进行安装点击权限操作".format(device,skip_check_of_install))
             installThread.join()
+            #从queue里获取线程函数的返回值
+            result = q.get()
             if result=="Install Success":
                 return "Success"
             else:
@@ -287,7 +287,7 @@ class MultiAdb:
         # 这里是针对不同机型进行不同控件的选取，需要用户根据自己的实际机型实际控件进行修改
         n = self.get_iteration()
         #先实现功能，以后有空参数化函数
-        if devices == "127.0.0.1:62021":
+        if devices == "172.16.6.82:7425":
             count = 0
             # 找n次或找到对象以后跳出，否则等5秒重试。
             while True:
