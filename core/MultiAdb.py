@@ -178,7 +178,7 @@ class MultiAdb:
         print("{}进入StartAPP函数".format(devices))
         start_app(self.get_packagename())
         if not skip_check_of_startapp:
-            print("设备{}，needclickstartapp为{}，开始初始化pocoui，处理应用权限".format(devices,skip_check_of_startapp))
+            print("设备{}，skip_check_of_startapp为{}，开始初始化pocoui，处理应用权限".format(devices,skip_check_of_startapp))
             # 获取andorid的poco代理对象，准备进行开启应用权限（例如申请文件存储、定位等权限）点击操作
             pocoAndroid = AndroidUiautomationPoco(use_airtest_input=True, screenshot_each_action=False)
             n=self.get_iteration()
@@ -227,13 +227,13 @@ class MultiAdb:
             #从queue里获取线程函数的返回值
             result = q.get()
             if not skip_check_of_install:
-                #如果配置上needclickinstall为True，则再开一个线程，执行安装权限点击操作
-                print("设备{}，needclickinstall为{}，开始进行安装点击权限操作".format(device,skip_check_of_install))
+                #如果配置上skip_check_of_install为True，则再开一个线程，执行安装权限点击操作
+                print("设备{}，skip_check_of_install为{}，开始进行安装点击权限操作".format(device,skip_check_of_install))
                 inputThread = threading.Thread(target=self.InputEvent, args=())
                 inputThread.start()
                 inputThread.join()
             else:
-                print("设备{}，needclickinstall不为True，不进行安装点击权限操作".format(device))
+                print("设备{}，skip_check_of_install为{}，不进行安装点击权限操作".format(device,skip_check_of_install))
             installThread.join()
             if result=="Install Success":
                 return "Success"
