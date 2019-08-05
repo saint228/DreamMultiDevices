@@ -21,6 +21,11 @@ def getTestCase(path,device=""):
     else:
         return []
 
+def getEmail(path,key):
+    con.read(path)
+    result = con.get("Email", key)
+    return result
+
 #重新写回配置文件
 def setValue(configpath,key,value):
     if  key!="" and value!="":
