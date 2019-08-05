@@ -8,6 +8,7 @@ from airtest.core.error import *
 from poco.exceptions import *
 from airtest.core.api import *
 from DreamMultiDevices.core import RunTestCase
+from DreamMultiDevices.tools.Email import *
 import traceback
 from DreamMultiDevices.Performance import *
 
@@ -70,6 +71,13 @@ def main():
             print("发生未知错误" +  traceback.format_exc())
     else:
         print("未找到设备，测试结束")
+    mailtext="自动化测试完毕"
+    try:
+        sendemail(mailtext)
+    except Exception as e:
+        print("邮件发送失败"+  traceback.format_exc())
+
+
 
 def enter_processing(processNo,madb,flag,start):
     devices = madb.get_mdevice()
