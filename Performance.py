@@ -61,6 +61,7 @@ def collect_data(madb,flag,storage_by_excel,sheet="",jsonfilepath="",timeout=360
     starttime=time.time()
     dequelist = deque([])
     n=0
+    totalcpu,maxcpu=madb.get_totalcpu()
     try:
         while True:
             #当执行一小时或flag为1时，跳出。
@@ -102,7 +103,7 @@ def collect_data(madb,flag,storage_by_excel,sheet="",jsonfilepath="",timeout=360
             #批量获得结果
             allocated=get_allocated_memory.get_result()
             total,free,used=get_memory_info.get_result()
-            totalcpu,maxcpu=get_total_cpu.get_result()
+            totalcpu,unused_maxcpu=get_total_cpu.get_result()
             allocatedcpu=get_allocated_cpu.get_result()
             png=get_png.get_result()
             #批量回收线程
@@ -114,18 +115,21 @@ def collect_data(madb,flag,storage_by_excel,sheet="",jsonfilepath="",timeout=360
             get_fps.join()
             for p in Threadlist:
                 p.join()
-            #对安卓7以下的设备，默认不区分cpu内核数，默认值改成100%
-            if maxcpu=="":
-                maxcpu="100%"
             #将性能数据填充到一个数组里，塞进excel
             nowtime = time.localtime()
             inputtime = str(time.strftime("%H:%M:%S", nowtime))
             #print(inputtime,type(inputtime))
             if storage_by_excel:
-                list = ["'" + inputtime, total, allocated, used, free, totalcpu + "/" + maxcpu, allocatedcpu, fps]
+                if allocatedcpu=="N/a":
+                    list = ["'" + inputtime, total, "N/a", used, free, format(totalcpu / maxcpu, "0.2f") + "%","N/a", fps]
+                else:
+                    list = ["'" + inputtime, total, allocated, used, free, format(totalcpu / maxcpu,"0.2f")+"%", format(float(allocatedcpu)/maxcpu,"0.2f")+"%", fps]
                 record_to_excel(sheet,list,png=png)
             else:
-                list =[inputtime, total, allocated, used, free, format(float(totalcpu.split("%")[0])/float(maxcpu.split("%")[0]),".2f"), allocatedcpu, fps,png]
+                if allocatedcpu == "N/a":
+                    list = [inputtime, total, allocated, used, free, float(format(float(totalcpu)/maxcpu,".2f")),0, fps, png]
+                else:
+                    list =[inputtime, total, allocated, used, free, float(format(float(totalcpu)/maxcpu,".2f")), float(format(float(allocatedcpu)/maxcpu,"0.2f")), fps,png]
                 record_to_json(jsonfilepath,list)
 
     except Exception as e:
@@ -189,7 +193,6 @@ def EditReport(origin_html_path,storage_by_excelavglist,avglist="",maxlist="",mi
     fr_prev, fr_next = GetHtmlContent(fr, "</body>", True, 1)
     highchartspath=templatePath+"\\highcharts.js"
     highcharts_str="<script src = "+highchartspath+" > </script >"
-    #print(highcharts_str)
     js = open(templatePath+"\\app.js", "r+", encoding='UTF-8')
     js_str = js.read()
     js.close()

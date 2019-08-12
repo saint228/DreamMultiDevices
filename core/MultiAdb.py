@@ -437,56 +437,45 @@ class MultiAdb:
         q.put(TotalRAM,FreeRAM,UsedRAM)
         return  TotalRAM, FreeRAM,UsedRAM
 
-    #判断给定设备运行时的总CPU占用，对安卓8以上，CPU总数不一定是100%，视手机CPU内核数决定。
+    #判断给定设备运行时的总CPU占用。部分手机在安卓8以后多内核会分别显示CPU占用，这里统一除以内核数。
     def get_totalcpu(self):
-        starttime =time.time()
         command = adb + " -s {} shell top -n 1 ".format(self.get_mdevice())
         print(command)
         commandresult =os.popen(command)
         cputotal=0
         andversion=self.get_androidversion()
-        #print("get_totalcpu",time.time()-starttime)
-        maxcpu=""
+        maxcpu=1
+        ABIcommand = adb + " -s {} shell getprop ro.product.cpu.abi".format(self.get_mdevice())
+        ABI = os.popen(ABIcommand).read().strip()
+
         for line in commandresult:
             list=line.strip().split(" ")
             while '' in list:
                 list.remove('')
-            #print(list)
-            if len(list)>8:
-                if andversion <7:
-                    #print(list)
+            if len(list)>8 :
+                if andversion <7 and  ABI != "x86":
                     if ("%" in list[2]and list[2]!="CPU%"):
                         cpu=int(list[2][:-1])
                         if cpu!=0:
                             cputotal=cputotal+cpu
                         else:
                             break
-                elif andversion ==7 :
-                    #print(list)
+                elif andversion ==7 and  ABI != "x86":
                     if ("%" in list[4] and list[4] != "CPU%"):
                         cpu = int(list[4][:-1])
                         if cpu != 0:
                             cputotal = cputotal + cpu
                         else:
                             break
-                elif andversion >7:
-                    #print(list)
+                elif andversion >7 and  ABI != "x86":
                     if "%cpu" in list[0]:
                         maxcpu = list[0]
-                        #print(list)
-                        #print(maxcpu)
-                    try :
-                        cpu=float(list[8])
-                        if cpu != 0:
-                            cputotal = cputotal + cpu
-                        else:
-                            break
-                    except:
-                        pass
-        totalcpu=str(format(cputotal, ".2f")) + "%"
-        q.put(totalcpu,maxcpu)
-        return  totalcpu,maxcpu
-
+                        idlecpu= list[4]
+                        cputotal=int(maxcpu.split("%")[0])-int(idlecpu.split("%")[0])
+                        maxcpu=int(int(maxcpu.split("%")[0])/100)
+        q.put(cputotal,maxcpu)
+        return  cputotal,maxcpu
+    touch
     #判断给定设备运行时的总使用CPU
     def get_allocated_cpu(self):
         start=time.time()
@@ -507,11 +496,11 @@ class MultiAdb:
             #print(self.get_mdevice(),"cpuresult=",cpuresult)
             cpu=""
             if version<7:
-                cpu = cpuresult[2]
+                cpu = cpuresult[2].split("%")[0]
             elif version ==7:
-                cpu=cpuresult[4]
+                cpu=cpuresult[4].split("%")[0]
             elif version>7:
-                cpu = cpuresult[8]+"%"
+                cpu = cpuresult[8]
             q.put(cpu)
             return cpu
 
@@ -593,21 +582,20 @@ class MultiAdb:
         return (list(deltas), [delta / refresh_period for delta in deltas])
 
 if __name__=="__main__":
-    #android 8
-    #madb1=MultiAdb("172.16.6.82:7573")
-    #android 7
-    madb2=MultiAdb("172.16.6.82:7425")
-    print("activityname=",madb2.get_activityname())
-    #android 6
-    #madb3=MultiAdb("172.16.6.82:7461")
     #android 9
-    madb4=MultiAdb("172.16.6.82:7409")
+    madb1=MultiAdb("172.16.6.82:7413")
+    print("total1=",madb1.get_totalcpu())
+    #android 8
+    madb2=MultiAdb("172.16.6.82:7437")
+    print("total2=",madb2.get_totalcpu())
+    #android 7
+    madb3=MultiAdb("172.16.6.82:7409")
+    print("total3=",madb3.get_totalcpu())
+    #android 6
+    madb4=MultiAdb("172.16.6.82:7441")
+    print("total4=",madb4.get_totalcpu())
 
-    i=0
-    while i<10000:
-        print("fps,jank=",madb2.get_fps())
-        #print(madb4.get_fps())
-        i+=1
+
 
 
 

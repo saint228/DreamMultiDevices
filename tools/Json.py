@@ -38,8 +38,8 @@ def  record_to_json(jsonfilepath,list):
     list[2]=float(list[2])
     list[3]=float(list[3])
     list[4]=float(list[4])
-    list[5]=float(list[5])*100
-    list[6]=float(list[6].split("%")[0])
+    list[5]=float(list[5])
+    list[6]=float(list[6])
     list[7]=float(list[7])
     print("list=",list)
     f = open(jsonfilepath, "r+")

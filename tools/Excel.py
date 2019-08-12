@@ -14,7 +14,7 @@ def create_log_excel(nowtime,device):
     exclefile = create_time+ "_"+ device + "_log.xlsx"
     app = xw.App(visible=True, add_book=False)
     wb = app.books.add()
-    sheet=wb.sheets("Sheet1")
+    sheet = wb.sheets.active
     sheet.range('A1').value = ["Time","TotalMemory(MB)", "AllocatedMemory(MB)","UsedMemory(MB)","FreeMemory(MB)","TotalCPU","AllocatedCPU","FPS","","PNG","PNGAddress"]
     sheet.range('A1:K1').color=205, 197, 191
     if os.path.exists(exclefile):
@@ -39,15 +39,18 @@ def calculate(sheet):
     FPS=sheet.range("H2:H{}".format(nrow)).value
 
     sum_TotalCPU=[]
-    while "N/a" in AllocatedMemory:
+    while "N/a"  in AllocatedMemory:
         AllocatedMemory.remove("N/a")
-    while "N/a" in AllocatedCPU:
+
+    while "N/a"  in AllocatedCPU:
         AllocatedCPU.remove("N/a")
-    while "N/a" in FPS:
+
+    while "N/a"  in FPS:
         FPS.remove("N/a")
 
+
     for i in range(len(TotalCPU)):
-        tmp=float(TotalCPU[i].split("%")[0])
+        tmp=TotalCPU[i]
         sum_TotalCPU.append(tmp)
     avg_am,max_am,min_am=getcount(AllocatedMemory)
     avg_um,max_um,min_um=getcount(sum_UsedMemory)
@@ -59,9 +62,9 @@ def calculate(sheet):
     if avg_tc=="N/a":
         pass
     else:
-        avg_tc = str(format(avg_tc, ".2f")) + "%"
-        max_tc = str(format(max_tc, ".2f")) + "%"
-        min_tc = str(format(min_tc, ".2f")) + "%"
+        avg_tc = str(format(avg_tc*100, ".2f")) + "%"
+        max_tc = str(format(max_tc*100, ".2f")) + "%"
+        min_tc = str(format(min_tc*100, ".2f")) + "%"
     if   avg_ac=="N/a":
          pass
     else:
@@ -134,22 +137,20 @@ def get_series(sheet,Key):
             tmp=cum+"2:"+cum+str(nrow)
             serieslist=sheet.range(tmp).value
             break
-    if Key=="TotalCPU":
+    if Key=="TotalCPU" or Key=="AllocatedCPU":
         for i in range(len(serieslist)):
-            serieslist[i]=float(format(float(serieslist[i].split("%")[0])/float(serieslist[i].split("%")[1].split("/")[1])*100,"0.2f"))
             if serieslist[i] == "N/a":
                 serieslist[i] = 0
-    if Key=="AllocatedCPU":
+            else:
+                serieslist[i] = float(format(float(serieslist[i]) * 100, "0.2f"))
+    if Key=="AllocatedMemory(MB)":
         for i in range(len(serieslist)):
             if serieslist[i]=="N/a":
                 serieslist[i]=0
-            else:
-                serieslist[i]=float(format(float(serieslist[i])*100,"0.2f"))
-
     return  serieslist
 
 #在序列表里查询指定键值对，转成json返回
-def get_json(sheet,Key):
+def  get_json(sheet,Key):
     series = get_series(sheet, Key)
     series_json=json.dumps({Key:series})
     return series_json
