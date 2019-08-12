@@ -16,6 +16,11 @@ index_print = print
 def print(*args, **kwargs):
     index_print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
+'''
+整个框架的主程序，根据配置表读取设备，并逐一为其分配功能测试进程和性能测试进程。
+由于每个设备需要调用2个进程配合工作，所以使用Value进行进程间通信。Value会传递一个int值，默认为0，在功能进程结束时通知性能进程随之结束。
+'''
+
 def main():
     #默认去config.ini里读取期望参与测试的设备，若为空，则选择当前连接的所有状态为“device”的设备
     devicesList = Madb().get_devicesList()
@@ -77,7 +82,12 @@ def main():
     except Exception as e:
         print("邮件发送失败"+  traceback.format_exc())
 
-
+'''
+功能进程模块
+首先调用airtest库的方法进行设备连接并初始化，然后读取配表，进行应用的安装、启动、权限点击等操作。同步的操作会分由线程来完成。
+确定启动应用成功以后，调用分配测试用例的RunTestCase函数。
+在用例执行完毕以后，将Value置为1。
+'''
 
 def enter_processing(processNo,madb,flag,start):
     devices = madb.get_mdevice()

@@ -6,8 +6,9 @@ import os
 import time
 import json
 
-
-
+'''
+每次都会生成一个空的sheet1，换了好几种初始化方式都无效，不知道为什么，谁xlwings玩得溜的求告知。
+'''
 #创建一个log_excel用以记录性能数据
 def create_log_excel(nowtime,device):
     create_time=time.strftime("%m%d%H%M", nowtime)
@@ -23,42 +24,39 @@ def create_log_excel(nowtime,device):
     print("创建Excel文件：{}".format(exclefile))
     return exclefile,sheet,wb
 
-
-
-
-
 #计算一个sheet里已存在的所有数据，然后返回该sheet里的各项的平均、最大、最小值。
 def calculate(sheet):
+    #获取excel里的所有已被编辑数据
     rng = sheet.range('A1').expand()
+    #获取行号
     nrow = rng.last_cell.row
+    #获得对应数据列的数据
     AllocatedMemory=sheet.range("C2:C{}".format(nrow)).value
     sum_UsedMemory=sheet.range("D2:D{}".format(nrow)).value
     sum_FreeMemory=sheet.range("E2:E{}".format(nrow)).value
-    TotalCPU=sheet.range("F2:F{}".format(nrow)).value
+    sum_TotalCPU=sheet.range("F2:F{}".format(nrow)).value
     AllocatedCPU=sheet.range("G2:G{}".format(nrow)).value
     FPS=sheet.range("H2:H{}".format(nrow)).value
-
-    sum_TotalCPU=[]
+    #sum_TotalCPU=[]
+    #为了统计最大最小平均值，需要剔除掉空值的N/a。
     while "N/a"  in AllocatedMemory:
         AllocatedMemory.remove("N/a")
-
     while "N/a"  in AllocatedCPU:
         AllocatedCPU.remove("N/a")
-
     while "N/a"  in FPS:
         FPS.remove("N/a")
-
-
+    '''
     for i in range(len(TotalCPU)):
         tmp=TotalCPU[i]
         sum_TotalCPU.append(tmp)
+    '''
     avg_am,max_am,min_am=getcount(AllocatedMemory)
     avg_um,max_um,min_um=getcount(sum_UsedMemory)
     avg_fm,max_fm,min_fm=getcount(sum_FreeMemory)
     avg_tc,max_tc,min_tc=getcount(sum_TotalCPU)
     avg_ac,max_ac,min_ac=getcount(AllocatedCPU)
     avg_fps,max_fps,min_fps=getcount(FPS)
-
+    #CPU的数据需要处理下百分号
     if avg_tc=="N/a":
         pass
     else:
@@ -71,6 +69,7 @@ def calculate(sheet):
         avg_ac = str(format(avg_ac * 100,".2f")) + "%"
         max_ac = str(format(max_ac * 100,".2f")) + "%"
         min_ac = str(format(min_ac * 100,".2f")) + "%"
+    #填充excel表格的list。每个字段对应excle的一列。
     avglist = ["平均值","",avg_am,avg_um,avg_fm,avg_tc,avg_ac,avg_fps]
     maxlist = ["最大值：","",max_am,max_um,max_fm,max_tc,max_ac,max_fps]
     minlist = ["最小值：","",min_am,min_um,min_fm,min_tc,min_ac,min_fps]
@@ -108,14 +107,17 @@ def record_to_excel(sheet,list,**kwargs):
     rng = sheet.range('A1').expand()
     nrow = rng.last_cell.row
     currentcell="A"+str(nrow+1)
+    #记录截图的链接和实际地址
     currentcellpng="J"+str(nrow+1)
     currentcellpngvalue="K"+str(nrow+1)
     currentcellrange=currentcell+":"+"H"+str(nrow+1)
     sheet.range(currentcell).value =list
+    #分行换色
     if nrow % 2 == 0:
         sheet.range(currentcellrange).color = 173, 216, 230
     else:
         sheet.range(currentcellrange).color = 221, 245, 250
+    #单独处理颜色参数以及截图参数
     for  key, value  in kwargs.items():
         if key=="color":
             sheet.range(currentcellrange).color=value

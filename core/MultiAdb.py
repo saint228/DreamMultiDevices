@@ -22,6 +22,12 @@ adb = ADB().adb_path
 #同文件内用queue进行线程通信
 q = queue.Queue()
 
+'''
+MultiAdb类封装了所有与设备有关的方法。
+大部分方法都单独写了注释。
+
+'''
+
 class MultiAdb:
 
     def __init__(self,mdevice=""):
@@ -341,7 +347,7 @@ class MultiAdb:
     #判断给定设备运行指定apk时的内存占用
     def get_allocated_memory(self):
         command=adb + " -s {} shell dumpsys meminfo {}".format(self.get_mdevice(),self.get_packagename())
-        print(command)
+        #print(command)
         memory=os.popen(command)
         list=[]
         for line in memory:
@@ -359,7 +365,7 @@ class MultiAdb:
     #判断给定设备运行时的内存总占用
     def get_totalmemory(self):
         command = adb + " -s {} shell dumpsys meminfo ".format(self.get_mdevice())
-        print(command)
+        #print(command)
         memory=os.popen(command)
         TotalRAM=0
         for line in memory:
@@ -377,7 +383,7 @@ class MultiAdb:
     #判断给定设备运行时的空闲内存
     def get_freememory(self):
         command = adb + " -s {} shell dumpsys meminfo ".format(self.get_mdevice())
-        print(command)
+        #print(command)
         memory = os.popen(command)
         FreeRAM=0
         for line in memory:
@@ -395,7 +401,7 @@ class MultiAdb:
     #判断给定设备运行时的总使用内存
     def get_usedmemory(self):
         command = adb + " -s {} shell dumpsys meminfo ".format(self.get_mdevice())
-        print(command)
+        #print(command)
         memory = os.popen(command)
         UsedRAM=0
         for line in memory:
@@ -413,7 +419,7 @@ class MultiAdb:
     #判断给定设备运行时的Total/Free/Used内存,一次dump，加快获取速度
     def get_memoryinfo(self):
         command = adb + " -s {} shell dumpsys meminfo ".format(self.get_mdevice())
-        print(command)
+        #print(command)
         memory = os.popen(command)
         androidversion=self.get_androidversion()
         for line in memory:
@@ -440,14 +446,15 @@ class MultiAdb:
     #判断给定设备运行时的总CPU占用。部分手机在安卓8以后多内核会分别显示CPU占用，这里统一除以内核数。
     def get_totalcpu(self):
         command = adb + " -s {} shell top -n 1 ".format(self.get_mdevice())
-        print(command)
+        #print(command)
         commandresult =os.popen(command)
         cputotal=0
         andversion=self.get_androidversion()
         maxcpu=1
+        #ABI判断设备的内核型号，对一般安卓手机来说，基本都是ARM，但对模拟器来说，内核一般是X86。可以用这个值来判断真机或模拟器。
         ABIcommand = adb + " -s {} shell getprop ro.product.cpu.abi".format(self.get_mdevice())
         ABI = os.popen(ABIcommand).read().strip()
-
+        #逐行分析adbdump，根据不同的版本解析返回结果集，获得相应的cpu数据。
         for line in commandresult:
             list=line.strip().split(" ")
             while '' in list:
@@ -473,16 +480,19 @@ class MultiAdb:
                         idlecpu= list[4]
                         cputotal=int(maxcpu.split("%")[0])-int(idlecpu.split("%")[0])
                         maxcpu=int(int(maxcpu.split("%")[0])/100)
+        #由于cputotal在安卓7以下的adbdump里，无法通过Total-Idle获得，只能通过各个进程的CPU占用率累加，故有可能因四舍五入导致总和超过100%。当这种情况发生，则手动将cputotal置为100%。
+        if cputotal>100:
+            cputotal=100
         q.put(cputotal,maxcpu)
         return  cputotal,maxcpu
-    touch
+
     #判断给定设备运行时的总使用CPU
     def get_allocated_cpu(self):
         start=time.time()
         #包名过长时，包名会在adbdump里被折叠显示，所以需要提前将包名压缩，取其前11位基本可以保证不被压缩也不被混淆
         packagename=self.get_packagename()[0:11]
         command = adb + " -s {} shell top -n 1 |findstr {} ".format(self.get_mdevice(),packagename)
-        print(command)
+        #print(command)
         subresult= os.popen(command).read()
         version=self.get_androidversion()
         if subresult == "" :
@@ -518,7 +528,7 @@ class MultiAdb:
         elif androidversion>7:
             command = adb + " -s {} shell \"dumpsys SurfaceFlinger --latency 'SurfaceView - {}/{}#0'\"".format(device, package, activity)
             #command= adb + " -s {} shell \"dumpsys SurfaceFlinger --latency\"".format(device)
-        print(command)
+        #print(command)
         results=os.popen(command)
         if not results:
             print("nothing")

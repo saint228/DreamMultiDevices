@@ -7,7 +7,9 @@ import time
 import json
 import numpy as np
 
-
+'''
+生成一个json文件用来存储每次性能测试的数据
+'''
 def create_log_json(nowtime,device):
     create_time = time.strftime("%m%d%H%M", nowtime)
     jsonfile = create_time + "_" + device + "_log.json"
@@ -29,7 +31,9 @@ def create_log_json(nowtime,device):
     f.write(json.dumps(resultData))
     f.close()
     return jsonfile
-
+'''
+由于highcharts绘图需要浮点数，在记录到json前，先强制将所有的性能数据格式化一下。
+'''
 def  record_to_json(jsonfilepath,list):
     for i in range(len(list)):
         if list[i] =="N/a":
@@ -41,9 +45,9 @@ def  record_to_json(jsonfilepath,list):
     list[5]=float(list[5])
     list[6]=float(list[6])
     list[7]=float(list[7])
-    print("list=",list)
     f = open(jsonfilepath, "r+")
     strdata=f.read()
+    #将文件输入点定位到文件头，每次用最新数据覆盖老数据。
     f.seek(0)
     dictdata=json.loads(strdata)
     dictdata["Time_series"].append(list[0])
@@ -59,6 +63,9 @@ def  record_to_json(jsonfilepath,list):
     f.write(strdata)
     f.close()
 
+'''
+类似excel的统计函数，计算各个字段的最大、最小、平均值。然后写回文件。
+'''
 def calculate_by_json(jsonfile):
     f = open(jsonfile, "r+")
     strdata=f.read()

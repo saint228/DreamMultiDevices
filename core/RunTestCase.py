@@ -18,7 +18,7 @@ def RunTestCase(madb,start):
     # 获取路径
     package = madb.get_packagename()
     TestCasePath = madb.get_TestCasePath()
-    print("TestCasePath=",TestCasePath)
+    #print("TestCasePath=",TestCasePath)
     if not os.path.exists(TestCasePath):
         print("测试用例需放到‘TestCase’文件目录下")
     reportpath = os.path.join(os.getcwd(), "Report")
@@ -30,9 +30,8 @@ def RunTestCase(madb,start):
     suite = unittest.TestSuite()
     for i in range(len(TestList)):
         fileName = "TC_" + TestList[i]
-        print("fileName=",fileName)
+        #print("fileName=",fileName)
         if fileName in scriptList:
-            print("进入循环")
             #在整个命名空间里遍历所有名称为"TC_xx.py"形式的文件，默认这些文件都是unittest测试文件，然后调用其Main函数。
             result = globals()[fileName].Main(devices)
             suite.addTests(result)

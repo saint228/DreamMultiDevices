@@ -15,20 +15,16 @@ import json
 from collections import deque
 
 '''
-performance_print = print
-def print(*args, **kwargs):
-    performance_print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
+性能数据进程，首先根据storage_by_excel参数创建excel或json文件，再定期塞数据进去，最后统计各项的最大最小平均值。
 '''
 def enter_performance(madb,flag,start,storage_by_excel=True):
     print("设备{}进入enter_performance方法".format(madb.get_mdevice()))
     wb=""
     jsonfilepath=""
-    print("storage_by_excel",storage_by_excel)
     if storage_by_excel:
         #创表
         filepath, sheet, wb = create_log_excel(time.localtime(), madb.get_nickname())
         #塞数据
-        #flag = Value('i', 0)
         collect_data(madb,flag,storage_by_excel,sheet=sheet)
         #计算各平均值最大值最小值等并塞数据
         avglist,maxlist,minlist=calculate(sheet)
@@ -125,6 +121,7 @@ def collect_data(madb,flag,storage_by_excel,sheet="",jsonfilepath="",timeout=360
                 else:
                     list = ["'" + inputtime, total, allocated, used, free, format(totalcpu / maxcpu,"0.2f")+"%", format(float(allocatedcpu)/maxcpu,"0.2f")+"%", fps]
                 record_to_excel(sheet,list,png=png)
+            # 将性能数据填充到一个数组里，塞进json
             else:
                 if allocatedcpu == "N/a":
                     list = [inputtime, total, allocated, used, free, float(format(float(totalcpu)/maxcpu,".2f")),0, fps, png]
@@ -153,10 +150,11 @@ class MyThread(threading.Thread):
             print( traceback.format_exc())
             return None
 
-
+'''
+小T写的。编辑由BR生成的html文件，将功能与性能整合成一个html。
+'''
 def EditReport(origin_html_path,storage_by_excelavglist,avglist="",maxlist="",minlist="",wb="",jsonfilepath=""):
     #取项目的绝对路径
-
     rootPath = os.path.abspath(os.path.dirname(inspect.getfile(inspect.currentframe())) + os.path.sep + ".")
     templatePath= os.path.join(rootPath, "template")
     # 读取报告文件
@@ -201,7 +199,7 @@ def EditReport(origin_html_path,storage_by_excelavglist,avglist="",maxlist="",mi
     Max_AllocatedMemory=Min_AllocatedMemory=Avg_AllocatedMemory=Max_AllocatedCPU=Min_AllocatedCPU=Avg_AllocatedCPU=Max_FPS=Min_FPS=Avg_FPS=0
     data_count=""
     if storage_by_excelavglist:
-        # 嵌入性能测试结果
+        # 嵌入性能测试结果到excel
         sheet = wb.sheets("Sheet1")
         Time_series=get_json(sheet,"Time")
         TotalMemory=get_json(sheet,"TotalMemory(MB)")
@@ -227,7 +225,7 @@ def EditReport(origin_html_path,storage_by_excelavglist,avglist="",maxlist="",mi
                       "Max_FPS": [Max_FPS],
                       "Min_FPS": [Min_FPS], "Avg_FPS": [Avg_FPS]}
         data_count = "\n" + "var data_count=" + json.dumps(data_count)
-
+        # 嵌入性能测试结果到json
     else:
         jsonfilepath=(os.getcwd() + "\\" + jsonfilepath)
         jsondata = open(jsonfilepath, "r+", encoding='UTF-8')
@@ -244,7 +242,7 @@ def EditReport(origin_html_path,storage_by_excelavglist,avglist="",maxlist="",mi
         data_count=json.dumps(jsondata["data_count"])
         data_count=data_count[1:-1]
         data_count = "\n" + "var data_count=" + data_count
-
+    #data_series和data_count会被嵌入到html里，作为highcharts的数据源。
     data_series = Time_series + "\n" + "var TotalMemory=" + TotalMemory + "\n" + "var AllocatedMemory=" + AllocatedMemory + "\n" + "var UsedMemory=" + UsedMemory + "\n" + "var FreeMemory=" \
                   + FreeMemory + "\n" + "var TotalCPU=" + TotalCPU + "\n" + "var AllocatedCPU=" + AllocatedCPU + "\n" + "var FPS=" + FPS + "\n" + "var PNG=" + PNG + "\n"
     fr_prev, fr_next = GetHtmlContent(fr, "// tag data", False, 1)
@@ -259,7 +257,7 @@ def EditReport(origin_html_path,storage_by_excelavglist,avglist="",maxlist="",mi
 
     return newPath
 
-# 获取需要插入性能图表的节点
+# 小T写的。获取需要插入性能图表的节点，reverse参数决定了从左数还是从右数，然后将html拆成2分，方便填标签。很有趣的思路。
 def GetHtmlContent(content, tag, reverse=False, round_num=1):
     fr_r_index = ""
     if reverse:
