@@ -6,7 +6,7 @@
 
 
 1.本框架由无声andTreize编写，落落测试。
-须事先安装如下环境：python3.6以上、airtest、pocoui、BeautifulReport、unittest、xlwings。
+须事先安装如下环境：python3.6以上、airtest、pocoui、BeautifulReport、unittest、xlwings(如果你想使用Excel储存性能数据的话)。
 安装方法
     
     pip install DreamMultiDevices
@@ -30,18 +30,33 @@
     
     [config]
     packName填写待测试包名，str；
+    activityname 填写测试包的入口类名，留空的话，Madb也会在需要时自动计算，可能会多花一点时间。
     deviceslist填写测试设备名，以逗号分隔，（PS：如不想使用配置，留空即可，则读取当前所有已连接的设备）元组；
     apkpath填写待测试应用的安装地址，须使用绝对路径，str；
     testcase填写期望测试的用例id，须是一个int元组，RunTestCase函数会比对testcase元组与TestCase目录下的TC_*.py文件，在元组内的用例才会被测试；
     needclickinstall和needclickstartapp 填写True或False，设置是否需要安装点击或运行点击，不为True则不执行；
-    timeoutperaction填写全局sleep时间，int；
-    timeoutofstartapp填写安装app等待时间，int；
+    timeout_of_per_action填写全局sleep时间，int；
+    timeout_of_startapp填写安装app等待时间，int（已废弃）；
     iteration填写权限脚本循环次数，int。
     needPerformance填写是否需要同步进行性能监控，填写True或False，不为True则不执行。
+    
+    skip_pushapk2devices填写“是否跳过pushapk2devices函数”的标志，1为True 0为False，以下同。
+    auto_delete_package填写“是否在安装包过程中自动删除设备里的旧包”的标志。
+    auto_install_package填写“是否需要重新安装新包”的标志。
+    skip_check_of_install填写“是否要跳过安装过程中的自动输入权限检查部分”的标志。
+    skip_check_of_startapp填写“是否要跳过安装过程中的自动输入权限检查部分”的标志。
+    skip_performance填写“是否要跳过性能监控部分”的标志。
+    storage_by_excel填写“是否使用excel存储性能数据”的标志，填1为使用excel，填0为使用json。
     
     [TestCaseforDevice]
     按设备配置执行用例，不填则默认全部
     
+    [Email]
+    mail_host 邮件host地址
+    mail_user 邮件账户名
+    mail_pass 邮件密码
+    sender    邮件发件人
+    receivers 邮件收件人
         
 3./start.py。可以使用pycharm运行，也可以被其他方法调用运行。
 
