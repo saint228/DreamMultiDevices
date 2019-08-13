@@ -3,7 +3,7 @@
 
 欢迎加入QQ群：739857090 一起讨论。
 
- 图片太大，点这里(https://github.com/saint228/DreamMultiDevices/tree/master/template/框架.gif)查看效果动画。
+ 图片太大，点这里(https://github.com/saint228/DreamMultiDevices/tree/master/template/框架.gif) 查看效果动画。
 
 
 
