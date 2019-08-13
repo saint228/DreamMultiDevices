@@ -467,6 +467,12 @@ class MultiAdb:
                             cputotal=cputotal+cpu
                         else:
                             break
+                if andversion < 7 and ABI == "x86":
+                    if "%cpu" in list[0]:
+                        maxcpu = list[0]
+                        idlecpu = list[4]
+                        cputotal = int(maxcpu.split("%")[0]) - int(idlecpu.split("%")[0])
+                        maxcpu = int(int(maxcpu.split("%")[0]) / 100)
                 elif andversion ==7 and  ABI != "x86":
                     if ("%" in list[4] and list[4] != "CPU%"):
                         cpu = int(list[4][:-1])
@@ -474,6 +480,12 @@ class MultiAdb:
                             cputotal = cputotal + cpu
                         else:
                             break
+                elif andversion == 7 and ABI == "x86":
+                    if "%cpu" in list[0]:
+                        maxcpu = list[0]
+                        idlecpu = list[4]
+                        cputotal = int(maxcpu.split("%")[0]) - int(idlecpu.split("%")[0])
+                        maxcpu = int(int(maxcpu.split("%")[0]) / 100)
                 elif andversion >7 and  ABI != "x86":
                     if "%cpu" in list[0]:
                         maxcpu = list[0]
@@ -489,6 +501,8 @@ class MultiAdb:
     #判断给定设备运行时的总使用CPU
     def get_allocated_cpu(self):
         start=time.time()
+        ABIcommand = adb + " -s {} shell getprop ro.product.cpu.abi".format(self.get_mdevice())
+        ABI = os.popen(ABIcommand).read().strip()
         #包名过长时，包名会在adbdump里被折叠显示，所以需要提前将包名压缩，取其前11位基本可以保证不被压缩也不被混淆
         packagename=self.get_packagename()[0:11]
         command = adb + " -s {} shell top -n 1 |findstr {} ".format(self.get_mdevice(),packagename)
@@ -505,10 +519,14 @@ class MultiAdb:
                 cpuresult.remove('')
             #print(self.get_mdevice(),"cpuresult=",cpuresult)
             cpu=""
-            if version<7:
+            if version<7 and ABI!="x86":
                 cpu = cpuresult[2].split("%")[0]
-            elif version ==7:
+            if version < 7 and ABI== "x86":
+                cpu = cpuresult[8]
+            elif version ==7 and ABI!="x86":
                 cpu=cpuresult[4].split("%")[0]
+            elif version ==7 and ABI=="x86":
+                cpu=cpuresult[8]
             elif version>7:
                 cpu = cpuresult[8]
             q.put(cpu)
@@ -528,7 +546,7 @@ class MultiAdb:
         elif androidversion>7:
             command = adb + " -s {} shell \"dumpsys SurfaceFlinger --latency 'SurfaceView - {}/{}#0'\"".format(device, package, activity)
             #command= adb + " -s {} shell \"dumpsys SurfaceFlinger --latency\"".format(device)
-        #print(command)
+        print(command)
         results=os.popen(command)
         if not results:
             print("nothing")
