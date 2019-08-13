@@ -3,6 +3,8 @@
 
 欢迎加入QQ群：739857090 一起讨论。
 
+ ![image](https://github.com/saint228/DreamMultiDevices/tree/master/template/框架.gif)
+
 
 
 1.本框架由无声andTreize编写，落落测试。
