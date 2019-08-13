@@ -3,7 +3,7 @@
 
 欢迎加入QQ群：739857090 一起讨论。
 
- 图片太大，点这里(https://github.com/saint228/DreamMultiDevices/tree/master/template/框架.gif) 查看效果动画。
+ 图片太大，点这里![](template/框架.gif) 查看效果动画。
 
 
 
@@ -89,4 +89,4 @@
 
 以前我一直对打赏这种行为不屑一顾，但真正得收到社区成员千翻百计找到我的打赏码给我打赏的时候还是很开心，感觉工作得到大家的认可，真的很开心。我也有时候会打赏别人，让激动的心情有了发泄的出口。 请不要打赏太多，知道了你们的心意就好了。我将会用收到的money通通拿来去楼下自动售货机买饮料。^_^
 [![ZJ2zm4.png](https://s2.ax1x.com/2019/07/02/ZJ2zm4.png)](https://imgchr.com/i/ZJ2zm4)
-![image](https://github.com/saint228/DreamMultiDevices/tree/master/template/赞赏码.png)
+![image](template/赞赏码.png)
