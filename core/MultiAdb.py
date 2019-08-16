@@ -608,8 +608,36 @@ class MultiAdb:
                           deltas)
 
         return (list(deltas), [delta / refresh_period for delta in deltas])
+    
+
+    def setScreenOFF(device):
+        platform = sys.platform
+        # setScreenON(device)
+        if platform == "win32":
+            command1 = "adb -s {}  shell dumpsys window policy|findstr mScreenOnFully".format(device)
+        else:
+            command1 = "adb -s {}  shell dumpsys window policy|grep mScreenOnFully".format(device)
+        print(command1)
+        result = os.popen(command1)
+        line = result.read()
+        if "mScreenOnEarly=false" in line:
+            pass
+        else:
+            command2 = "adb -s {}  shell input keyevent 26".format(device)
+            os.popen(command2)
+        off = True
+        while off:
+            result = os.popen(command1)
+            line = result.read()
+            if "mScreenOnEarly=true" in line:
+                os.popen(command2)
+                time.sleep(2)
+            else:
+                off = False
+        print(device, "has been ScreenOFF")
 
 if __name__=="__main__":
+    '''
     #android 9
     madb1=MultiAdb("172.16.6.82:7413")
     print("total1=",madb1.get_totalcpu())
@@ -622,6 +650,12 @@ if __name__=="__main__":
     #android 6
     madb4=MultiAdb("172.16.6.82:7441")
     print("total4=",madb4.get_totalcpu())
+    '''
+    print(sys.platform)
+    madb=MultiAdb("cbe9d630")
+    madb.setScreenON()
+    sleep(5)
+    madb.setScreenOFF()
 
 
 

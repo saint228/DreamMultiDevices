@@ -77,11 +77,12 @@ def main():
     else:
         print("未找到设备，测试结束")
     mailtext="自动化测试完毕"
+    '''
     try:
         sendemail(mailtext)
     except Exception as e:
         print("邮件发送失败"+  traceback.format_exc())
-
+    '''
 '''
 功能进程模块
 首先调用airtest库的方法进行设备连接并初始化，然后读取配表，进行应用的安装、启动、权限点击等操作。同步的操作会分由线程来完成。
@@ -135,6 +136,7 @@ def enter_processing(processNo,madb,flag,start):
         print( "连接设备{}失败".format(devices)+ traceback.format_exc())
     #无论结果如何，将flag置为1，通知Performance停止记录。
     flag.value = 1
+    madb.setScreenOFF(madb.get_mdevice())
 
 
 
