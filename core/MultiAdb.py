@@ -629,7 +629,7 @@ class MultiAdb:
             os.popen(command2)
         off = True
         n=0
-        while off or n>10:
+        while off or n<10:
             result = os.popen(command1)
             line = result.read()
             if "mScreenOnEarly=true" in line:
