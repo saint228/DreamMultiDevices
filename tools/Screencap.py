@@ -32,6 +32,7 @@ def  GetScreen(starttime,devices,action):
 #用ADBCAP的方法截图
 def GetScreenbyADBCap(starttime,devices,action):
     #先给昵称赋值，防止生成图片的命名格式问题。
+
     if ":" in devices:
         nickname = devices.split(":")[1]
     else:

@@ -610,8 +610,10 @@ class MultiAdb:
         return (list(deltas), [delta / refresh_period for delta in deltas])
     
 
-    def setScreenOFF(device):
+    def setScreenOFF(self):
         platform = sys.platform
+        device=self.get_mdevice()
+        command1=command2=""
         # setScreenON(device)
         if platform == "win32":
             command1 = "adb -s {}  shell dumpsys window policy|findstr mScreenOnFully".format(device)
@@ -626,12 +628,14 @@ class MultiAdb:
             command2 = "adb -s {}  shell input keyevent 26".format(device)
             os.popen(command2)
         off = True
-        while off:
+        n=0
+        while off or n>10:
             result = os.popen(command1)
             line = result.read()
             if "mScreenOnEarly=true" in line:
                 os.popen(command2)
                 time.sleep(2)
+                n+=1
             else:
                 off = False
         print(device, "has been ScreenOFF")

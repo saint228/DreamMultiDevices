@@ -136,7 +136,12 @@ def enter_processing(processNo,madb,flag,start):
         print( "连接设备{}失败".format(devices)+ traceback.format_exc())
     #无论结果如何，将flag置为1，通知Performance停止记录。
     flag.value = 1
-    madb.setScreenOFF(madb.get_mdevice())
+    madb.setScreenOFF()
+
+if __name__ == "__main__":
+    madb=Madb("172.16.6.82:20484")
+    madb.setScreenOFF()
+
 
 
 
