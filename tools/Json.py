@@ -86,9 +86,12 @@ def calculate_by_json(jsonfile):
     Max_AllocatedCPU=max(cpulist)
     Min_AllocatedCPU=min(cpulist)
     Avg_AllocatedCPU=format(np.average(cpulist),".2f")
-    Max_FPS=max(fpslist)
-    Min_FPS=min(fpslist)
-    Avg_FPS=format(np.average(fpslist),".2f")
+    Max_FPS=Min_FPS=Avg_FPS="N/a"
+    #防止对某些应用或某些机型，因取不到fps导致max函数报错因而中断流程的问题。
+    if len(fpslist)!=0:
+        Max_FPS=max(fpslist)
+        Min_FPS=min(fpslist)
+        Avg_FPS=format(np.average(fpslist),".2f")
     dictdata["data_count"].append({"Max_AllocatedMemory": [Max_AllocatedMemory], "Min_AllocatedMemory": [Min_AllocatedMemory], "Avg_AllocatedMemory": [Avg_AllocatedMemory], "Max_AllocatedCPU": [str(Max_AllocatedCPU)+"%"], "Min_AllocatedCPU": [str(Min_AllocatedCPU)+"%"], "Avg_AllocatedCPU": [str(Avg_AllocatedCPU)+"%"], "Max_FPS": [Max_FPS], "Min_FPS": [Min_FPS], "Avg_FPS": [Avg_FPS]})
     strdata=json.dumps(dictdata)
     print("strdata=",strdata)
