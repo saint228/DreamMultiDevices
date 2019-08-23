@@ -532,8 +532,18 @@ class MultiAdb:
             q.put(cpu)
             return cpu
 
+    def get_fps(self,SurfaceView=True):
+        if SurfaceView:
+            self.get_fps_SurfaceView()
+        else:
+            self.get_fps_gfxinfo()
+
+    def get_fps_gfxinfo(self):
+        pass
+
+
     #算法提取自 https://github.com/ChromiumWebApps/chromium/tree/master/build/android/pylib
-    def get_fps(self):
+    def get_fps_SurfaceView(self):
         device=self.get_mdevice()
         package=self.get_packagename()
         activity=self.get_activityname()
