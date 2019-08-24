@@ -650,6 +650,43 @@ class MultiAdb:
                 off = False
         print(device, "has been ScreenOFF")
 
+    def check_device(self):
+        ABIcommand = adb + " -s {} shell getprop ro.product.cpu.abi".format(self.get_mdevice())
+        ABI = os.popen(ABIcommand).read().strip()
+        versioncommand=adb+" -s {} shell getprop ro.build.version.release  ".format(self.get_mdevice())
+        version=os.popen(versioncommand).read()[0]
+        devicenamecommand = adb + " -s {} shell getprop ro.product.model".format(self.get_mdevice())
+        devicename=os.popen(devicenamecommand).read().strip()
+        batterycommand=adb+  " -s {} shell dumpsys battery".format(self.get_mdevice())
+        battery=os.popen(batterycommand)
+        for line in battery:
+            if "level:" in line:
+                battery=line.split(":")[1].strip()
+                break
+        wmsizecommand = adb + " -s {} shell wm size".format(self.get_mdevice())
+        size = os.popen(wmsizecommand).read().strip()
+        size = size.split(":")[1].strip()
+        DPIcommand= adb+ " -s {}  shell wm density".format(self.get_mdevice())
+        dpi = os.popen(DPIcommand).read().strip()
+        if "Override density" in dpi:
+            dpi= dpi.split(":")[2].strip()
+        else:
+            dpi = dpi.split(":")[1].strip()
+        serialno_command= adb + " -s {} get-serialno".format(self.get_mdevice())
+        serialno=os.popen(serialno_command).read().strip()
+        mac_address_command = adb + " -s {}  shell cat /sys/class/net/wlan0/address".format(self.get_mdevice())
+        mac_address=os.popen(mac_address_command).read().strip()
+        if "Permission denied" in mac_address:
+            mac_address="Permission denied"
+        typecommand= adb + " -s {}  shell getprop ro.product.model".format(self.get_mdevice())
+        typename=os.popen(typecommand).read().strip()
+        brandcommand= adb + " -s {}  shell getprop ro.product.brand".format(self.get_mdevice())
+        brand=os.popen(brandcommand).read().strip()
+        namecommand=adb + " -s {} shell getprop ro.product.name".format(self.get_mdevice())
+        name=os.popen(namecommand).read().strip()
+        deviceinfo={"ABI":ABI,"VERSION":version,"DEVICENAME":devicename,"BATTERY":battery,"VMSIZE":size,"DPI":dpi,"SERIAL_NO":serialno,"MAC_ADDRESS":mac_address,"TYPE":typename,"BRAND":brand,"NAME":name}
+        return  deviceinfo
+
 if __name__=="__main__":
     '''
     #android 9
@@ -665,11 +702,11 @@ if __name__=="__main__":
     madb4=MultiAdb("172.16.6.82:7441")
     print("total4=",madb4.get_totalcpu())
     '''
-    print(sys.platform)
-    madb=MultiAdb("cbe9d630")
-    madb.setScreenON()
-    sleep(5)
-    madb.setScreenOFF()
+    devicesList = MultiAdb().getdevices()
+    print("最终的devicesList=",devicesList)
+    for device in devicesList:
+        madb=MultiAdb(device)
+        print(madb.check_device())
 
 
 
