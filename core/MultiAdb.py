@@ -654,7 +654,7 @@ class MultiAdb:
         ABIcommand = adb + " -s {} shell getprop ro.product.cpu.abi".format(self.get_mdevice())
         ABI = os.popen(ABIcommand).read().strip()
         versioncommand=adb+" -s {} shell getprop ro.build.version.release  ".format(self.get_mdevice())
-        version=os.popen(versioncommand).read()[0]
+        version=os.popen(versioncommand).read().strip()
         devicenamecommand = adb + " -s {} shell getprop ro.product.model".format(self.get_mdevice())
         devicename=os.popen(devicenamecommand).read().strip()
         batterycommand=adb+  " -s {} shell dumpsys battery".format(self.get_mdevice())
@@ -672,8 +672,8 @@ class MultiAdb:
             dpi= dpi.split(":")[2].strip()
         else:
             dpi = dpi.split(":")[1].strip()
-        serialno_command= adb + " -s {} get-serialno".format(self.get_mdevice())
-        serialno=os.popen(serialno_command).read().strip()
+        android_id_command= adb + " -s {} shell  settings get secure android_id ".format(self.get_mdevice())
+        android_id=os.popen(android_id_command).read().strip()
         mac_address_command = adb + " -s {}  shell cat /sys/class/net/wlan0/address".format(self.get_mdevice())
         mac_address=os.popen(mac_address_command).read().strip()
         if "Permission denied" in mac_address:
@@ -684,7 +684,10 @@ class MultiAdb:
         brand=os.popen(brandcommand).read().strip()
         namecommand=adb + " -s {} shell getprop ro.product.name".format(self.get_mdevice())
         name=os.popen(namecommand).read().strip()
-        deviceinfo={"ABI":ABI,"VERSION":version,"DEVICENAME":devicename,"BATTERY":battery,"VMSIZE":size,"DPI":dpi,"SERIAL_NO":serialno,"MAC_ADDRESS":mac_address,"TYPE":typename,"BRAND":brand,"NAME":name}
+        core_command = adb + " -s {} shell cat /sys/devices/system/cpu/present".format(self.get_mdevice())
+        core_num=os.popen(core_command).read().strip()[2]
+        core_num=int(core_num)+1
+        deviceinfo={"ABI":ABI,"VERSION":version,"DEVICENAME":devicename,"BATTERY":battery,"VMSIZE":size,"DPI":dpi,"ANDROID_ID":android_id,"MAC_ADDRESS":mac_address,"TYPE":typename,"BRAND":brand,"NAME":name,"CORE_NUM":core_num}
         return  deviceinfo
 
 if __name__=="__main__":

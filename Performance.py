@@ -21,6 +21,8 @@ def enter_performance(madb,flag,start,storage_by_excel=True):
     print("设备{}进入enter_performance方法".format(madb.get_mdevice()))
     wb=""
     jsonfilepath=""
+    devicesinfo=madb.check_device()
+
     if storage_by_excel:
         #创表
         filepath, sheet, wb = create_log_excel(time.localtime(), madb.get_nickname())
