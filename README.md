@@ -8,7 +8,7 @@
 
 
 
-1.本框架由无声andTreize编写，落落测试。
+1.本框架由无声 and Treize编写，落落 and 人生如梦 测试。
 须事先安装如下环境：python3.6以上、airtest、pocoui、BeautifulReport、unittest、xlwings(如果你想使用Excel储存性能数据的话)。
 安装方法
     
