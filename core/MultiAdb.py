@@ -534,12 +534,14 @@ class MultiAdb:
 
     def get_fps(self,SurfaceView=True):
         if SurfaceView:
-            self.get_fps_SurfaceView()
+            fps=self.get_fps_SurfaceView()
         else:
-            self.get_fps_gfxinfo()
+            fps= self.get_fps_gfxinfo()
+        return  fps
 
     def get_fps_gfxinfo(self):
-        pass
+        fps=0
+        return fps
 
 
     #算法提取自 https://github.com/ChromiumWebApps/chromium/tree/master/build/android/pylib
