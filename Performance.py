@@ -229,7 +229,7 @@ def EditReport(origin_html_path,storage_by_excelavglist,avglist="",maxlist="",mi
         data_count = "\n" + "var data_count=" + json.dumps(data_count)
         # 嵌入性能测试结果到json
     else:
-        jsonfilepath=(os.getcwd() + "\\" + jsonfilepath)
+        jsonfilepath=(jsonfilepath)
         jsondata = open(jsonfilepath, "r+", encoding='UTF-8')
         jsondata = json.load(jsondata)
         Time_series=json.dumps({"Time":jsondata["Time_series"]})

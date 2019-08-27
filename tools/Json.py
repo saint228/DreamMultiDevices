@@ -10,9 +10,13 @@ import numpy as np
 '''
 生成一个json文件用来存储每次性能测试的数据
 '''
+
+reportpath = os.path.join(os.getcwd(), "Report")
+datapath=os.path.join(reportpath, "Data")
+
 def create_log_json(nowtime,device):
     create_time = time.strftime("%m%d%H%M", nowtime)
-    jsonfile = create_time + "_" + device + "_log.json"
+    jsonfile =datapath+"\\"+ create_time + "_" + device + "_log.json"
     if os.path.exists(jsonfile):
         raise Exception( "FileHasExisted")
     f = open(jsonfile, "w")

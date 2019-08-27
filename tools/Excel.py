@@ -9,10 +9,13 @@ import json
 '''
 每次都会生成一个空的sheet1，换了好几种初始化方式都无效，不知道为什么，谁xlwings玩得溜的求告知。
 '''
+reportpath = os.path.join(os.getcwd(), "Report")
+datapath=os.path.join(reportpath, "Data")
+
 #创建一个log_excel用以记录性能数据
 def create_log_excel(nowtime,device):
     create_time=time.strftime("%m%d%H%M", nowtime)
-    exclefile = create_time+ "_"+ device + "_log.xlsx"
+    exclefile = datapath+"\\"+create_time+ "_"+ device + "_log.xlsx"
     app = xw.App(visible=True, add_book=False)
     wb = app.books.add()
     sheet = wb.sheets.active
