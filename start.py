@@ -8,5 +8,6 @@ def start():
 
 #从根目录启动，确保相对路径调用正常
 if __name__ == '__main__':
+    os.popen("adb start-server")
     start()
 
