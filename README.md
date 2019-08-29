@@ -14,15 +14,13 @@
     
     pip install DreamMultiDevices
 
-使用下列命令初始化配置，初始化只需要一次，会存储在config.ini中：
+第一次运行前需要手动修改config.ini，里面的包名和包路径是必填项，也支持在运行过程中通过set方式修改。
 
-    from DreamMultiDevices.core.MultiAdb import *
-    madb=MultiAdb()
     madb.set_packagename("")#填待测apk的包名
     madb.set_packagepath("")#填待测apk在硬盘上的绝对路径
     madb.set_TestCasePath("")#填本地测试用例目录的绝对路径
     
-调用方法
+程序入口
 
     from DreamMultiDevices.start import *
     
@@ -41,7 +39,6 @@
     timeout_of_per_action填写全局sleep时间，int；
     timeout_of_startapp填写安装app等待时间，int（已废弃）；
     iteration填写权限脚本循环次数，int。
-    needPerformance填写是否需要同步进行性能监控，填写True或False，不为True则不执行。
     
     skip_pushapk2devices填写“是否跳过pushapk2devices函数”的标志，1为True 0为False，以下同。
     auto_delete_package填写“是否在安装包过程中自动删除设备里的旧包”的标志。
