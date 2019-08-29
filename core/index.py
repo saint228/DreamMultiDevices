@@ -9,6 +9,7 @@ from poco.exceptions import *
 from airtest.core.api import *
 from DreamMultiDevices.core import RunTestCase
 from DreamMultiDevices.tools.Email import *
+from DreamMultiDevices.tools.ScreenOFF import *
 import traceback
 from DreamMultiDevices.Performance import *
 
@@ -69,6 +70,12 @@ def main():
                 p.join()
             print("进程回收完毕")
             print("测试结束")
+            screenoff=Madb().get_screenoff()
+            screenoff = True if screenoff == "1" else False
+            if screenoff:
+                for i in devicesList:
+                    setScreenOFF(i)
+                    print("设备{}已灭屏".format(i))
         except AirtestError as ae:
             print("Airtest发生错误" + traceback.format_exc())
         except PocoException as pe:
@@ -137,11 +144,16 @@ def enter_processing(processNo,madb,flag,start):
         print( "连接设备{}失败".format(devices)+ traceback.format_exc())
     #无论结果如何，将flag置为1，通知Performance停止记录。
     flag.value = 1
-    madb.setScreenOFF()
+
 
 if __name__ == "__main__":
-    madb=Madb("172.16.6.82:20484")
-    madb.setScreenOFF()
+    screenoff = Madb().get_screenoff()
+    screenoff = True if screenoff == "1" else False
+    devicesList = Madb().getdevices()
+    if screenoff:
+        for i in devicesList:
+            setScreenOFF(i)
+            print("设备{}已灭屏".format(i))
 
 
 

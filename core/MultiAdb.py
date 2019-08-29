@@ -47,6 +47,7 @@ class MultiAdb:
         self._skip_check_of_startapp = Config.getValue(self._configPath, "skip_check_of_startapp")[0]
         self._skip_performance=Config.getValue(self._configPath,"skip_performance")[0]
         self._storage_by_excel=Config.getValue(self._configPath,"storage_by_excel")[0]
+        self._screenoff=Config.getValue(self._configPath,"screenoff")[0]
         self._startTime=time.time()
         self._timeout_of_per_action=int(Config.getValue(self._configPath, "timeout_of_per_action")[0])
         self._timeout_of_startapp=int(Config.getValue(self._configPath, "timeout_of_startapp")[0])
@@ -146,6 +147,10 @@ class MultiAdb:
     #获取是否需要用excel来存储性能数据
     def get_storage_by_excel(self):
         return self._storage_by_excel
+
+    #获取是否需要在测试结束以后灭屏
+    def get_screenoff(self):
+        return self._screenoff
 
     #修改当前设备的方法
     def set_mdevice(self,device):
@@ -622,35 +627,7 @@ class MultiAdb:
         return (list(deltas), [delta / refresh_period for delta in deltas])
     
 
-    def setScreenOFF(self):
-        platform = sys.platform
-        device=self.get_mdevice()
-        command1=command2=""
-        # setScreenON(device)
-        if platform == "win32":
-            command1 = "adb -s {}  shell dumpsys window policy|findstr mScreenOnFully".format(device)
-        else:
-            command1 = "adb -s {}  shell dumpsys window policy|grep mScreenOnFully".format(device)
-        print(command1)
-        result = os.popen(command1)
-        line = result.read()
-        if "mScreenOnEarly=false" in line:
-            pass
-        else:
-            command2 = "adb -s {}  shell input keyevent 26".format(device)
-            os.popen(command2)
-        off = True
-        n=0
-        while off or n<10:
-            result = os.popen(command1)
-            line = result.read()
-            if "mScreenOnEarly=true" in line:
-                os.popen(command2)
-                time.sleep(2)
-                n+=1
-            else:
-                off = False
-        print(device, "has been ScreenOFF")
+
 
     def check_device(self):
         ABIcommand = adb + " -s {} shell getprop ro.product.cpu.abi".format(self.get_mdevice())
