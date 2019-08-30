@@ -537,10 +537,11 @@ class MultiAdb:
             q.put(cpu)
             return cpu
 
-    def get_fps(self,SurfaceView=True):
-        if SurfaceView:
+    def get_fps(self,SurfaceView):
+        #print("SurfaceView=",SurfaceView)
+        if SurfaceView==0:
             fps=self.get_fps_SurfaceView()
-        else:
+        elif SurfaceView==1:
             fps= self.get_fps_gfxinfo()
         return  fps
 
@@ -602,7 +603,7 @@ class MultiAdb:
         frame_count = len(frame_lengths) + 1
         #数据不足时，返回None
         if not refresh_period or not len(timestamps) >= 3 or len(frame_lengths) == 0:
-            print("未收集到有效数据")
+            print("未收集到有效fps数据")
             return "N/a"
         #总秒数为时间戳序列最后一位减第一位
         seconds = timestamps[-1] - timestamps[0]
@@ -666,7 +667,37 @@ class MultiAdb:
         core_command = adb + " -s {} shell cat /sys/devices/system/cpu/present".format(self.get_mdevice())
         core_num=os.popen(core_command).read().strip()[2]
         core_num=int(core_num)+1
-        deviceinfo={"ABI":ABI,"VERSION":version,"DEVICENAME":devicename,"BATTERY":battery,"VMSIZE":size,"DPI":dpi,"ANDROID_ID":android_id,"MAC_ADDRESS":mac_address,"TYPE":typename,"BRAND":brand,"NAME":name,"CORE_NUM":core_num}
+        device=self.get_mdevice()
+        package=self.get_packagename()
+        activity=self.get_activityname()
+        androidversion=self.get_androidversion()
+        isSurfaceView=False
+        isGfxInfo=False
+        SurfaceView_command=""
+        if androidversion<7:
+            SurfaceView_command=adb+ " -s {} shell dumpsys SurfaceFlinger --latency 'SurfaceView'".format(device)
+        elif androidversion==7:
+            SurfaceView_command=adb+ " -s {} shell \"dumpsys SurfaceFlinger --latency 'SurfaceView - {}/{}'\"".format(device,package,activity)
+        elif androidversion>7:
+            SurfaceView_command = adb + " -s {} shell \"dumpsys SurfaceFlinger --latency 'SurfaceView - {}/{}#0'\"".format(device, package, activity)
+        print(SurfaceView_command)
+        results=os.popen(SurfaceView_command)
+        for line in results:
+            print("surface",line)
+            if line =="16666666":
+                continue
+            elif len(line)>10:
+                isSurfaceView=True
+                break
+
+        GfxInfo_command=adb + " -s {} shell dumpsys gfxinfo {}".format(device,package)
+        results = os.popen(GfxInfo_command)
+        for line in results:
+            #print("gfx",line)
+            if "Draw" and "Prepare" and "Process" and "Execute" in line:
+                isGfxInfo=True
+                break
+        deviceinfo={"ABI":ABI,"VERSION":version,"DEVICENAME":devicename,"BATTERY":battery,"VMSIZE":size,"DPI":dpi,"ANDROID_ID":android_id,"MAC_ADDRESS":mac_address,"TYPE":typename,"BRAND":brand,"NAME":name,"CORE_NUM":core_num,"isSurfaceView":isSurfaceView,"isGfxInfo":isGfxInfo}
         return  deviceinfo
 
 if __name__=="__main__":

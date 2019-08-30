@@ -59,10 +59,11 @@ def main():
                 else:
                     #进程通信变量flag，默认为0，完成测试时修改为1。
                     flag = Value('i', 0)
+                    fpsflag= Value('i',0)
                     if not skip_performance:
-                        p1 = Process(target=enter_performance, args=(madb,flag,start,is_storaged_by_excel))
+                        p1 = Process(target=enter_performance, args=(madb,flag,fpsflag,start,is_storaged_by_excel))
                         list.append(p1)
-                p2=Process(target=enter_processing, args=(i,madb,flag,start,))
+                p2=Process(target=enter_processing, args=(i,madb,flag,fpsflag,start,))
                 list.append(p2)
             for p in list:
                 p.start()
@@ -98,7 +99,7 @@ def main():
 在用例执行完毕以后，将Value置为1。
 '''
 
-def enter_processing(processNo,madb,flag,start):
+def enter_processing(processNo,madb,flag,fpsflag,start):
     devices = madb.get_mdevice()
     print("进入{}进程,devicename={}".format(processNo,devices))
     isconnect=""
@@ -134,7 +135,18 @@ def enter_processing(processNo,madb,flag,start):
             time.sleep(madb.get_timeout_of_per_action())
             #应用启动成功则开始运行用例
             if (startflag=="Success"):
-                RunTestCase.RunTestCase(madb,start)
+
+                time.sleep(3)
+                devicesinfo = madb.check_device()
+                isSurfaceView = devicesinfo["isSurfaceView"]
+                isGfxInfo = devicesinfo["isGfxInfo"]
+                print("isSurfaceView=", isSurfaceView, "  isGfxInfo=", isGfxInfo)
+                if not isSurfaceView and isGfxInfo:
+                    fpsflag.value=1
+                if not isSurfaceView and not isGfxInfo:
+                    print("SurfaceView和Gfxinfo模式均无法抓取fps数据。")
+                    fpsflag.value=2
+                RunTestCase.RunTestCase(madb, start)
                 print("{}完成测试".format(devices))
             else:
                 print("{}未运行测试。".format(devices))
