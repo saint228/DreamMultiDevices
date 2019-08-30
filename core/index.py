@@ -135,7 +135,6 @@ def enter_processing(processNo,madb,flag,fpsflag,start):
             time.sleep(madb.get_timeout_of_per_action())
             #应用启动成功则开始运行用例
             if (startflag=="Success"):
-
                 time.sleep(3)
                 devicesinfo = madb.check_device()
                 isSurfaceView = devicesinfo["isSurfaceView"]

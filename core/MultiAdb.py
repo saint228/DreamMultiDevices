@@ -546,7 +546,25 @@ class MultiAdb:
         return  fps
 
     def get_fps_gfxinfo(self):
-        fps=0
+        device = self.get_mdevice()
+        package = self.get_packagename()
+        command = adb+ " -s {} shell dumpsys gfxinfo {}".format(device,package)
+        print(command)
+        results = os.popen(command)
+        stamp_time=0
+        frames=1
+        for line in results:
+            #if "Draw" and "Prepare" and "Process" and "Execute" in line:
+            list = line.strip().split("\t")
+            if len(list)!=4 or "Draw" in line:
+                continue
+            else:
+                stamp_time+=float(list[0])+float(list[1])+float(list[2])+float(list[3])
+                frames+=1
+            if len(line)==0:
+                break
+        fps=round(stamp_time/(frames),1)
+        print("使用GfxInfo方式收集到有效fps数据")
         return fps
 
 
@@ -603,11 +621,11 @@ class MultiAdb:
         frame_count = len(frame_lengths) + 1
         #数据不足时，返回None
         if not refresh_period or not len(timestamps) >= 3 or len(frame_lengths) == 0:
-            print("未收集到有效fps数据")
+            print("使用SurfaceView方式未收集到有效fps数据")
             return "N/a"
         #总秒数为时间戳序列最后一位减第一位
         seconds = timestamps[-1] - timestamps[0]
-        fps = int(round((frame_count - 1) / seconds))
+        fps = round((frame_count - 1) / seconds,1)
         #这部分计算掉帧率。思路是先将序列化过的帧列表重新序列化，由于min_normalized_delta此时为None，故直接求出frame_lengths数组中各个元素的差值保存到数组deltas中。
         #length_changes, normalized_changes = self.GetNormalizedDeltas(frame_lengths, refresh_period)
         #求出normalized_changes数组中比0大的数，这部分就是掉帧。
@@ -719,7 +737,8 @@ if __name__=="__main__":
     print("最终的devicesList=",devicesList)
     for device in devicesList:
         madb=MultiAdb(device)
-        print(madb.check_device())
+        #print(madb.check_device())
+        madb.get_fps_gfxinfo()
 
 
 
