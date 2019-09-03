@@ -147,7 +147,9 @@ def get_series(sheet,Key):
             if serieslist[i] == "N/a":
                 serieslist[i] = 0
             else:
-                serieslist[i] = float(format(float(serieslist[i]) * 100, "0.2f"))
+                string=serieslist[i].split("'")[0]
+                number=float(string[:-1])
+                serieslist[i] = float('%.2f' %number)
     if Key=="AllocatedMemory(MB)":
         for i in range(len(serieslist)):
             if serieslist[i]=="N/a":

@@ -71,6 +71,7 @@ class MultiAdb:
 
         if self._activityName=="":
             self._activityName=APK(self.get_apkpath()).activities[0]
+        self._isSurfaceView=Config.getValue(self._configPath,"isSurfaceView")[0]
 
     #获取设备列表
     def get_devicesList(self):
@@ -151,6 +152,9 @@ class MultiAdb:
     #获取是否需要在测试结束以后灭屏
     def get_screenoff(self):
         return self._screenoff
+
+    def get_isSurfaceView(self):
+        return  self._isSurfaceView
 
     #修改当前设备的方法
     def set_mdevice(self,device):
@@ -451,7 +455,7 @@ class MultiAdb:
     #判断给定设备运行时的总CPU占用。部分手机在安卓8以后多内核会分别显示CPU占用，这里统一除以内核数。
     def get_totalcpu(self):
         command = adb + " -s {} shell top -n 1 ".format(self.get_mdevice())
-        #print(command)
+        print(command)
         commandresult =os.popen(command)
         cputotal=0
         andversion=self.get_androidversion()
@@ -498,7 +502,7 @@ class MultiAdb:
                         cputotal=int(maxcpu.split("%")[0])-int(idlecpu.split("%")[0])
                         maxcpu=int(int(maxcpu.split("%")[0])/100)
         #由于cputotal在安卓7以下的adbdump里，无法通过Total-Idle获得，只能通过各个进程的CPU占用率累加，故有可能因四舍五入导致总和超过100%。当这种情况发生，则手动将cputotal置为100%。
-        if cputotal>100:
+        if cputotal/maxcpu>100:
             cputotal=100
         q.put(cputotal,maxcpu)
         return  cputotal,maxcpu
@@ -538,10 +542,9 @@ class MultiAdb:
             return cpu
 
     def get_fps(self,SurfaceView):
-        #print("SurfaceView=",SurfaceView)
-        if SurfaceView==0:
+        if SurfaceView=="1":
             fps=self.get_fps_SurfaceView()
-        elif SurfaceView==1:
+        elif SurfaceView=="0":
             fps= self.get_fps_gfxinfo()
         return  fps
 
@@ -552,7 +555,8 @@ class MultiAdb:
         print(command)
         results = os.popen(command)
         stamp_time=0
-        frames=1
+        frames=0
+        fps="N/a"
         for line in results:
             #if "Draw" and "Prepare" and "Process" and "Execute" in line:
             list = line.strip().split("\t")
@@ -563,8 +567,12 @@ class MultiAdb:
                 frames+=1
             if len(line)==0:
                 break
-        fps=round(stamp_time/(frames),1)
-        print("使用GfxInfo方式收集到有效fps数据")
+        try:
+            fps=round(stamp_time/(frames),1)
+            print("使用GfxInfo方式收集到有效fps数据")
+        except:
+            print("使用GfxInfo方式未收集到有效fps数据")
+
         return fps
 
 

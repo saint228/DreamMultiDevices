@@ -17,7 +17,7 @@ from collections import deque
 '''
 性能数据进程，首先根据storage_by_excel参数创建excel或json文件，再定期塞数据进去，最后统计各项的最大最小平均值。
 '''
-def enter_performance(madb,flag,fpsflag,start,storage_by_excel=True):
+def enter_performance(madb,flag,start,storage_by_excel=True):
     print("设备{}进入enter_performance方法".format(madb.get_mdevice()))
     wb=""
     jsonfilepath=""
@@ -25,7 +25,7 @@ def enter_performance(madb,flag,fpsflag,start,storage_by_excel=True):
         #创表
         filepath, sheet, wb = create_log_excel(time.localtime(), madb.get_nickname())
         #塞数据
-        collect_data(madb,flag,fpsflag,storage_by_excel,sheet=sheet)
+        collect_data(madb,flag,storage_by_excel,sheet=sheet)
         #计算各平均值最大值最小值等并塞数据
         avglist,maxlist,minlist=calculate(sheet)
         record_to_excel(sheet,avglist,color=(230, 230 ,250))
@@ -52,12 +52,13 @@ def enter_performance(madb,flag,fpsflag,start,storage_by_excel=True):
 
 
 #接受设备madb类对象、excel的sheet对象、共享内存flag、默认延时一小时
-def collect_data(madb,flag,fpsflag,storage_by_excel,sheet="",jsonfilepath="",timeout=3600):
+def collect_data(madb,flag,storage_by_excel,sheet="",jsonfilepath="",timeout=3600):
 
     starttime=time.time()
     dequelist = deque([])
     n=0
     totalcpu,maxcpu=madb.get_totalcpu()
+    SurfaceViewFlag=madb.get_isSurfaceView()
     try:
         while True:
             #当执行一小时或flag为1时，跳出。
@@ -75,31 +76,29 @@ def collect_data(madb,flag,fpsflag,storage_by_excel,sheet="",jsonfilepath="",tim
             get_allocated_cpu = MyThread(madb.get_allocated_cpu,args=() )
             get_png=MyThread(GetScreen,args=(time.time(), madb.get_mdevice(), "performance"))
             #为了避免重复场景不渲染导致的fps统计为0，fps取过去一秒内的最大值（约8次）。
-            if fpsflag.value <2:
-                Threadlist=[]
-                for i in range(8):
-                    get_fps = MyThread(madb.get_fps, args=(fpsflag.value,))
-                    Threadlist.append(get_fps)
+            Threadlist=[]
+            for i in range(8):
+                get_fps = MyThread(madb.get_fps, args=(SurfaceViewFlag,))
+                Threadlist.append(get_fps)
             #批量执行
             get_allocated_memory.start()
             get_memory_info.start()
             get_total_cpu.start()
             get_allocated_cpu.start()
             get_png.start()
-            if fpsflag.value<2:
-                for p in Threadlist:
-                    p.start()
-                    fpstmp = p.get_result()
-                    if fpstmp=="N/a":
-                        fpstmp=0
-                    if len(dequelist) < 9 :
-                        dequelist.append(fpstmp)
-                    else:
-                        dequelist.popleft()
-                        dequelist.append(fpstmp)
-                fps=max(dequelist)
-            else:
+
+            for p in Threadlist:
+                p.start()
+                fpstmp = p.get_result()
+                if len(dequelist) < 9 :
+                    dequelist.append(fpstmp)
+                else:
+                    dequelist.popleft()
+                    dequelist.append(fpstmp)
+            if "N/a" in dequelist:
                 fps="N/a"
+            else:
+                fps=max(dequelist)
             #批量获得结果
             allocated=get_allocated_memory.get_result()
             total,free,used=get_memory_info.get_result()
@@ -112,21 +111,23 @@ def collect_data(madb,flag,fpsflag,storage_by_excel,sheet="",jsonfilepath="",tim
             get_total_cpu.join()
             get_allocated_cpu.join()
             get_png.join()
-            if fpsflag.value<2:
-                for p in Threadlist:
-                    p.join()
+            for p in Threadlist:
+                p.join()
             #将性能数据填充到一个数组里，塞进excel
             nowtime = time.localtime()
             inputtime = str(time.strftime("%H:%M:%S", nowtime))
             #print(inputtime,type(inputtime))
             if storage_by_excel:
                 if allocatedcpu=="N/a":
-                    list = ["'" + inputtime, total, "N/a", used, free, format(totalcpu / maxcpu, "0.2f") + "%","N/a", fps]
+                    list = ["'" + inputtime, total, "N/a", used, free,"'"+format(totalcpu / maxcpu, "0.2f") + "%","N/a", fps]
                 else:
-                    list = ["'" + inputtime, total, allocated, used, free, format(totalcpu / maxcpu,"0.2f")+"%", format(float(allocatedcpu)/maxcpu,"0.2f")+"%", fps]
+                    list = ["'" + inputtime, total, allocated, used, free, "'"+format(totalcpu / maxcpu,"0.2f")+"%", "'"+format(float(allocatedcpu)/maxcpu,"0.2f")+"%", fps]
+                    print("list=",list)
                 record_to_excel(sheet,list,png=png)
             # 将性能数据填充到一个数组里，塞进json
             else:
+                if fps=="N/a":
+                    fps=0
                 if allocatedcpu == "N/a":
                     list = [inputtime, total, allocated, used, free, float(format(float(totalcpu)/maxcpu,".2f")),0, fps, png]
                 else:
