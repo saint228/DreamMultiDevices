@@ -49,8 +49,6 @@ def enter_performance(madb,flag,start,storage_by_excel=True):
     print("设备{}生成报告：{}完毕".format(madb.get_mdevice(), reportPlusPath))
 
 
-
-
 #接受设备madb类对象、excel的sheet对象、共享内存flag、默认延时一小时
 def collect_data(madb,flag,storage_by_excel,sheet="",jsonfilepath="",timeout=3600):
 
@@ -116,13 +114,11 @@ def collect_data(madb,flag,storage_by_excel,sheet="",jsonfilepath="",timeout=360
             #将性能数据填充到一个数组里，塞进excel
             nowtime = time.localtime()
             inputtime = str(time.strftime("%H:%M:%S", nowtime))
-            #print(inputtime,type(inputtime))
             if storage_by_excel:
                 if allocatedcpu=="N/a":
                     list = ["'" + inputtime, total, "N/a", used, free,"'"+format(totalcpu / maxcpu, "0.2f") + "%","N/a", fps]
                 else:
                     list = ["'" + inputtime, total, allocated, used, free, "'"+format(totalcpu / maxcpu,"0.2f")+"%", "'"+format(float(allocatedcpu)/maxcpu,"0.2f")+"%", fps]
-                    print("list=",list)
                 record_to_excel(sheet,list,png=png)
             # 将性能数据填充到一个数组里，塞进json
             else:
@@ -136,6 +132,7 @@ def collect_data(madb,flag,storage_by_excel,sheet="",jsonfilepath="",timeout=360
 
     except Exception as e:
         print(madb.get_mdevice()+ traceback.format_exc())
+
 
 #线程类，用来获取线程函数的返回值
 class MyThread(threading.Thread):
@@ -214,6 +211,9 @@ def EditReport(origin_html_path,storage_by_excelavglist,avglist="",maxlist="",mi
         TotalCPU=get_json(sheet,"TotalCPU")
         AllocatedCPU=get_json(sheet,"AllocatedCPU")
         FPS=get_json(sheet,"FPS")
+        FPSlist=json.loads(FPS)
+        FPSlist=FPSlist["FPS"]
+
         PNG=get_json(sheet,"PNGAddress")
         Max_AllocatedMemory=maxlist[2]
         Min_AllocatedMemory=minlist[2]

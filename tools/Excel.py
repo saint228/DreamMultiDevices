@@ -5,6 +5,7 @@ import xlwings as xw
 import os
 import time
 import json
+import traceback
 
 '''
 每次都会生成一个空的sheet1，换了好几种初始化方式都无效，不知道为什么，谁xlwings玩得溜的求告知。
@@ -46,13 +47,12 @@ def calculate(sheet):
         AllocatedMemory.remove("N/a")
     while "N/a"  in AllocatedCPU:
         AllocatedCPU.remove("N/a")
+    for i in range(len(AllocatedCPU)):
+        AllocatedCPU[i]=float(AllocatedCPU[i][:-1])
     while "N/a"  in FPS:
         FPS.remove("N/a")
-    '''
-    for i in range(len(TotalCPU)):
-        tmp=TotalCPU[i]
-        sum_TotalCPU.append(tmp)
-    '''
+    for i in range(len(sum_TotalCPU)):
+        sum_TotalCPU[i]=float(sum_TotalCPU[i][:-1])
     avg_am,max_am,min_am=getcount(AllocatedMemory)
     avg_um,max_um,min_um=getcount(sum_UsedMemory)
     avg_fm,max_fm,min_fm=getcount(sum_FreeMemory)
@@ -63,15 +63,15 @@ def calculate(sheet):
     if avg_tc=="N/a":
         pass
     else:
-        avg_tc = str(format(avg_tc*100, ".2f")) + "%"
-        max_tc = str(format(max_tc*100, ".2f")) + "%"
-        min_tc = str(format(min_tc*100, ".2f")) + "%"
+        avg_tc = str(format(avg_tc, ".2f")) + "%"
+        max_tc = str(format(max_tc, ".2f")) + "%"
+        min_tc = str(format(min_tc, ".2f")) + "%"
     if   avg_ac=="N/a":
          pass
     else:
-        avg_ac = str(format(avg_ac * 100,".2f")) + "%"
-        max_ac = str(format(max_ac * 100,".2f")) + "%"
-        min_ac = str(format(min_ac * 100,".2f")) + "%"
+        avg_ac = str(format(avg_ac  ,".2f")) + "%"
+        max_ac = str(format(max_ac  ,".2f")) + "%"
+        min_ac = str(format(min_ac  ,".2f")) + "%"
     #填充excel表格的list。每个字段对应excle的一列。
     avglist = ["平均值","",avg_am,avg_um,avg_fm,avg_tc,avg_ac,avg_fps]
     maxlist = ["最大值：","",max_am,max_um,max_fm,max_tc,max_ac,max_fps]
@@ -96,7 +96,7 @@ def getcount(list):
                 elif float(Na) < min:
                     min = float(Na)
     except Exception as e:
-        print(e)
+        print(traceback.format_exc())
     if sum == 0:
         avg = "N/a"
         max = "N/a"
@@ -142,15 +142,14 @@ def get_series(sheet,Key):
             tmp=cum+"2:"+cum+str(nrow)
             serieslist=sheet.range(tmp).value
             break
-    if Key=="TotalCPU" or Key=="AllocatedCPU":
+    if Key=="TotalCPU" or Key=="AllocatedCPU" :
         for i in range(len(serieslist)):
             if serieslist[i] == "N/a":
                 serieslist[i] = 0
             else:
-                string=serieslist[i].split("'")[0]
-                number=float(string[:-1])
-                serieslist[i] = float('%.2f' %number)
-    if Key=="AllocatedMemory(MB)":
+                stringnum=serieslist[i][:-1]
+                serieslist[i] = float(stringnum)
+    if Key=="AllocatedMemory(MB)" or Key=="FPS":
         for i in range(len(serieslist)):
             if serieslist[i]=="N/a":
                 serieslist[i]=0
