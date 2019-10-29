@@ -4,7 +4,7 @@
 欢迎加入QQ群：739857090 一起讨论。
 
 效果动画:  
-![](template/框架.gif) 
+![image](template/框架.gif) 
 
 
 
