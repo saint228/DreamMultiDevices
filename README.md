@@ -4,7 +4,7 @@
 欢迎加入QQ群：739857090 一起讨论。
 
 效果动画:  
-![img](template/框架.gif) 
+![img](https://github.com/saint228/DreamMultiDevices/blob/master/template/%E6%A1%86%E6%9E%B6.gif) 
 
 
 
