@@ -10,6 +10,7 @@ class KThread(threading.Thread):
     def __init__(self, *args, **kwargs):
         threading.Thread.__init__(self, *args, **kwargs)
         self.killed = False
+        self.exception=None
 
     def start(self):
         self.__run_backup = self.run
