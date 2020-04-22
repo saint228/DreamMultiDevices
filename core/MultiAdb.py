@@ -350,8 +350,9 @@ class MultiAdb:
     #判断给定设备的安卓版本号
     def get_androidversion(self):
         command=adb+" -s {} shell getprop ro.build.version.release".format(self.get_mdevice())
-        version=os.popen(command).read()[0]
-        return int(version)
+        version=os.popen(command).read()
+        version=int(version)
+        return version
 
     #判断给定设备运行指定apk时的内存占用
     def get_allocated_memory(self):
