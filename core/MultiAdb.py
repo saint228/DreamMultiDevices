@@ -350,7 +350,7 @@ class MultiAdb:
     #判断给定设备的安卓版本号
     def get_androidversion(self):
         command=adb+" -s {} shell getprop ro.build.version.release".format(self.get_mdevice())
-        version=os.popen(command).read()
+        version=os.popen(command).read().split(".")[0]
         version=int(version)
         return version
 
