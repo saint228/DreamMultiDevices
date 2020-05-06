@@ -17,10 +17,12 @@ from collections import deque
 '''
 性能数据进程，首先根据storage_by_excel参数创建excel或json文件，再定期塞数据进去，最后统计各项的最大最小平均值。
 '''
-def enter_performance(madb,flag,start,storage_by_excel=True):
+def enter_performance(madb,flag,start,storage_by_excel=True,adb_log=True):
     print("设备{}进入enter_performance方法".format(madb.get_mdevice()))
     wb=""
     jsonfilepath=""
+    if adb_log:
+        logfile=madb.create_adb_log(time.localtime())
     if storage_by_excel:
         #创表
         filepath, sheet, wb = create_log_excel(time.localtime(), madb.get_nickname())
@@ -41,16 +43,20 @@ def enter_performance(madb,flag,start,storage_by_excel=True):
     nowtime = time.strftime("%H%M%S", start)
     reportpath = os.path.join(os.getcwd(), "Report")
     filename = reportpath + "\\" + madb.get_nickname() + "_" + str(nowtime) + ".html"
+    adblog = reportpath + "\\" + madb.get_nickname() + "_" + str(nowtime) + ".txt"
     print("要操作的文件名为：", filename)
     if storage_by_excel:
         reportPlusPath = EditReport(filename,storage_by_excel,avglist, maxlist, minlist,wb=wb)
     else:
         reportPlusPath = EditReport(filename,storage_by_excel, jsonfilepath=jsonfilepath)
+    if adb_log:
+        f=open(logfile,"w")
+        f.close()
     print("设备{}生成报告：{}完毕".format(madb.get_mdevice(), reportPlusPath))
 
 
 #接受设备madb类对象、excel的sheet对象、共享内存flag、默认延时一小时
-def collect_data(madb,flag,storage_by_excel,sheet="",jsonfilepath="",timeout=3600):
+def collect_data(madb,flag,storage_by_excel,sheet="",jsonfilepath="",timeout=60):
 
     starttime=time.time()
     dequelist = deque([])

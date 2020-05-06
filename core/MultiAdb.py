@@ -47,6 +47,7 @@ class MultiAdb:
         self._skip_check_of_startapp = Config.getValue(self._configPath, "skip_check_of_startapp")[0]
         self._skip_performance=Config.getValue(self._configPath,"skip_performance")[0]
         self._storage_by_excel=Config.getValue(self._configPath,"storage_by_excel")[0]
+        self._adb_log=Config.getValue(self._configPath,"adb_log")[0]
         self._screenoff=Config.getValue(self._configPath,"screenoff")[0]
         self._startTime=time.time()
         self._timeout_of_per_action=int(Config.getValue(self._configPath, "timeout_of_per_action")[0])
@@ -148,6 +149,10 @@ class MultiAdb:
     #获取是否需要用excel来存储性能数据
     def get_storage_by_excel(self):
         return self._storage_by_excel
+
+    #获取是否需要记录adblog
+    def get_adb_log(self):
+        return self._adb_log
 
     #获取是否需要在测试结束以后灭屏
     def get_screenoff(self):
@@ -653,9 +658,16 @@ class MultiAdb:
                           deltas)
 
         return (list(deltas), [delta / refresh_period for delta in deltas])
-    
 
-
+    def create_adb_log(self,nowtime):
+        reportpath = os.path.join(os.getcwd(), "Report")
+        logpath=os.path.join(reportpath, "Data")
+        nowtime=time.strftime("%m%d%H%M", nowtime)
+        filename=logpath+"\\"+self.get_nickname()+"_"+nowtime+".txt"
+        print("filename=",filename)
+        command = adb + " -s {} logcat".format(self.get_mdevice())+"> "+filename
+        os.popen(command)
+        return filename
 
     def check_device(self):
         ABIcommand = adb + " -s {} shell getprop ro.product.cpu.abi".format(self.get_mdevice())

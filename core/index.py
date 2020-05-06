@@ -36,6 +36,8 @@ def main():
     skip_performance=True if skip_performance=="1" else False
     is_storaged_by_excel=Madb().get_storage_by_excel()
     is_storaged_by_excel=True if is_storaged_by_excel=="1" else False
+    adb_log = Madb().get_adb_log()
+    adb_log=True if adb_log=="1" else False
     reportpath = os.path.join(os.getcwd(), "Report")
     # 没有Report目录时自动创建
     if not os.path.exists(reportpath):
@@ -61,7 +63,7 @@ def main():
                     flag = Value('i', 0)
                     fpsflag= Value('i',0)
                     if not skip_performance:
-                        p1 = Process(target=enter_performance, args=(madb,flag,start,is_storaged_by_excel))
+                        p1 = Process(target=enter_performance, args=(madb,flag,start,is_storaged_by_excel,adb_log))
                         list.append(p1)
                 p2=Process(target=enter_processing, args=(i,madb,flag,start,))
                 list.append(p2)

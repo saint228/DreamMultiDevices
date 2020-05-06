@@ -23,10 +23,9 @@ def  GetScreen(starttime,devices,action):
         png = GetScreenbyADBCap(starttime, devices, action)
     else:
         try:
-            png= GetScreenbyMiniCap(starttime,devices,action)
+            png=GetScreenbyADBCap (starttime,devices,action)
         except:
-            print("MiniCap截图失败，换ADB截图")
-            png=GetScreenbyADBCap(starttime,devices,action)
+            png=GetScreenbyMiniCap(starttime,devices,action)
     return  png
 
 #用ADBCAP的方法截图

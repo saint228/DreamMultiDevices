@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 __author__ = "无声"
-
+from airtest.core.android.adb import ADB
 import xlwings as xw
 import os
 import time
 import json
 import traceback
+adb = ADB().adb_path
 
-'''
-每次都会生成一个空的sheet1，换了好几种初始化方式都无效，不知道为什么，谁xlwings玩得溜的求告知。
-'''
 reportpath = os.path.join(os.getcwd(), "Report")
 datapath=os.path.join(reportpath, "Data")
 
