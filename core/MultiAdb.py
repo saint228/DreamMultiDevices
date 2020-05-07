@@ -667,7 +667,10 @@ class MultiAdb:
         filename=logpath+"\\"+self.get_nickname()+"_"+nowtime+".txt"
         print("filename=",filename)
         keywords=self._keywords
-        command = adb + " -s {} logcat |findstr ".format(self.get_mdevice())+keywords+"> "+filename
+        if keywords!="":
+            command = adb + " -s {} logcat |findstr ".format(self.get_mdevice())+keywords+"> "+filename
+        else:
+            command = adb + " -s {} logcat  ".format(self.get_mdevice())  + "> " + filename
         print("command=",command)
         os.popen(command)
         return filename
