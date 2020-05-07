@@ -43,7 +43,6 @@ def enter_performance(madb,flag,start,storage_by_excel=True,adb_log=True):
     nowtime = time.strftime("%H%M%S", start)
     reportpath = os.path.join(os.getcwd(), "Report")
     filename = reportpath + "\\" + madb.get_nickname() + "_" + str(nowtime) + ".html"
-    adblog = reportpath + "\\" + madb.get_nickname() + "_" + str(nowtime) + ".txt"
     print("要操作的文件名为：", filename)
     if storage_by_excel:
         reportPlusPath = EditReport(filename,storage_by_excel,avglist, maxlist, minlist,wb=wb)

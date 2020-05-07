@@ -25,7 +25,7 @@ def Main(devices):
             u'''这里放需要在每条用例前执行的部分'''
             print("我是setUp，在每条用例之前执行")
 
-        @Timeout.timeout(5)
+        @Timeout.timeout(30)
         def test_01_of_101(self):
             u'''用例test_01_of_101的操作步骤'''
             # 每个函数里分别实例poco，否则容易出现pocoserver无限重启的情况

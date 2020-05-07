@@ -48,6 +48,7 @@ class MultiAdb:
         self._skip_performance=Config.getValue(self._configPath,"skip_performance")[0]
         self._storage_by_excel=Config.getValue(self._configPath,"storage_by_excel")[0]
         self._adb_log=Config.getValue(self._configPath,"adb_log")[0]
+        self._keywords=Config.getValue(self._configPath,"keywords")[0]
         self._screenoff=Config.getValue(self._configPath,"screenoff")[0]
         self._startTime=time.time()
         self._timeout_of_per_action=int(Config.getValue(self._configPath, "timeout_of_per_action")[0])
@@ -665,7 +666,9 @@ class MultiAdb:
         nowtime=time.strftime("%m%d%H%M", nowtime)
         filename=logpath+"\\"+self.get_nickname()+"_"+nowtime+".txt"
         print("filename=",filename)
-        command = adb + " -s {} logcat".format(self.get_mdevice())+"> "+filename
+        keywords=self._keywords
+        command = adb + " -s {} logcat |findstr ".format(self.get_mdevice())+keywords+"> "+filename
+        print("command=",command)
         os.popen(command)
         return filename
 
@@ -759,7 +762,7 @@ if __name__=="__main__":
     for device in devicesList:
         madb=MultiAdb(device)
         #print(madb.check_device())
-        madb.get_fps_gfxinfo()
+        print(madb.get_memoryinfo())
 
 
 
