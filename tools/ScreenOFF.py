@@ -5,6 +5,9 @@ __author__ = "无声"
 
 import sys,os,time
 
+from airtest.core.android.adb import ADB
+adb = ADB().adb_path
+
 def setScreenOFF(device):
     platform = sys.platform
     command1 = command2 = ""
