@@ -68,7 +68,7 @@ class MultiAdb:
         except Exception:
             self._testcaseForSelfDevice=self._allTestcase
         self._testCasePath=Config.getValue(self._configPath, "testcasepath")[0]
-        if self._testCasePath[0]=="":
+        if self._testCasePath=="":
             self._testCasePath=os.path.join(self._rootPath, "TestCase")
 
         if self._activityName=="":
