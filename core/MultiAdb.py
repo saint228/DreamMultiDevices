@@ -67,7 +67,7 @@ class MultiAdb:
                 self._testcaseForSelfDevice = self._allTestcase
         except Exception:
             self._testcaseForSelfDevice=self._allTestcase
-        self._testCasePath=Config.getValue(self._configPath, "testcasepath")
+        self._testCasePath=Config.getValue(self._configPath, "testcasepath")[0]
         if self._testCasePath[0]=="":
             self._testCasePath=os.path.join(self._rootPath, "TestCase")
 
