@@ -12,7 +12,9 @@ _print = print
 def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 '''
-adb = ADB().adb_path
+adb_str = ADB().adb_path
+if adb_str.count(' ') != 0:
+    adb = '\"' + adb_str + '\"'
 reportpath = os.path.join(os.getcwd(), "Report")
 screenpath = os.path.join(reportpath, "Screen")
 

@@ -18,7 +18,9 @@ _print = print
 def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
-adb = ADB().adb_path
+adb_str = ADB().adb_path
+if adb_str.count(' ') != 0:
+    adb = '\"' + adb_str + '\"'
 #同文件内用queue进行线程通信
 q = queue.Queue()
 

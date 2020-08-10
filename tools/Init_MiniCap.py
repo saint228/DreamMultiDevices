@@ -14,7 +14,9 @@ _print = print
 def print(*args, **kwargs):
     _print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), *args, **kwargs)
 
-adb = ADB().adb_path
+adb_str = ADB().adb_path
+if adb_str.count(' ') != 0:
+    adb = '\"' + adb_str + '\"'
 
 #用来给设备初始化MiniCap的，介绍见 https://blog.csdn.net/saint_228/article/details/92142914
 def ini_MiniCap(devices):
